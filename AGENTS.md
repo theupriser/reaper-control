@@ -6,6 +6,7 @@ Working notes for AI agents (and humans) on this repo. Read this first, then the
 Reaper Control v2: a stage app that controls the REAPER DAW and plays a setlist live. It is a rewrite of v1 (Electron/Svelte/TS, at `~/Projects/Reaper-Control-App`, **read-only reference, never edit it**; if the local copy is not available, the same code is at https://github.com/theupriser/Reaper-Control-App, `main`, read it with `gh api repos/theupriser/Reaper-Control-App/contents/<path> --jq .content | base64 -d` or `gh repo clone` into the scratchpad). Owner: Rick Peters (rickpeters@upriser.nl). Used on stage, so **stability beats features**.
 
 ## Source of truth (read in this order)
+0. `docs/STATUS.md` — where we are and what is next.
 1. `docs/SPEC.md` — what/how (architecture, protocol, state machine, safety, installer, DDD). Draft 2.
 2. `docs/PLAN.md` — phases, work packages (WP ids), gates, risks, estimates (~205 focused days).
 3. `docs/REVIEW-1.md` — consistency review and why some decisions changed.
@@ -71,12 +72,7 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 - **This MacBook is the homebase** for all development and testing. Windows x64 is covered by CI only for now; real Windows testing needs another machine later.
 
 ## Status and next steps
-- Planning done (SPEC draft 2, PLAN, design canvas v1). Designs still to update for D7 (SPEC §10e: wizard, settings connection card, connection states, pre-show check, copy "script"→"extension").
-- **Phase 0 in progress.** Done: WP 0.1 Rust part (git repo, Cargo workspace with one crate per context + `protocol`, `reaper-port`, `reaper-extension`; workspace lint wall; `shared-kernel` with `Seconds`/`Bpm` + tests). Committed and pushed to `main`. CI (macOS arm64 + Windows x64) and executable dependency rules (`crates/architecture-tests`) landed via `feature/ci-and-dependency-rules`. Remaining: pnpm/UI workspace + Tauri shell, CI (0.2), dependency-rule check (0.3/0.9), type generation (0.4), ADRs (0.5), licence (0.6), portable REAPER + sample project (0.7), domain discovery (0.8). Then Phase 1 spikes (S1 first).
-- Original Phase 0 list: repo + Cargo/pnpm workspaces, lint configs (0.1), CI for macOS arm64 + Windows x64 (0.2), dependency-rule check (0.3/0.9), Rust→TS type generation (0.4), ADRs (0.5), licence decision (0.6), portable REAPER + sample project (0.7), domain discovery workshop (0.8).
-- **Spike S1 (macOS arm64 half) done, see `docs/adr/ADR-002-extension-owned-playback.md`** on `feature/spike-s1-extension-hello`: extension loads, main-thread tick 30.0 ms avg, reads match v1's web-interface data (12/12 regions). Still open for Gate 1: Windows half of S1, S2 (timing/seek), S3 (socket), S4 (installer, signing), S7 (crash containment).
-- Known doc fix pending (own `bugfix/` branch): directive placement. `!1008` may sit anywhere inside the song; `!bpm` sits at the start edge; v1's "within 0.001 s of the boundary" Help text is wrong (SPEC §4, Help design, `docs/design/canvas/Help.dc.html`).
-- Open questions for the owner: PLAN §16 (minimum REAPER version, app name/licence, crash reporting, ReaPack, Windows x64 only?).
+See **`docs/STATUS.md`** (single source: done, in progress, next, Gate 1 checklist, open questions). Update it in the same PR whenever a feature, spike or bug completes. Do not duplicate status here.
 
 ## Commands
 ```
@@ -87,8 +83,8 @@ cargo test --workspace      # includes the architecture rules
 ```
 
 ## Project commands (`.claude/commands/`)
-- `/start`: orient at the start of a session (reads AGENTS.md, checks git/PRs/ADRs, proposes the next step, waits for confirmation).
-- `/next`: after finishing something: sync `main`, list open PRs, update status, propose the next work package.
+- `/start`: orient at the start of a session (reads AGENTS.md and docs/STATUS.md, verifies against git/PRs/ADRs, proposes the next step, waits for confirmation).
+- `/next`: after finishing something: sync `main`, list open PRs, update docs/STATUS.md, propose the next work package.
 - Remind the owner to `/compact` whenever a feature, spike or bug is complete.
 
 ## Pointers
