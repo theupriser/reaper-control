@@ -1,0 +1,44 @@
+# PROPRIETARY LICENSE AGREEMENT
+
+## Reaper Control
+
+Copyright © 2025 Reaper Control
+
+## Source Available License
+
+This software, Reaper Control (the "Software"), is made available to you with its source code visible for inspection and learning purposes. However, this is NOT an open-source license, and significant restrictions apply to its use, modification, and distribution.
+
+## Terms and Conditions
+
+1. **Source Code Access**: The source code of the Software is available for viewing and inspection purposes only.
+
+2. **Restricted Rights**: All rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell the Software are expressly RESERVED by the copyright holder.
+
+3. **Permission Required**: Any of the following activities require EXPLICIT WRITTEN PERMISSION from the copyright holder:
+   - Distribution of the Software or derivatives
+   - Commercial use of the Software
+   - Use of the Software in production environments
+   - Incorporation of the Software into other products
+   - Creation of derivative works
+
+4. **No Implied License**: Possession of the source code does not grant any license to use the Software beyond the express terms of this agreement.
+
+5. **No Warranty**: The Software is provided "AS IS", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement.
+
+6. **Limitation of Liability**: In no event shall the copyright holder be liable for any claim, damages, or other liability arising from, out of, or in connection with the Software or the use or other dealings in the Software.
+
+## Permission Requests
+
+For permission requests or any questions regarding this license, please contact the copyright holder by:
+
+1. Opening an issue in the GitHub repository
+2. Contacting the author via email (provided in the package.json author field)
+3. Reaching out through the project's homepage
+
+## Effective Date
+
+This license is effective as of August 11, 2025.
+
+---
+
+All rights not expressly granted under this agreement are reserved by the copyright holder.

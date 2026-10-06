@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Setlists</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; display: flex; background: #0E0F11; color: #F2F3F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; overflow: hidden">
+<dc-import name="Sidebar" active="setlists" hint-size="240px,800px"></dc-import>
+
+<main style="flex: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 16px">
+
+<div style="display: flex; align-items: flex-end; justify-content: space-between">
+<div>
+<h1 style="margin: 0; font-size: 28px; font-weight: 800">Setlists</h1>
+<div style="font-size: 14px; color: #9AA1A9; margin-top: 4px">Project: Summer Tour 2026.rpp</div>
+</div>
+<div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #9AA1A9"><span style="width: 8px; height: 8px; border-radius: 50%; background: #4CAF50; display: block"></span>Saved in the REAPER project</div>
+</div>
+
+<div style="flex: 1; min-height: 0; display: grid; grid-template-columns: 240px minmax(0, 1fr) 250px; gap: 16px">
+
+<section aria-label="Setlists" style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden">
+<div style="padding: 16px; border-bottom: 1px solid #2A2E34">
+<button style="width: 100%; height: 44px; border-radius: 10px; border: none; background: #4CAF50; color: #0A1A0B; font-size: 15px; font-weight: 800; cursor: pointer">+ New setlist</button>
+</div>
+<div style="flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{lists}}" as="l" hint-placeholder-count="3">
+<a href="#" style="display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px; text-decoration: none; background: {{l.bg}}">
+<span style="font-size: 15px; font-weight: 700; color: {{l.color}}">{{l.name}}</span>
+<span style="font-size: 13px; color: #9AA1A9">{{l.meta}}</span>
+</a>
+</sc-for>
+</div>
+</section>
+
+<section aria-label="Setlist entries" style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; min-width: 0">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #2A2E34">
+<div style="min-width: 0">
+<div style="font-size: 20px; font-weight: 800">Friday Night Set</div>
+<div style="font-size: 13px; color: #9AA1A9; margin-top: 2px">6 songs · 23:20</div>
+</div>
+<div style="display: flex; gap: 8px">
+<button style="background: transparent; border: 1px solid #2A2E34; color: #C5CAD0; border-radius: 8px; padding: 0 12px; height: 36px; font-size: 13px; font-weight: 600; cursor: pointer">Rename</button>
+<button style="background: transparent; border: 1px solid #2A2E34; color: #FF8A80; border-radius: 8px; padding: 0 12px; height: 36px; font-size: 13px; font-weight: 600; cursor: pointer">Delete</button>
+</div>
+</div>
+
+<div style="margin: 14px 20px 0 20px; display: flex; align-items: center; gap: 10px; background: rgba(255,193,7,0.12); border-radius: 10px; padding: 10px 14px; font-size: 14px; color: #FFD54F">
+<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="flex-shrink: 0"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+<span>1 song is missing in the REAPER project. Fix it before you perform.</span>
+</div>
+
+<div style="flex: 1; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; overflow: hidden">
+<sc-for list="{{entries}}" as="e" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 12px; padding: 0 10px; height: 52px; border-radius: 10px; background: {{e.bg}}">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="#8B929A" aria-label="Drag to reorder" style="flex-shrink: 0"><path d="M9 5h2v2H9zm4 0h2v2h-2zM9 11h2v2H9zm4 0h2v2h-2zM9 17h2v2H9zm4 0h2v2h-2z"/></svg>
+<span style="width: 22px; text-align: right; font-size: 14px; color: #8B929A; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">{{e.n}}</span>
+<span style="flex: 1; min-width: 0; font-size: 16px; font-weight: 600; color: {{e.color}}">{{e.name}}</span>
+<span style="font-size: 12px; font-weight: 700; color: #FFC107">{{e.note}}</span>
+<span style="width: 50px; text-align: right; font-size: 14px; color: #9AA1A9; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">{{e.dur}}</span>
+<button aria-label="Remove from setlist" style="width: 36px; height: 36px; border-radius: 8px; border: none; background: transparent; color: #9AA1A9; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section aria-label="Songs in project" style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden">
+<div style="padding: 16px; border-bottom: 1px solid #2A2E34">
+<div style="font-size: 16px; font-weight: 700">Songs in project</div>
+<div style="margin-top: 10px; height: 40px; border-radius: 10px; border: 1px solid #2A2E34; background: #0E0F11; display: flex; align-items: center; padding: 0 12px; color: #8B929A; font-size: 14px">Search songs</div>
+</div>
+<div style="flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 2px; overflow: hidden">
+<sc-for list="{{pool}}" as="p" hint-placeholder-count="7">
+<div style="display: flex; align-items: center; gap: 8px; padding: 0 6px 0 10px; height: 46px; border-radius: 8px">
+<span style="flex: 1; min-width: 0; font-size: 15px; color: #DDE1E5">{{p.name}}</span>
+<button aria-label="Add to setlist" style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid #2A2E34; background: transparent; color: #4CAF50; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() {
+const lists = [
+{ name: 'Friday Night Set', meta: '6 songs · 23:20', on: true },
+{ name: 'Acoustic Encore', meta: '3 songs · 11:05', on: false },
+{ name: 'Festival 45 min', meta: '9 songs · 44:12', on: false }
+].map(l => ({ name: l.name, meta: l.meta, bg: l.on ? '#1E2125' : 'transparent', color: l.on ? '#4CAF50' : '#F2F3F4' }));
+const raw = [
+['1','Midnight Drive','03:12',''],['2','Paper Moons','04:20',''],['3','Static Hearts','02:58','HARD STOP'],
+['4','Neon Skyline','04:02',''],['5','Old Lighthouse','missing','NOT FOUND'],['6','Glass Houses','03:41','']
+];
+const entries = raw.map(r => ({ n: r[0], name: r[1], dur: r[2] === 'missing' ? '--:--' : r[2], note: r[3], bg: r[3] === 'NOT FOUND' ? 'rgba(255,82,82,0.10)' : 'transparent', color: r[3] === 'NOT FOUND' ? '#FF8A80' : '#F2F3F4' }));
+const pool = ['Low Tide','Wire and Wine','Second Wind','Hollow Crown','Slow Burn','Afterglow','Radio Silence'].map(n => ({ name: n }));
+return { lists, entries, pool };
+}
+}
+</script>
+</body>
+</html>

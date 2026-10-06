@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Help</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 1060px; display: flex; background: #0E0F11; color: #F2F3F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; overflow: hidden">
+<dc-import name="Sidebar" active="help" hint-size="240px,1060px"></dc-import>
+
+<main style="flex: 1; min-width: 0; padding: 28px 32px; display: flex; gap: 28px">
+
+<nav aria-label="Help topics" style="width: 190px; flex-shrink: 0; display: flex; flex-direction: column; gap: 2px">
+<h1 style="margin: 0 0 14px 0; font-size: 28px; font-weight: 800">Help</h1>
+<sc-for list="{{toc}}" as="t" hint-placeholder-count="6">
+<a href="#" style="padding: 10px 12px; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; min-height: 44px; box-sizing: border-box; display: flex; align-items: center; background: {{t.bg}}; color: {{t.color}}">{{t.label}}</a>
+</sc-for>
+</nav>
+
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; padding-top: 4px">
+
+<section style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 20px; font-weight: 800">Songs and markers in REAPER</h2>
+<div style="font-size: 15px; color: #C5CAD0; line-height: 1.6">Every <b style="color: #F2F3F4">region</b> in your project is a song. Press <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #2A2E34; padding: 2px 8px; border-radius: 6px; color: #F2F3F4">Shift + R</span> to create one. Every <b style="color: #F2F3F4">marker</b> (press <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #2A2E34; padding: 2px 8px; border-radius: 6px; color: #F2F3F4">M</span>) becomes a point you can jump to from the timeline.</div>
+</section>
+
+<section style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 20px; font-weight: 800">Special markers</h2>
+<div style="font-size: 15px; color: #C5CAD0; line-height: 1.6">Add these to a marker name to change how a song behaves. Place the marker within 0.001 seconds of the region start or end. Special markers are hidden from the timeline.</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+<sc-for list="{{directives}}" as="d" hint-placeholder-count="3">
+<div style="background: #1E2125; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+<span style="align-self: flex-start; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 15px; font-weight: 700; color: {{d.tint}}; background: {{d.tintBg}}; padding: 4px 10px; border-radius: 8px">{{d.code}}</span>
+<div style="font-size: 16px; font-weight: 700">{{d.title}}</div>
+<div style="font-size: 14px; color: #9AA1A9; line-height: 1.5">{{d.text}}</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section aria-label="Marker name helper" style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px">
+<div>
+<h2 style="margin: 0; font-size: 20px; font-weight: 800">Marker name helper</h2>
+<div style="font-size: 14px; color: #9AA1A9; margin-top: 4px">Pick what you need, copy the name, paste it into a REAPER marker.</div>
+</div>
+<div style="display: flex; align-items: center; gap: 22px; flex-wrap: wrap">
+<label style="display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; min-height: 44px"><span style="width: 44px; height: 26px; border-radius: 13px; background: #4CAF50; position: relative; display: block"><span style="position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 50%; background: #fff; display: block"></span></span>Hard stop</label>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600">Length<span style="width: 90px; height: 44px; border-radius: 10px; border: 1px solid #2A2E34; background: #0E0F11; display: flex; align-items: center; padding: 0 14px; font-weight: 500; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">45</span><span style="color: #9AA1A9; font-weight: 500">seconds</span></label>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600">Tempo<span style="width: 90px; height: 44px; border-radius: 10px; border: 1px solid #2A2E34; background: #0E0F11; display: flex; align-items: center; padding: 0 14px; font-weight: 500; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">140</span><span style="color: #9AA1A9; font-weight: 500">BPM</span></label>
+</div>
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="flex: 1; height: 52px; border-radius: 12px; background: #0E0F11; border: 1px solid #2A2E34; display: flex; align-items: center; padding: 0 18px; font-size: 18px; font-weight: 700; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: #FFC107">!length:45 !bpm:140 !1008</div>
+<button style="height: 52px; padding: 0 24px; border-radius: 12px; border: none; background: #4CAF50; color: #0A1A0B; font-size: 15px; font-weight: 800; cursor: pointer">Copy</button>
+</div>
+<div style="font-size: 13px; color: #9AA1A9">Use a length only together with a hard stop. The order of the parts does not matter.</div>
+</section>
+
+<section style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 8px 24px; display: flex; flex-direction: column">
+<h2 style="margin: 14px 0 6px 0; font-size: 20px; font-weight: 800">Troubleshooting</h2>
+<sc-for list="{{faq}}" as="f" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; justify-content: space-between; min-height: 54px; border-top: 1px solid #22262B; font-size: 15px; font-weight: 600"><span>{{f.q}}</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#9AA1A9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+</sc-for>
+</section>
+
+<div style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #9AA1A9">
+<span>Something not working? Run setup again or export diagnostics from Settings.</span>
+<button style="height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid #2A2E34; background: transparent; color: #F2F3F4; font-size: 14px; font-weight: 700; cursor: pointer">Run setup again</button>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1060}}'>
+class Component extends DCLogic {
+renderVals() {
+const toc = ['Songs and markers', 'Special markers', 'Marker name helper', 'MIDI control', 'Troubleshooting'].map((l, i) => ({ label: l, bg: i === 1 ? '#1E2125' : 'transparent', color: i === 1 ? '#4CAF50' : '#C5CAD0' }));
+const directives = [
+{ code: '!1008', title: 'Hard stop', text: 'Playback stops at the end of the song and waits. Press play to continue with the next song.', tint: '#FF5252', tintBg: 'rgba(255,82,82,0.14)' },
+{ code: '!length:45', title: 'Custom length', text: 'The song ends after 45 seconds. Use it together with a hard stop.', tint: '#FFC107', tintBg: 'rgba(255,193,7,0.14)' },
+{ code: '!bpm:120', title: 'Starting tempo', text: 'Tells the app the tempo for count-in when the tempo cannot be read yet.', tint: '#5AA9F0', tintBg: 'rgba(90,169,240,0.14)' }
+];
+const faq = [
+{ q: 'The app does not connect to REAPER' },
+{ q: 'The companion script is not running' },
+{ q: 'The next song does not start by itself' },
+{ q: 'My MIDI controller does not react' }
+];
+return { toc, directives, faq };
+}
+}
+</script>
+</body>
+</html>

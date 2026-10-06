@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Player</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; display: flex; background: #0E0F11; color: #F2F3F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; overflow: hidden">
+<dc-import name="Sidebar" active="player" hint-size="240px,800px"></dc-import>
+
+<main style="flex: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 16px">
+
+<div style="display: flex; align-items: center; justify-content: space-between">
+<h1 style="margin: 0; font-size: 28px; font-weight: 800">Player</h1>
+<button style="display: flex; align-items: center; gap: 10px; background: #17191C; border: 1px solid #2A2E34; color: #F2F3F4; border-radius: 10px; padding: 0 14px; height: 44px; font-size: 15px; font-weight: 600; cursor: pointer">
+<span style="color: #9AA1A9; font-weight: 500">Setlist</span>Friday Night Set
+<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+</button>
+</div>
+
+<section aria-label="Transport" style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 20px 24px 12px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 24px">
+<div style="min-width: 0">
+<div style="font-size: 13px; font-weight: 700; letter-spacing: 1px; color: #4CAF50">NOW PLAYING · 4 OF 12</div>
+<div style="font-size: 34px; font-weight: 800; line-height: 1.15; margin-top: 4px">Neon Skyline</div>
+</div>
+<div style="display: flex; align-items: flex-end; gap: 28px; flex-shrink: 0">
+<div style="text-align: right"><div style="font-size: 13px; color: #9AA1A9; font-weight: 600">TEMPO</div><div style="font-size: 26px; font-weight: 700; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">128 <span style="font-size: 14px; color: #9AA1A9">BPM · 4/4</span></div></div>
+<div style="text-align: right"><div style="font-size: 13px; color: #9AA1A9; font-weight: 600">TIME</div><div style="font-size: 26px; font-weight: 700; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">02:14 <span style="font-size: 16px; color: #9AA1A9">/ 04:02</span></div></div>
+</div>
+</div>
+
+<div style="position: relative; height: 10px; background: #2A2E34; border-radius: 5px; margin: 6px 0">
+<div style="width: 55%; height: 100%; background: #4CAF50; border-radius: 5px"></div>
+<div style="position: absolute; left: 22%; top: -6px; width: 4px; height: 22px; background: #FFC107; border-radius: 2px"></div>
+<div style="position: absolute; left: 48%; top: -6px; width: 6px; height: 22px; background: #FFC107; border-radius: 2px; transform: translateX(-1px)">
+<div style="position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); background: #0E0F11; border: 1px solid #2A2E34; color: #F2F3F4; padding: 5px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.4)">Bridge · 01:58</div>
+</div>
+<div style="position: absolute; left: 78%; top: -6px; width: 4px; height: 22px; background: #FFC107; border-radius: 2px"></div>
+<div style="position: absolute; left: 66%; bottom: 30px; transform: translateX(-50%); background: #2A2E34; color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 13px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; box-shadow: 0 4px 12px rgba(0,0,0,0.4)">02:41<span style="position: absolute; top: 100%; left: 50%; margin-left: -5px; border: 5px solid transparent; border-top-color: #2A2E34; display: block"></span></div>
+<div style="position: absolute; left: 100%; top: -6px; width: 4px; height: 22px; background: #FF5252; border-radius: 2px"></div>
+</div>
+
+<div style="display: flex; align-items: center; justify-content: center; gap: 24px">
+<div style="display: flex; align-items: center; gap: 14px">
+<button aria-label="Previous song" style="width: 48px; height: 48px; border-radius: 50%; background: #1E2125; border: 1px solid #2A2E34; color: #F2F3F4; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" fill="currentColor"/></svg></button>
+<button aria-label="Restart song" style="width: 48px; height: 48px; border-radius: 50%; background: #1E2125; border: 1px solid #2A2E34; color: #F2F3F4; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 5V1L7 6l5 5V7c3.3 0 6 2.7 6 6s-2.7 6-6 6-6-2.7-6-6H4c0 4.4 3.6 8 8 8s8-3.6 8-8-3.6-8-8-8z" fill="currentColor"/></svg></button>
+<button aria-label="Pause" style="width: 64px; height: 64px; border-radius: 50%; background: #4CAF50; border: none; color: #0A1A0B; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" fill="currentColor"/></svg></button>
+<button aria-label="Next song" style="width: 48px; height: 48px; border-radius: 50%; background: #1E2125; border: 1px solid #2A2E34; color: #F2F3F4; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" fill="currentColor"/></svg></button>
+</div>
+</div>
+
+<div style="display: flex; align-items: center; justify-content: center; gap: 28px; border-top: 1px solid #2A2E34; padding-top: 12px">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 1px; color: #8B929A">OPTIONS</span>
+<sc-for list="{{toggles}}" as="t" hint-placeholder-count="3">
+<label style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: #C5CAD0; cursor: pointer; min-height: 44px">
+<span style="width: 44px; height: 26px; border-radius: 13px; background: {{t.track}}; position: relative; display: block; flex-shrink: 0"><span style="position: absolute; top: 3px; left: {{t.knob}}; width: 20px; height: 20px; border-radius: 50%; background: #ffffff; display: block"></span></span>
+{{t.label}}
+</label>
+</sc-for>
+</div>
+</section>
+
+<section aria-label="Songs" style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid #2A2E34">
+<div style="font-size: 16px; font-weight: 700">Songs <span style="color: #9AA1A9; font-weight: 500">· 12 in setlist</span></div>
+<button style="background: transparent; border: 1px solid #2A2E34; color: #C5CAD0; border-radius: 8px; padding: 0 12px; height: 36px; font-size: 13px; font-weight: 600; cursor: pointer">Refresh from REAPER</button>
+</div>
+<div style="flex: 1; overflow: hidden">
+<sc-for list="{{songs}}" as="s" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 16px; padding: 0 24px; height: 50px; box-sizing: border-box; background: {{s.bg}}; border-bottom: 1px solid #22262B">
+<span style="width: 24px; text-align: right; font-size: 14px; color: {{s.numColor}}; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">{{s.n}}</span>
+<span style="flex: 1; font-size: 16px; font-weight: {{s.weight}}; color: {{s.nameColor}}">{{s.name}}</span>
+<sc-if value="{{s.hardStop}}" hint-placeholder-val="{{false}}"><span style="font-size: 12px; font-weight: 700; color: #FF5252; background: rgba(255,82,82,0.14); border-radius: 6px; padding: 3px 8px">HARD STOP</span></sc-if>
+<sc-if value="{{s.bpm}}" hint-placeholder-val="{{false}}"><span style="font-size: 12px; font-weight: 700; color: #FFC107; background: rgba(255,193,7,0.14); border-radius: 6px; padding: 3px 8px">{{s.bpm}} BPM</span></sc-if>
+<span style="width: 56px; text-align: right; font-size: 14px; color: #9AA1A9; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">{{s.dur}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() {
+const toggles = [
+{ label: 'Arm recording', on: false, red: true },
+{ label: 'Auto-resume playback', on: true },
+{ label: 'Count-in when pressing marker', on: false }
+].map(t => ({ label: t.label, track: t.on ? '#4CAF50' : '#3A3F46', knob: t.on ? '21px' : '3px' }));
+const rows = [
+['1','Midnight Drive','03:12'],['2','Paper Moons','04:20'],['3','Static Hearts','02:58'],
+['4','Neon Skyline','04:02'],['5','Glass Houses','03:41']
+];
+const songs = rows.map((r, i) => {
+const cur = r[0] === '4';
+return { n: r[0], name: r[1], dur: r[2], bg: cur ? 'rgba(76,175,80,0.12)' : 'transparent', numColor: cur ? '#4CAF50' : '#8B929A', nameColor: cur ? '#FFFFFF' : '#DDE1E5', weight: cur ? 700 : 500, hardStop: r[0] === '3', bpm: r[0] === '5' ? '96' : '' };
+});
+return { toggles, songs };
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+[package]
+name = "reaper-extension"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+shared-kernel.workspace = true
+performance.workspace = true
+catalogue.workspace = true
+setlists.workspace = true
+protocol.workspace = true
+reaper-port.workspace = true
+
+# The only crate that may contain unsafe code (FFI boundary to REAPER, SPEC S-9).
+# Keep it confined to one module; everything else stays safe.
+[lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"
+todo = "deny"
+dbg_macro = "deny"

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pre-show check</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; display: flex; background: #0E0F11; color: #F2F3F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; overflow: hidden">
+<dc-import name="Sidebar" active="checklist" hint-size="240px,800px"></dc-import>
+
+<main style="flex: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 16px">
+<div>
+<h1 style="margin: 0; font-size: 28px; font-weight: 800">Pre-show check</h1>
+<div style="font-size: 14px; color: #9AA1A9; margin-top: 4px">Setlist: Friday Night Set · 6 songs · 23:20</div>
+</div>
+
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; background: rgba(255,193,7,0.10); border: 1px solid rgba(255,193,7,0.35); border-radius: 16px; padding: 18px 22px">
+<div style="display: flex; align-items: center; gap: 14px">
+<svg viewBox="0 0 24 24" width="30" height="30" fill="#FFC107" style="flex-shrink: 0"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+<div><div style="font-size: 20px; font-weight: 800; color: #FFD54F">Almost ready</div><div style="font-size: 14px; color: #C5CAD0; margin-top: 2px">7 checks passed, 1 needs your attention.</div></div>
+</div>
+<button style="height: 48px; padding: 0 22px; border-radius: 12px; border: 1px solid rgba(255,193,7,0.5); background: transparent; color: #FFD54F; font-size: 15px; font-weight: 800; cursor: pointer; flex-shrink: 0">Perform anyway</button>
+</div>
+
+<div style="flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px">
+
+<section aria-label="Checks" style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 6px 20px; display: flex; flex-direction: column">
+<sc-for list="{{checks}}" as="c" hint-placeholder-count="8">
+<div style="display: flex; align-items: center; gap: 14px; flex: 1; border-bottom: 1px solid #22262B">
+<span style="width: 28px; height: 28px; border-radius: 50%; background: {{c.dotBg}}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: {{c.dotColor}}; font-size: 15px; font-weight: 900">{{c.mark}}</span>
+<div style="flex: 1; min-width: 0">
+<div style="font-size: 16px; font-weight: 700">{{c.title}}</div>
+<div style="font-size: 13px; color: {{c.detailColor}}; margin-top: 2px">{{c.detail}}</div>
+</div>
+<sc-if value="{{c.action}}" hint-placeholder-val="{{false}}"><button style="height: 38px; padding: 0 14px; border-radius: 9px; border: 1px solid #2A2E34; background: #1E2125; color: #F2F3F4; font-size: 14px; font-weight: 700; cursor: pointer">{{c.action}}</button></sc-if>
+</div>
+</sc-for>
+</section>
+
+<section aria-label="Dry run" style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="font-size: 18px; font-weight: 800">Dry run</div>
+<div style="font-size: 14px; color: #9AA1A9; line-height: 1.5">Plays through every hand-over, hard stop and count-in of this setlist in fast-forward, without touching REAPER or making sound.</div>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px">
+<div style="display: flex; justify-content: space-between"><span style="color: #9AA1A9">Last run</span><span style="font-weight: 600">Yesterday 18:02</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #9AA1A9">Result</span><span style="font-weight: 700; color: #4CAF50">6 of 6 hand-overs OK</span></div>
+</div>
+<div style="flex: 1"></div>
+<button style="height: 48px; border-radius: 12px; border: none; background: #4CAF50; color: #0A1A0B; font-size: 15px; font-weight: 800; cursor: pointer">Start dry run</button>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() {
+const ok = (title, detail) => ({ title, detail, mark: '✓', dotBg: 'rgba(76,175,80,0.18)', dotColor: '#4CAF50', detailColor: '#9AA1A9', action: '' });
+const checks = [
+ok('REAPER connected', 'Latency 8 ms'),
+ok('Companion script up to date', 'v2.0.0, starts with REAPER'),
+ok('Web interface protected', 'Password set, port 8080'),
+ok('Project loaded', 'Summer Tour 2026.rpp'),
+{ title: 'Setlist is complete', detail: '1 song is missing in the project: Old Lighthouse', mark: '!', dotBg: 'rgba(255,193,7,0.2)', dotColor: '#FFC107', detailColor: '#FFD54F', action: 'Fix in Setlists' },
+ok('MIDI device connected', 'FootCtrl Mini on all channels'),
+ok('Recording is not armed', 'Arm recording is off'),
+ok('Hard stops found', '1 song with a hard stop: Static Hearts')
+];
+return { checks };
+}
+}
+</script>
+</body>
+</html>

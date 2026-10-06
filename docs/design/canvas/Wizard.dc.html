@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>First-run setup</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; display: flex; background: #0E0F11; color: #F2F3F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; overflow: hidden">
+
+<aside style="width: 340px; box-sizing: border-box; background: #121417; border-right: 1px solid #2A2E34; padding: 40px 32px; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="width: 40px; height: 40px; border-radius: 11px; background: #4CAF50; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0A1A0B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3l2-7 4 14 3-10 2 3h4"/></svg></div>
+<div style="font-size: 18px; font-weight: 800">Reaper Control</div>
+</div>
+<div>
+<div style="font-size: 26px; font-weight: 800; line-height: 1.2">Let's connect to REAPER</div>
+<div style="font-size: 15px; color: #9AA1A9; margin-top: 10px; line-height: 1.55">A small script runs inside REAPER so your set keeps playing even if this app closes. We install it for you.</div>
+</div>
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="4">
+<li style="display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 12px; background: {{s.bg}}">
+<span style="width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; flex-shrink: 0; background: {{s.dot}}; color: {{s.dotText}}">{{s.mark}}</span>
+<span style="font-size: 16px; font-weight: 700; color: {{s.color}}">{{s.label}}</span>
+</li>
+</sc-for>
+</ol>
+</aside>
+
+<main style="flex: 1; min-width: 0; padding: 48px 56px; display: flex; flex-direction: column; gap: 22px">
+<div>
+<div style="font-size: 13px; font-weight: 700; letter-spacing: 1px; color: #FFC107">STEP 3 OF 4</div>
+<h1 style="margin: 6px 0 0 0; font-size: 32px; font-weight: 800; line-height: 1.2">One thing is left for you to do</h1>
+<div style="font-size: 16px; color: #9AA1A9; margin-top: 8px; line-height: 1.5">REAPER is open, so we can't change its web interface setting for you. It takes about a minute.</div>
+</div>
+
+<div style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 8px 20px">
+<sc-for list="{{done}}" as="d" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 14px; height: 46px; border-bottom: 1px solid #22262B">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#4CAF50" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+<span style="flex: 1; font-size: 15px; font-weight: 600">{{d.text}}</span>
+<span style="font-size: 13px; color: #9AA1A9">{{d.note}}</span>
+</div>
+</sc-for>
+</div>
+
+<div style="background: rgba(255,193,7,0.08); border: 1px solid rgba(255,193,7,0.35); border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 800; color: #FFD54F">
+<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="flex-shrink: 0"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+Turn on the web interface in REAPER
+</div>
+<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 16px; line-height: 1.5">
+<sc-for list="{{how}}" as="h" hint-placeholder-count="4">
+<li style="display: flex; gap: 14px"><span style="width: 26px; height: 26px; border-radius: 50%; background: #2A2E34; color: #F2F3F4; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px">{{h.n}}</span><span style="color: #E6E9EC">{{h.text}}</span></li>
+</sc-for>
+</ol>
+<div style="font-size: 14px; color: #C5CAD0; background: rgba(0,0,0,0.25); border-radius: 10px; padding: 12px 14px; line-height: 1.5">Set a password. Without one, anyone on the venue Wi-Fi could control your REAPER.</div>
+</div>
+
+<div style="flex: 1"></div>
+
+<div style="display: flex; align-items: center; justify-content: space-between">
+<button style="height: 48px; padding: 0 20px; border-radius: 12px; border: 1px solid #2A2E34; background: transparent; color: #C5CAD0; font-size: 15px; font-weight: 700; cursor: pointer">Back</button>
+<div style="display: flex; align-items: center; gap: 12px">
+<button style="height: 48px; padding: 0 20px; border-radius: 12px; border: 1px solid #2A2E34; background: transparent; color: #C5CAD0; font-size: 15px; font-weight: 700; cursor: pointer">Show script folder</button>
+<button style="height: 48px; padding: 0 28px; border-radius: 12px; border: none; background: #4CAF50; color: #0A1A0B; font-size: 16px; font-weight: 800; cursor: pointer">Check again</button>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() {
+const defs = [
+{ label: 'Find REAPER', state: 'done' },
+{ label: 'Install script', state: 'done' },
+{ label: 'Web interface', state: 'now' },
+{ label: 'Connect', state: 'todo' }
+];
+const steps = defs.map((s, i) => ({
+label: s.label,
+mark: s.state === 'done' ? '✓' : String(i + 1),
+bg: s.state === 'now' ? '#1E2125' : 'transparent',
+dot: s.state === 'done' ? '#4CAF50' : s.state === 'now' ? '#FFC107' : '#2A2E34',
+dotText: s.state === 'todo' ? '#9AA1A9' : '#0A1A0B',
+color: s.state === 'todo' ? '#8B929A' : '#F2F3F4'
+}));
+const done = [
+{ text: 'Found REAPER 7.27', note: 'Applications / REAPER' },
+{ text: 'Backed up your REAPER settings', note: 'RC2-backups / today' },
+{ text: 'Copied the script into REAPER', note: 'Scripts / ReaperControl' },
+{ text: 'Registered it as an action', note: 'Action list' },
+{ text: 'Set it to start with REAPER', note: 'Startup' }
+];
+const how = [
+{ n: '1', text: 'In REAPER, open Preferences (Cmd + , on Mac, Ctrl + P on Windows).' },
+{ n: '2', text: 'Go to Control/OSC/web and click Add.' },
+{ n: '3', text: 'Choose "Web browser interface", keep port 8080 and set a password.' },
+{ n: '4', text: 'Click OK, then press Check again here.' }
+];
+return { steps, done, how };
+}
+}
+</script>
+</body>
+</html>

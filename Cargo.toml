@@ -1,0 +1,46 @@
+[workspace]
+resolver = "3"
+members = [
+  "crates/shared-kernel",
+  "crates/performance",
+  "crates/catalogue",
+  "crates/setlists",
+  "crates/protocol",
+  "crates/reaper-port",
+  "crates/reaper-extension",
+]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+license = "LicenseRef-Proprietary"
+publish = false
+
+[workspace.dependencies]
+thiserror = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+shared-kernel = { path = "crates/shared-kernel" }
+performance = { path = "crates/performance" }
+catalogue = { path = "crates/catalogue" }
+setlists = { path = "crates/setlists" }
+protocol = { path = "crates/protocol" }
+reaper-port = { path = "crates/reaper-port" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"
+todo = "deny"
+dbg_macro = "deny"
+
+[profile.release]
+panic = "unwind"
+lto = "thin"
+codegen-units = 1

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Connection states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 700px; box-sizing: border-box; padding: 32px; background: #0E0F11; color: #F2F3F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column; gap: 20px">
+
+<div>
+<h1 style="margin: 0; font-size: 28px; font-weight: 800">Connection and script states</h1>
+<div style="font-size: 15px; color: #9AA1A9; margin-top: 6px">These banners sit at the top of every screen except Performer, where only the status dot and one red line appear. Numbers are never shown as live when the link is down.</div>
+</div>
+
+<div style="flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<sc-for list="{{states}}" as="s" hint-placeholder-count="6">
+<section style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+<div style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: {{s.tint}}">{{s.tag}}</div>
+
+<div style="background: {{s.bannerBg}}; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: flex-start; gap: 10px">
+<span style="width: 10px; height: 10px; border-radius: 50%; background: {{s.tint}}; display: block; margin-top: 6px; flex-shrink: 0"></span>
+<div style="min-width: 0">
+<div style="font-size: 16px; font-weight: 800; color: {{s.titleColor}}">{{s.title}}</div>
+<div style="font-size: 14px; color: #C5CAD0; margin-top: 3px; line-height: 1.45">{{s.text}}</div>
+</div>
+</div>
+<sc-if value="{{s.action}}" hint-placeholder-val="{{true}}">
+<div><button style="height: 40px; padding: 0 16px; border-radius: 10px; border: none; background: {{s.tint}}; color: #0A1A0B; font-size: 14px; font-weight: 800; cursor: pointer; opacity: {{s.actionOpacity}}">{{s.action}}</button></div>
+</sc-if>
+</div>
+
+<div style="display: flex; align-items: baseline; justify-content: space-between; border-top: 1px solid #22262B; padding-top: 12px">
+<span style="font-size: 13px; color: #9AA1A9">{{s.readoutLabel}}</span>
+<span style="font-size: 22px; font-weight: 700; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: {{s.readoutColor}}">{{s.readout}}</span>
+</div>
+<div style="font-size: 13px; color: #9AA1A9; line-height: 1.45">{{s.note}}</div>
+</section>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":700}}'>
+class Component extends DCLogic {
+renderVals() {
+const green = '#4CAF50', red = '#FF5252', amber = '#FFC107', blue = '#5AA9F0', grey = '#9AA1A9';
+const states = [
+{ tag: 'CONNECTED', tint: green, bannerBg: 'rgba(76,175,80,0.10)', titleColor: '#FFFFFF', title: 'Connected to REAPER', text: 'Script v2.0.0 is running. Latency 8 ms.', action: '', readoutLabel: 'Position', readout: '02:14', readoutColor: '#F2F3F4', note: 'Normal state. Only the sidebar badge shows it.' },
+{ tag: 'LINK LOST', tint: red, bannerBg: 'rgba(255,82,82,0.12)', titleColor: '#FF8A80', title: 'Connection lost', text: 'REAPER keeps playing your set. We are trying to reconnect.', action: 'Reconnect now', readoutLabel: 'Position (last seen 4 s ago)', readout: '02:14', readoutColor: '#8B929A', note: 'Readouts turn grey and show their age. Transport buttons are disabled.' },
+{ tag: 'REAPER NOT FOUND', tint: grey, bannerBg: 'rgba(154,161,169,0.12)', titleColor: '#FFFFFF', title: 'REAPER is not running', text: 'Open REAPER and load your project. We connect on our own.', action: 'Open REAPER', readoutLabel: 'Position', readout: '--:--', readoutColor: '#8B929A', note: 'Shown when the REAPER process is not found.' },
+{ tag: 'SCRIPT MISSING', tint: amber, bannerBg: 'rgba(255,193,7,0.10)', titleColor: '#FFD54F', title: 'Companion script not installed', text: 'REAPER is open but the script is not running. Playback control needs it.', action: 'Set it up', readoutLabel: 'Position', readout: '--:--', readoutColor: '#8B929A', note: 'Opens the setup wizard at the right step.' },
+{ tag: 'SCRIPT OUTDATED', tint: blue, bannerBg: 'rgba(90,169,240,0.10)', titleColor: '#8CC4F5', title: 'Script update available', text: 'Installed v1.9.2, this app needs v2.0.0.', action: 'Update script', actionOpacity: '0.45', readoutLabel: 'Position', readout: '02:14', readoutColor: '#F2F3F4', note: 'The button is disabled while music plays. It is never offered mid-show.' },
+{ tag: 'DEGRADED', tint: amber, bannerBg: 'rgba(255,193,7,0.10)', titleColor: '#FFD54F', title: 'Slow connection', text: 'Replies from REAPER take 240 ms. Playback is not affected.', action: '', readoutLabel: 'Position', readout: '02:14', readoutColor: '#F2F3F4', note: 'Informational. The script still runs the set on its own.' }
+].map(s => ({ ...s, actionOpacity: s.actionOpacity || '1' }));
+return { states };
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Empty, loading and dialog states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 940px; box-sizing: border-box; padding: 32px; background: #0E0F11; color: #F2F3F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column; gap: 16px">
+
+<div>
+<h1 style="margin: 0; font-size: 28px; font-weight: 800">Empty, loading, dialog and message states</h1>
+<div style="font-size: 15px; color: #9AA1A9; margin-top: 6px">Small pieces that appear inside the screens. Messages never block the show: they appear in a corner and clear themselves.</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: 1fr 1fr auto; gap: 16px; flex: 1; min-height: 0">
+
+<section style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #9AA1A9">LOADING</div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px">
+<div style="width: 40px; height: 40px; border-radius: 50%; border: 4px solid #2A2E34; border-top-color: #4CAF50"></div>
+<div style="font-size: 16px; font-weight: 600">Loading data from REAPER</div>
+<div style="font-size: 14px; color: #9AA1A9">Reading songs, markers and setlists</div>
+</div>
+</section>
+
+<section style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #9AA1A9">NO SONGS IN PROJECT</div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center">
+<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#8B929A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h18M3 16h18M7 4v16M17 4v16"/></svg>
+<div style="font-size: 16px; font-weight: 700">No regions found in this project</div>
+<div style="font-size: 14px; color: #9AA1A9; line-height: 1.45; max-width: 280px">Create regions in REAPER (Shift + R) for each song, then refresh.</div>
+<button style="height: 40px; padding: 0 18px; border-radius: 10px; border: 1px solid #2A2E34; background: #1E2125; color: #F2F3F4; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 4px">Refresh</button>
+</div>
+</section>
+
+<section style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #9AA1A9">EMPTY SETLIST</div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center">
+<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#8B929A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+<div style="font-size: 16px; font-weight: 700">This setlist is empty</div>
+<div style="font-size: 14px; color: #9AA1A9; line-height: 1.45; max-width: 280px">Add songs from the list on the right in Setlists.</div>
+<button style="height: 40px; padding: 0 18px; border-radius: 10px; border: none; background: #4CAF50; color: #0A1A0B; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 4px">Go to Setlists</button>
+</div>
+</section>
+
+<section style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #9AA1A9">NO SETLISTS YET</div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center">
+<div style="font-size: 16px; font-weight: 700">No setlists in this project</div>
+<div style="font-size: 14px; color: #9AA1A9; line-height: 1.45; max-width: 280px">Give your first setlist a name. You can add songs next.</div>
+<div style="display: flex; gap: 8px; margin-top: 6px; width: 100%; max-width: 320px">
+<span style="flex: 1; height: 44px; border-radius: 10px; border: 1px solid #2A2E34; background: #0E0F11; display: flex; align-items: center; padding: 0 14px; font-size: 15px; color: #8B929A">Setlist name</span>
+<button style="height: 44px; padding: 0 16px; border-radius: 10px; border: none; background: #4CAF50; color: #0A1A0B; font-size: 15px; font-weight: 800; cursor: pointer">Create</button>
+</div>
+</div>
+</section>
+
+<section style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #9AA1A9">SETLIST SELECTOR OPEN</div>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: center; justify-content: space-between; background: #0E0F11; border: 1px solid #4CAF50; border-radius: 10px; padding: 0 14px; height: 44px; font-size: 15px; font-weight: 600"><span><span style="color: #9AA1A9; font-weight: 500">Setlist </span>Friday Night Set</span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg></div>
+<div style="background: #1E2125; border: 1px solid #2A2E34; border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{options}}" as="o" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; justify-content: space-between; height: 40px; padding: 0 10px; border-radius: 8px; font-size: 15px; font-weight: 600; background: {{o.bg}}; color: {{o.color}}"><span>{{o.label}}</span><span style="font-size: 13px; color: #9AA1A9; font-weight: 500">{{o.meta}}</span></div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section style="background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden">
+<div style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #9AA1A9">DELETE CONFIRMATION</div>
+<div style="flex: 1; position: relative; background: rgba(0,0,0,0.55); border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 12px">
+<div role="dialog" aria-label="Delete setlist" style="background: #1E2125; border: 1px solid #2A2E34; border-radius: 14px; padding: 18px; width: 100%; box-shadow: 0 12px 32px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 17px; font-weight: 800">Delete "Acoustic Encore"?</div>
+<div style="font-size: 14px; color: #C5CAD0; line-height: 1.45">This removes the setlist from the project. Your songs and markers stay.</div>
+<div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px">
+<button style="height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid #2A2E34; background: transparent; color: #F2F3F4; font-size: 14px; font-weight: 700; cursor: pointer">Cancel</button>
+<button style="height: 40px; padding: 0 16px; border-radius: 10px; border: none; background: #FF5252; color: #1A0505; font-size: 14px; font-weight: 800; cursor: pointer">Delete</button>
+</div>
+</div>
+</div>
+</section>
+
+<section style="grid-column: 1 / span 3; background: #17191C; border: 1px solid #2A2E34; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #9AA1A9">MESSAGES (BOTTOM RIGHT, NEVER BLOCK THE SCREEN)</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+<sc-for list="{{toasts}}" as="t" hint-placeholder-count="3">
+<div role="status" style="display: flex; align-items: flex-start; gap: 12px; background: #1E2125; border: 1px solid #2A2E34; border-radius: 12px; padding: 12px 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.35)">
+<span style="width: 10px; height: 10px; border-radius: 50%; background: {{t.tint}}; display: block; margin-top: 6px; flex-shrink: 0"></span>
+<div style="flex: 1; min-width: 0"><div style="font-size: 15px; font-weight: 700">{{t.title}}</div><div style="font-size: 13px; color: #9AA1A9; margin-top: 2px; line-height: 1.4">{{t.text}}</div></div>
+<button aria-label="Dismiss" style="width: 32px; height: 32px; border: none; background: transparent; color: #9AA1A9; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; flex-shrink: 0"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</div>
+</sc-for>
+</div>
+<div style="font-size: 13px; color: #9AA1A9">Info clears after 2 seconds, warnings after 10 seconds, errors stay until dismissed.</div>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":940}}'>
+class Component extends DCLogic {
+renderVals() {
+const options = [
+{ label: 'All songs', meta: '12 songs', on: false },
+{ label: 'Friday Night Set', meta: '6 songs', on: true },
+{ label: 'Acoustic Encore', meta: '3 songs', on: false },
+{ label: 'Festival 45 min', meta: '9 songs', on: false }
+].map(o => ({ label: o.label, meta: o.meta, bg: o.on ? '#262A30' : 'transparent', color: o.on ? '#4CAF50' : '#F2F3F4' }));
+const toasts = [
+{ tint: '#5AA9F0', title: 'Setlist saved', text: 'Stored in the REAPER project.' },
+{ tint: '#FFC107', title: '1 song is missing', text: 'Old Lighthouse was not found in the project.' },
+{ tint: '#FF5252', title: 'Could not reach REAPER', text: 'Check that REAPER is open. We keep trying.' }
+];
+return { options, toasts };
+}
+}
+</script>
+</body>
+</html>
