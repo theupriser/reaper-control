@@ -50,11 +50,12 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 
 ## Git workflow (owner's rule)
 - Never commit to `main` directly. Every change lives on a branch: `feature/<short-name>` for features and chores, `bugfix/<short-name>` for bugs.
-- Merge into `main` **only when the feature or bug is complete**: tests written and green, clippy/fmt clean, docs updated, CI green on the pull request. Open a PR with `gh`, wait for the checks, then merge (merge commit, so the branch history stays visible) and delete the branch.
+- A feature or complete piece of functionality is **reviewed by the owner before it is merged**. When it is done: tests written and green, clippy/fmt clean, docs updated, PR open with CI green. Then stop and hand over for review: PR link, a short summary, what changed and where to look first, and the visible test evidence. Merge (merge commit, delete the branch) **only after the owner approves**. Never merge on my own.
 - Commit messages: plain, imperative, no `Co-Authored-By` lines and no tool/AI attribution (owner's explicit instruction).
 - The repo is public (`github.com/theupriser/reaper-control`): no secrets, tokens, personal data, or private paths in commits.
 
 ## Working agreements
+- **Test visibly.** Show the real terminal output of builds, linters and tests (not filtered through grep/tail, not summarised). For anything with a screen (UI, app window, REAPER), run it and show the screen (screenshot or opened window). Say what was run and what was seen.
 - **Spikes before commitments** (PLAN Phase 1): S1 extension loads, S2 timing, S3 socket, S4 installer, S5 webview, S6 identity, S7 crash containment. Record outcomes as ADRs in `docs/adr/`. Gate 1 is the go/no-go on the extension.
 - Work packages are referenced by id (e.g. WP 3.4). Definition of done: PLAN §14.
 - Each WP: tests with it; docs/ADR updated if a decision was made; parity checklist updated when a feature is reached.
