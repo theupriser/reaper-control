@@ -60,6 +60,8 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 - Work packages are referenced by id (e.g. WP 3.4). Definition of done: PLAN §14.
 - Each WP: tests with it; docs/ADR updated if a decision was made; parity checklist updated when a feature is reached.
 - Report faithfully: failing tests, skipped steps, measured numbers (with how they were measured).
+- **Cheap screenshots:** capture one window only (find its CGWindowID with a small swift `CGWindowListCopyWindowInfo` script filtered by pid, then `screencapture -x -o -l <id>`), downscale (`sips -Z 800 -s format jpeg -s formatOptions 60`), and only when it adds evidence; prefer log output for numbers. Screen Recording permission is granted to the terminal.
+- **Isolated REAPER for tests:** `open -n -a /Applications/REAPER.app --args -cfgfile <dir>/reaper.ini <project>` runs a second instance whose resource path is `<dir>` (verified). Put test extensions in `<dir>/UserPlugins/`. Real projects are only ever used as copies of the `.RPP` file under the git-ignored `.dev/`; never commit them or their song names.
 - Do not touch the v1 repo, the user's real REAPER config, or the user's real REAPER projects for experiments. Use a **portable REAPER copy and a sample project** (WP 0.7). If a step must touch the real REAPER install, ask first.
 - Confirm before installing system software, signing, publishing, or anything outward-facing.
 
@@ -72,6 +74,8 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 - Planning done (SPEC draft 2, PLAN, design canvas v1). Designs still to update for D7 (SPEC §10e: wizard, settings connection card, connection states, pre-show check, copy "script"→"extension").
 - **Phase 0 in progress.** Done: WP 0.1 Rust part (git repo, Cargo workspace with one crate per context + `protocol`, `reaper-port`, `reaper-extension`; workspace lint wall; `shared-kernel` with `Seconds`/`Bpm` + tests). Committed and pushed to `main`. CI (macOS arm64 + Windows x64) and executable dependency rules (`crates/architecture-tests`) landed via `feature/ci-and-dependency-rules`. Remaining: pnpm/UI workspace + Tauri shell, CI (0.2), dependency-rule check (0.3/0.9), type generation (0.4), ADRs (0.5), licence (0.6), portable REAPER + sample project (0.7), domain discovery (0.8). Then Phase 1 spikes (S1 first).
 - Original Phase 0 list: repo + Cargo/pnpm workspaces, lint configs (0.1), CI for macOS arm64 + Windows x64 (0.2), dependency-rule check (0.3/0.9), Rust→TS type generation (0.4), ADRs (0.5), licence decision (0.6), portable REAPER + sample project (0.7), domain discovery workshop (0.8).
+- **Spike S1 (macOS arm64 half) done, see `docs/adr/ADR-002-extension-owned-playback.md`** on `feature/spike-s1-extension-hello`: extension loads, main-thread tick 30.0 ms avg, reads match v1's web-interface data (12/12 regions). Still open for Gate 1: Windows half of S1, S2 (timing/seek), S3 (socket), S4 (installer, signing), S7 (crash containment).
+- Known doc fix pending (own `bugfix/` branch): directive placement. `!1008` may sit anywhere inside the song; `!bpm` sits at the start edge; v1's "within 0.001 s of the boundary" Help text is wrong (SPEC §4, Help design, `docs/design/canvas/Help.dc.html`).
 - Open questions for the owner: PLAN §16 (minimum REAPER version, app name/licence, crash reporting, ReaPack, Windows x64 only?).
 
 ## Commands
