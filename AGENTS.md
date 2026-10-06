@@ -3,7 +3,7 @@
 Working notes for AI agents (and humans) on this repo. Read this first, then the docs it points to. Keep it short and accurate: update it when a decision changes.
 
 ## What this is
-Reaper Control v2: a stage app that controls the REAPER DAW and plays a setlist live. It is a rewrite of v1 (Electron/Svelte/TS, at `~/Projects/Reaper-Control-App`, **read-only reference, never edit it**). Owner: Rick Peters (rickpeters@upriser.nl). Used on stage, so **stability beats features**.
+Reaper Control v2: a stage app that controls the REAPER DAW and plays a setlist live. It is a rewrite of v1 (Electron/Svelte/TS, at `~/Projects/Reaper-Control-App`, **read-only reference, never edit it**; if the local copy is not available, the same code is at https://github.com/theupriser/Reaper-Control-App, `main`, read it with `gh api repos/theupriser/Reaper-Control-App/contents/<path> --jq .content | base64 -d` or `gh repo clone` into the scratchpad). Owner: Rick Peters (rickpeters@upriser.nl). Used on stage, so **stability beats features**.
 
 ## Source of truth (read in this order)
 1. `docs/SPEC.md` — what/how (architecture, protocol, state machine, safety, installer, DDD). Draft 2.
