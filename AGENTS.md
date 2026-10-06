@@ -68,7 +68,7 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 ## Environment (as of 2026-10-06)
 - macOS, Apple Silicon (arm64). Node 22, pnpm 10, git 2.54, **Rust 1.99 stable (installed via rustup on 2026-10-06; run `source ~/.cargo/env` in fresh shells)**. No `lua`.
 - REAPER is installed at `/Applications/REAPER.app`; resource dir `~/Library/Application Support/REAPER` (contains a `Helgoboss` folder, i.e. ReaLearn/reaper-rs ecosystem is already present). v1 app: `/Applications/Reaper Control.app`, its data in `~/Library/Application Support/electron-reaper-control` and `reaper-control`.
-- Windows x64 testing needs a separate machine/VM (not available here yet).
+- **This MacBook is the homebase** for all development and testing. Windows x64 is covered by CI only for now; real Windows testing needs another machine later.
 
 ## Status and next steps
 - Planning done (SPEC draft 2, PLAN, design canvas v1). Designs still to update for D7 (SPEC §10e: wizard, settings connection card, connection states, pre-show check, copy "script"→"extension").
@@ -85,6 +85,11 @@ cargo fmt --all
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace      # includes the architecture rules
 ```
+
+## Project commands (`.claude/commands/`)
+- `/start`: orient at the start of a session (reads AGENTS.md, checks git/PRs/ADRs, proposes the next step, waits for confirmation).
+- `/next`: after finishing something: sync `main`, list open PRs, update status, propose the next work package.
+- Remind the owner to `/compact` whenever a feature, spike or bug is complete.
 
 ## Pointers
 - v1 key files for parity: `src/main/services/{reaperConnector,regionService,projectService,midiService}.ts`, `src/main/utils/{bpmUtils,config}.ts`, `src/renderer/src/lib/utils/markerUtils.ts`, `src/renderer/src/components/{PerformerMode,TransportControls,RegionList,SetlistEditor,Settings,Help}.svelte` (all under `~/Projects/Reaper-Control-App`).
