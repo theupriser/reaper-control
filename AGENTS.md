@@ -48,7 +48,14 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 - **Types are generated** from Rust to TS (no hand-copied interfaces). Marker test vectors live in `testing/vectors/`.
 - Match surrounding style; no comment noise; no abstractions without a second implementation or a test double (SPEC anti-goals). No event sourcing, no plugin system, no DI container.
 
+## Git workflow (owner's rule)
+- Never commit to `main` directly. Every change lives on a branch: `feature/<short-name>` for features and chores, `bugfix/<short-name>` for bugs.
+- A feature or complete piece of functionality is **reviewed by the owner before it is merged**. When it is done: tests written and green, clippy/fmt clean, docs updated, PR open with CI green. Then stop and hand over for review: PR link, a short summary, what changed and where to look first, and the visible test evidence. Merge (merge commit, delete the branch) **only after the owner approves**. Never merge on my own.
+- Commit messages: plain, imperative, no `Co-Authored-By` lines and no tool/AI attribution (owner's explicit instruction).
+- The repo is public (`github.com/theupriser/reaper-control`): no secrets, tokens, personal data, or private paths in commits.
+
 ## Working agreements
+- **Test visibly.** Show the real terminal output of builds, linters and tests (not filtered through grep/tail, not summarised). For anything with a screen (UI, app window, REAPER), run it and show the screen (screenshot or opened window). Say what was run and what was seen.
 - **Spikes before commitments** (PLAN Phase 1): S1 extension loads, S2 timing, S3 socket, S4 installer, S5 webview, S6 identity, S7 crash containment. Record outcomes as ADRs in `docs/adr/`. Gate 1 is the go/no-go on the extension.
 - Work packages are referenced by id (e.g. WP 3.4). Definition of done: PLAN §14.
 - Each WP: tests with it; docs/ADR updated if a decision was made; parity checklist updated when a feature is reached.
@@ -63,7 +70,7 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 
 ## Status and next steps
 - Planning done (SPEC draft 2, PLAN, design canvas v1). Designs still to update for D7 (SPEC §10e: wizard, settings connection card, connection states, pre-show check, copy "script"→"extension").
-- **Phase 0 in progress.** Done: WP 0.1 Rust part (git repo, Cargo workspace with one crate per context + `protocol`, `reaper-port`, `reaper-extension`; workspace lint wall; `shared-kernel` with `Seconds`/`Bpm` + tests). Not committed yet. Remaining: pnpm/UI workspace + Tauri shell, CI (0.2), dependency-rule check (0.3/0.9), type generation (0.4), ADRs (0.5), licence (0.6), portable REAPER + sample project (0.7), domain discovery (0.8). Then Phase 1 spikes (S1 first).
+- **Phase 0 in progress.** Done: WP 0.1 Rust part (git repo, Cargo workspace with one crate per context + `protocol`, `reaper-port`, `reaper-extension`; workspace lint wall; `shared-kernel` with `Seconds`/`Bpm` + tests). Committed and pushed to `main`. CI (macOS arm64 + Windows x64) and executable dependency rules (`crates/architecture-tests`) landed via `feature/ci-and-dependency-rules`. Remaining: pnpm/UI workspace + Tauri shell, CI (0.2), dependency-rule check (0.3/0.9), type generation (0.4), ADRs (0.5), licence (0.6), portable REAPER + sample project (0.7), domain discovery (0.8). Then Phase 1 spikes (S1 first).
 - Original Phase 0 list: repo + Cargo/pnpm workspaces, lint configs (0.1), CI for macOS arm64 + Windows x64 (0.2), dependency-rule check (0.3/0.9), Rust→TS type generation (0.4), ADRs (0.5), licence decision (0.6), portable REAPER + sample project (0.7), domain discovery workshop (0.8).
 - Open questions for the owner: PLAN §16 (minimum REAPER version, app name/licence, crash reporting, ReaPack, Windows x64 only?).
 
@@ -72,7 +79,7 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 source ~/.cargo/env
 cargo fmt --all
 cargo clippy --workspace --all-targets -- -D warnings
-cargo test --workspace
+cargo test --workspace      # includes the architecture rules
 ```
 
 ## Pointers

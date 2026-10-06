@@ -8,6 +8,7 @@ members = [
   "crates/protocol",
   "crates/reaper-port",
   "crates/reaper-extension",
+  "crates/architecture-tests",
 ]
 
 [workspace.package]
