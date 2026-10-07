@@ -1,10 +1,11 @@
 //! The endpoint file: where the extension listens and the token the app must present.
 
 use std::fs;
-use std::io;
 use std::path::Path;
 
 use serde::{Deserialize, Serialize};
+
+use crate::EndpointError;
 
 /// Port and token of a running extension.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -13,20 +14,6 @@ pub struct Endpoint {
     pub port: u16,
     /// Shared secret for the Hello.
     pub token: String,
-}
-
-/// The endpoint file could not be read or written.
-#[derive(Debug, thiserror::Error)]
-pub enum EndpointError {
-    /// File system problem.
-    #[error("endpoint file: {0}")]
-    Io(#[from] io::Error),
-    /// The file is not a valid endpoint.
-    #[error("endpoint file is not valid: {0}")]
-    Invalid(#[from] serde_json::Error),
-    /// The operating system gave no random bytes.
-    #[error("no random bytes for the token: {0}")]
-    Random(#[from] getrandom::Error),
 }
 
 impl Endpoint {

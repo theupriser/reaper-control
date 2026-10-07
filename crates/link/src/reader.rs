@@ -5,18 +5,9 @@ use std::net::TcpStream;
 
 use protocol::frame::FrameDecoder;
 use protocol::message::{CodecError, decode_message};
-use serde::de::DeserializeOwned;
 
-/// Why a connection has to be closed.
-#[derive(Debug, thiserror::Error)]
-pub(crate) enum ReadError {
-    #[error("peer closed the connection")]
-    Closed,
-    #[error("socket: {0}")]
-    Io(#[from] io::Error),
-    #[error(transparent)]
-    Codec(#[from] CodecError),
-}
+use crate::read_error::ReadError;
+use serde::de::DeserializeOwned;
 
 pub(crate) struct MessageReader {
     stream: TcpStream,
