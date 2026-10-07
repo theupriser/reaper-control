@@ -1,8 +1,8 @@
 //! The extension's side: accepts the app, pushes state, answers commands. Every socket
 //! operation runs on its own thread, so a slow or broken client never holds up the caller.
 
+mod acceptor;
 mod command_handler;
-mod connected_client;
 mod connection;
 mod hub;
 mod server_error;
@@ -20,7 +20,7 @@ use protocol::AppState;
 use protocol::message::{ServerMessage, encode_message};
 
 use crate::Endpoint;
-use connection::accept_loop;
+use acceptor::Acceptor;
 use hub::Hub;
 use shared::Shared;
 
@@ -55,7 +55,7 @@ impl LinkServer {
             let shared = Arc::clone(&shared);
             thread::Builder::new()
                 .name("link-accept".into())
-                .spawn(move || accept_loop(&listener, &shared))?
+                .spawn(move || Acceptor { listener, shared }.run())?
         };
         Ok(Self {
             shared,
@@ -76,7 +76,7 @@ impl LinkServer {
 
     /// Number of clients past the handshake.
     pub fn client_count(&self) -> usize {
-        self.shared.hub().clients.len()
+        self.shared.hub().client_count()
     }
 
     /// Remember `state` for clients that connect later and push it to everyone now.
@@ -85,16 +85,7 @@ impl LinkServer {
         let Ok(frame) = encode_message(&ServerMessage::State { state }) else {
             return;
         };
-        let frame = Arc::new(frame);
-        let mut hub = self.shared.hub();
-        hub.state = state;
-        hub.clients.retain(|c| {
-            let sent = c.outbox.try_send(Arc::clone(&frame)).is_ok();
-            if !sent {
-                let _ = c.stream.shutdown(std::net::Shutdown::Both);
-            }
-            sent
-        });
+        self.shared.hub().broadcast(state, &Arc::new(frame));
     }
 
     /// Stop accepting and close every connection.
@@ -103,9 +94,7 @@ impl LinkServer {
         if let Some(accept) = self.accept.take() {
             let _ = accept.join();
         }
-        for c in self.shared.hub().clients.drain(..) {
-            let _ = c.stream.shutdown(std::net::Shutdown::Both);
-        }
+        self.shared.hub().close_all();
     }
 }
 

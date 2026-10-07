@@ -6,7 +6,7 @@ use std::net::TcpStream;
 use protocol::frame::FrameDecoder;
 use protocol::message::{CodecError, decode_message};
 
-use crate::read_error::ReadError;
+use super::ReadError;
 use serde::de::DeserializeOwned;
 
 pub(crate) struct MessageReader {

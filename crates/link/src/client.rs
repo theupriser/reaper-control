@@ -4,21 +4,25 @@
 //! link is down: a stale command played back on stage later is worse than a refused one.
 
 mod client_config;
+mod handshake;
+mod link;
 mod link_event;
 mod send_error;
+mod session;
 mod worker;
 
 pub use client_config::ClientConfig;
 pub use link_event::LinkEvent;
 pub use send_error::SendError;
 
+use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::mpsc::{Receiver, Sender, channel};
-use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 
 use protocol::Command;
 
+use session::CommandQueue;
 use worker::Worker;
 
 /// A running client. Dropping it stops the thread.
@@ -40,7 +44,7 @@ impl LinkClient {
         let worker = Worker {
             config,
             events: event_tx,
-            commands: Mutex::new(command_rx),
+            commands: CommandQueue::new(command_rx),
             connected: Arc::clone(&connected),
             stop: Arc::clone(&stop),
         };

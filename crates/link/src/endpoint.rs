@@ -5,7 +5,9 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
-use crate::EndpointError;
+mod endpoint_error;
+
+pub use endpoint_error::EndpointError;
 
 /// Port and token of a running extension.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
