@@ -1,5 +1,5 @@
 //! Spike S2: timing of hand-overs. Reads a one-line command from `<resource>/RC2/s2-run.txt`
-//! (`seek <lead_ms> [start_s]` or `stopseek <lead_ms> [start_s]`), then plays the click project from 6 s and, when the
+//! (`seek <lead_ms> [start_s] [rec]` or `stopseek <lead_ms> [start_s] [rec]`; `rec` starts recording (action 1013) instead of play), then plays the click project from 6 s and, when the
 //! play position comes within `lead_ms` of the end of Song A (10 s), jumps to the start of Song B
 //! (12 s). Every main-thread tick is logged (`T`), plus the trigger (`E`), to `spike-s2.log`.
 #![allow(unsafe_code)] // spike only
@@ -12,7 +12,7 @@ use std::time::{Duration, Instant};
 use reaper_low::PluginContext;
 use reaper_macros::reaper_extension_plugin;
 use reaper_medium::{
-    ControlSurface, MainThreadScope, PositionInSeconds, ProjectContext, Reaper, ReaperSession,
+    CommandId, ControlSurface, MainThreadScope, PositionInSeconds, ProjectContext, Reaper, ReaperSession,
     SetEditCurPosOptions,
 };
 
@@ -33,6 +33,7 @@ struct Run {
     lead: f64,
     began: Instant,
     started_play: bool,
+    record: bool,
     triggered_at: Option<Instant>,
 }
 
@@ -77,6 +78,7 @@ impl Spike {
         };
         let lead_ms: f64 = parts.next().and_then(|s| s.parse().ok()).unwrap_or(0.0);
         let start_at: f64 = parts.next().and_then(|s| s.parse().ok()).unwrap_or(6.0);
+        let record = parts.next() == Some("rec");
         self.runs += 1;
         let project = ProjectContext::CurrentProject;
         self.reaper.on_stop_button_ex(project);
@@ -88,6 +90,7 @@ impl Spike {
             lead: lead_ms / 1000.0,
             began: Instant::now(),
             started_play: false,
+            record,
             triggered_at: None,
         });
     }
@@ -98,12 +101,16 @@ impl Spike {
         let state = self.reaper.get_play_state_ex(project);
         let Some(run) = self.run.as_mut() else { return };
         let ms = run.began.elapsed().as_secs_f64() * 1000.0;
-        let (id, method, lead) = (run.id, run.method, run.lead);
+        let (id, method, lead, record) = (run.id, run.method, run.lead, run.record);
         if !run.started_play {
             // give the stop/seek one tick to settle, then press play
             if ms > 100.0 {
                 run.started_play = true;
-                self.reaper.on_play_button_ex(project);
+                if run.record {
+                    self.reaper.main_on_command_ex(CommandId::new(1013), 0, project);
+                } else {
+                    self.reaper.on_play_button_ex(project);
+                }
             }
             return;
         }
@@ -128,7 +135,11 @@ impl Spike {
             self.log(format!("E run={id} ms={ms:.1} trigger pos_before={pos:.4} call_ms={call_ms:.3}"));
         }
         if done {
-            self.reaper.on_stop_button_ex(project);
+            if record {
+                self.reaper.main_on_command_ex(CommandId::new(40667), 0, project);
+            } else {
+                self.reaper.on_stop_button_ex(project);
+            }
             self.log(format!("END run={id}"));
             self.run = None;
         }
