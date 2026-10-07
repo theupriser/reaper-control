@@ -18,6 +18,7 @@ impl Handshake<'_> {
         link.send(&ClientMessage::Hello {
             protocol: PROTOCOL_VERSION,
             token,
+            resume_from_event_id: None,
         })?;
         let started = Instant::now();
         while started.elapsed() < WELCOME_TIMEOUT && !self.stop.load(Ordering::SeqCst) {
@@ -25,6 +26,7 @@ impl Handshake<'_> {
                 Some(ServerMessage::Welcome {
                     protocol,
                     extension_version,
+                    ..
                 }) if protocol == PROTOCOL_VERSION => return Some(extension_version),
                 Some(_) => return None,
                 None => {}

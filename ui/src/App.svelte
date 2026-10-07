@@ -6,7 +6,7 @@
   import { currentState, dispatch } from "./lib/ipc";
   import { screenLabel, type ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
-  import { keyIntent, seekCommand, type PerformerPhase, type SeekTarget } from "./lib/performer";
+  import { keyIntent, performerPhase, seekCommand, type PerformerPhase, type SeekTarget } from "./lib/performer";
   import type { AppState, Command } from "./lib/generated/protocol";
 
   let appState = $state<AppState>({
@@ -22,7 +22,7 @@
 
   const phases: PerformerPhase[] = ["Idle", "Playing", "Paused", "CountingIn", "HardStopped"];
   const forced = new URLSearchParams(location.search).get("phase") as PerformerPhase | null;
-  const shown = $derived(fixtureFor(forced && phases.includes(forced) ? forced : appState.phase));
+  const shown = $derived(fixtureFor(forced && phases.includes(forced) ? forced : performerPhase(appState.phase)));
   const view = $derived({
     ...shown,
     songPosition: forced ? shown.songPosition : appState.position,

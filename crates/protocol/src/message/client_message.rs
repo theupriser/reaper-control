@@ -12,7 +12,11 @@ pub enum ClientMessage {
         protocol: u32,
         /// Token from the endpoint file.
         token: String,
+        /// Id of the last event the app saw; everything after it is replayed. None on first contact.
+        resume_from_event_id: Option<u64>,
     },
+    /// Ask for the catalog now; answered by a [`ServerMessage::Catalog`].
+    GetCatalog,
     /// Ask the extension to do something; answered by an [`ServerMessage::Ack`].
     Command {
         /// Chosen by the app, echoed in the Ack.

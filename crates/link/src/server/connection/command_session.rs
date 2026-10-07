@@ -25,6 +25,7 @@ impl CommandSession<'_> {
                     outcome: self.handle(command),
                 },
                 Some(ClientMessage::Ping) => ServerMessage::Pong,
+                Some(ClientMessage::GetCatalog) => continue,
                 Some(ClientMessage::Hello { .. }) => return Ok(()),
             };
             self.outbox

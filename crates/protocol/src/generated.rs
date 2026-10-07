@@ -6,7 +6,10 @@ use std::path::PathBuf;
 
 use ts_rs::{Config, TS};
 
-use crate::{AppState, Command, Phase};
+use crate::{
+    AppState, Catalog, Command, CueInfo, EntryInfo, EventRecord, Live, Phase, SetlistInfo, Setting,
+    SongInfo, Transport, WireEvent,
+};
 
 const HEADER: &str =
     "// Generated from crates/protocol by `UPDATE_TYPES=1 cargo test -p protocol`. Do not edit.\n";
@@ -18,6 +21,16 @@ fn render() -> Result<String, ts_rs::ExportError> {
         Phase::export_to_string(&config)?,
         Command::export_to_string(&config)?,
         AppState::export_to_string(&config)?,
+        Transport::export_to_string(&config)?,
+        Setting::export_to_string(&config)?,
+        WireEvent::export_to_string(&config)?,
+        EventRecord::export_to_string(&config)?,
+        SongInfo::export_to_string(&config)?,
+        CueInfo::export_to_string(&config)?,
+        EntryInfo::export_to_string(&config)?,
+        SetlistInfo::export_to_string(&config)?,
+        Catalog::export_to_string(&config)?,
+        Live::export_to_string(&config)?,
     ] {
         out.push('\n');
         out.push_str(&strip_imports(&declaration));

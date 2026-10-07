@@ -1,8 +1,21 @@
-import type { Command } from "./generated/protocol";
+import type { Command, Phase } from "./generated/protocol";
 
 // Temporary hand-written view model for the Performer screen.
 // Replaced by generated types in WP 0.4; the performance core will fill it.
 export type PerformerPhase = "Idle" | "Playing" | "Paused" | "CountingIn" | "HardStopped";
+
+// The Performer screen (v1 look) has no state of its own for a hand-over or a finished show:
+// a hand-over looks like playing, a finished show like idle.
+export function performerPhase(phase: Phase): PerformerPhase {
+  switch (phase) {
+    case "HandingOver":
+      return "Playing";
+    case "Finished":
+      return "Idle";
+    default:
+      return phase;
+  }
+}
 
 export interface CueMark {
   name: string;

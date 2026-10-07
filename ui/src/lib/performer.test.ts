@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { fixtureFor } from "./performer-fixtures";
 import {
   keyIntent,
+  performerPhase,
   popoverX,
   progressPercent,
   seekCommand,
@@ -102,5 +103,14 @@ describe("hard-stop flash (v1: 2 s ease-in-out, #121212 to #2a0000, off for redu
   it("flashes only while waiting at a hard stop with a next song", () => {
     expect(isWaitingAtHardStop(fixtureFor("HardStopped"))).toBe(true);
     expect(isWaitingAtHardStop(fixtureFor("Paused"))).toBe(false);
+  });
+});
+
+describe("performerPhase", () => {
+  it("keeps the phases the screen knows and folds the two it does not", () => {
+    expect(performerPhase("CountingIn")).toBe("CountingIn");
+    expect(performerPhase("HardStopped")).toBe("HardStopped");
+    expect(performerPhase("HandingOver")).toBe("Playing");
+    expect(performerPhase("Finished")).toBe("Idle");
   });
 });

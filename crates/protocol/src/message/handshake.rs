@@ -2,7 +2,10 @@ use super::{ClientMessage, HandshakeError, PROTOCOL_VERSION};
 
 /// Accept the first message of a connection only if it is a Hello with the right version and token.
 pub fn check_hello(expected_token: &str, first: &ClientMessage) -> Result<(), HandshakeError> {
-    let ClientMessage::Hello { protocol, token } = first else {
+    let ClientMessage::Hello {
+        protocol, token, ..
+    } = first
+    else {
         return Err(HandshakeError::NotHello);
     };
     if !same_token(expected_token, token) {
