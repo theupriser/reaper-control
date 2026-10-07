@@ -38,6 +38,10 @@ pub use tempo_segment::TempoSegment;
 pub use time_signature::TimeSignature;
 
 #[cfg(test)]
+mod count_in_properties;
+#[cfg(test)]
 mod count_in_tests;
+#[cfg(test)]
+mod performance_properties;
 #[cfg(test)]
 mod tests;

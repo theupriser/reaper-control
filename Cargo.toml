@@ -23,6 +23,7 @@ publish = false
 thiserror = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+proptest = "1"
 shared-kernel = { path = "crates/shared-kernel" }
 performance = { path = "crates/performance" }
 catalogue = { path = "crates/catalogue" }
