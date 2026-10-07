@@ -46,7 +46,7 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 - **Extension safety (SPEC S-9):** every FFI entry wrapped in `catch_unwind`; `panic = "unwind"`; `#![deny(unsafe_code)]` except one FFI module; deny `unwrap_used`, `expect_used`, `indexing_slicing`; no blocking on REAPER's main/audio thread; audio hook only touches atomics and a lock-free queue; fuzz the protocol parser; safe-mode marker file.
 - **Make illegal states unrepresentable:** enums with data, newtypes (`SongId`, `Seconds`, `Bpm`). Errors are values (`thiserror`), no log-and-continue.
 - **Small units:** files < ~300 lines, functions < ~40, Svelte components < ~200 lines of script. Presentational components take props only; no business logic in `.svelte`.
-- **Types are generated** from Rust to TS (no hand-copied interfaces). Marker test vectors live in `testing/vectors/`.
+- **Types are generated** from Rust to TS (no hand-copied interfaces): types in `crates/protocol`, output `ui/src/lib/generated/protocol.ts`, refresh with `UPDATE_TYPES=1 cargo test -p protocol`. Marker test vectors live in `testing/vectors/`.
 - Match surrounding style; no comment noise; no abstractions without a second implementation or a test double (SPEC anti-goals). No event sourcing, no plugin system, no DI container.
 
 ## Git workflow (owner's rule)

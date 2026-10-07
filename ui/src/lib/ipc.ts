@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { AppState, Command } from "./types";
+import type { AppState, Command } from "./generated/protocol";
 
 export const dispatch = (command: Command): Promise<AppState> =>
   invoke<AppState>("dispatch", { command });

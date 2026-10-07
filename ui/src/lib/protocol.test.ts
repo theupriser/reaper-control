@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AppState } from "./types";
+import type { AppState } from "./generated/protocol";
 
 describe("AppState", () => {
   it("starts idle", () => {

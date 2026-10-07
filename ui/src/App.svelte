@@ -7,7 +7,7 @@
   import { screenLabel, type ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
   import type { PerformerPhase } from "./lib/performer";
-  import type { AppState, Command } from "./lib/types";
+  import type { AppState, Command } from "./lib/generated/protocol";
 
   let appState = $state<AppState>({ phase: "Idle" });
   let error = $state<string | null>(null);
