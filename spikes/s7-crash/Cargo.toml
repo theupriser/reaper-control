@@ -1,0 +1,15 @@
+[package]
+name = "s7-crash"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+reaper-low = { git = "https://github.com/helgoboss/reaper-rs", rev = "659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23" }
+reaper-medium = { git = "https://github.com/helgoboss/reaper-rs", rev = "659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23" }
+reaper-macros = { git = "https://github.com/helgoboss/reaper-rs", rev = "659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23" }
+
+[workspace]
