@@ -51,7 +51,7 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 
 ## Git workflow (owner's rule)
 - Never commit to `main` directly. Every change lives on a branch: `feature/<short-name>` for features and chores, `bugfix/<short-name>` for bugs.
-- A feature or complete piece of functionality is **reviewed by the owner before it is merged**. When it is done: tests written and green, clippy/fmt clean, docs updated, PR open with CI green. Then stop and hand over for review: PR link, a short summary, what changed and where to look first, and the visible test evidence. Merge (merge commit, delete the branch) **only after the owner approves**. Never merge on my own.
+- A finished **feature** is a checkpoint: it is **reviewed by the owner before it is merged**. **Spike and bugfix PRs** are merged by the agent itself once CI is green (owner's rule, 2026-10-07). When it is done: tests written and green, clippy/fmt clean, docs updated, PR open with CI green. Then stop and hand over for review: PR link, a short summary, what changed and where to look first, and the visible test evidence. Merge (merge commit, delete the branch) a feature **only after the owner approves**; spikes and bugfixes need no approval.
 - Commit messages: plain, imperative, no `Co-Authored-By` lines and no tool/AI attribution (owner's explicit instruction).
 - The repo is public (`github.com/theupriser/reaper-control`): no secrets, tokens, personal data, or private paths in commits.
 
