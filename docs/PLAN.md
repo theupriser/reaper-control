@@ -194,7 +194,7 @@ Architecture impact already accounted: command bus + event stream are the only i
 - The only hard blockers for everything: **S1/S2/S3/S4 results** (Gate 1: extension go/no-go).
 
 ## 14. Definition of Done (every WP)
-Code + tests + docs updated, clippy/eslint/svelte-check clean, layer check passes, reviewed against SPEC §6 stage-safety, ADR if a decision was made, parity checklist updated.
+Code + tests + docs updated, one type per file (SPEC §14), clippy/eslint/svelte-check clean, layer check passes, reviewed against SPEC §6 stage-safety, ADR if a decision was made, parity checklist updated.
 
 ## 15. Risk register
 | # | Risk | P | I | Mitigation | Owner trigger |

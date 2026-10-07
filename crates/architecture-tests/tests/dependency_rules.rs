@@ -45,6 +45,11 @@ const RULES: &[Rule] = &[
         must_not_use_external: HEAVY,
     },
     Rule {
+        krate: "link",
+        may_use_workspace: &["shared-kernel", "protocol"],
+        must_not_use_external: HEAVY,
+    },
+    Rule {
         krate: "reaper-port",
         may_use_workspace: &["shared-kernel"],
         must_not_use_external: HEAVY,
@@ -57,13 +62,14 @@ const RULES: &[Rule] = &[
             "catalogue",
             "setlists",
             "protocol",
+            "link",
             "reaper-port",
         ],
         must_not_use_external: HEAVY,
     },
     Rule {
         krate: "app",
-        may_use_workspace: &["shared-kernel", "protocol"],
+        may_use_workspace: &["shared-kernel", "protocol", "link"],
         must_not_use_external: &[],
     },
 ];

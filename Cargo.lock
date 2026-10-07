@@ -1772,6 +1772,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "link"
+version = "0.0.0"
+dependencies = [
+ "getrandom 0.3.4",
+ "protocol",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "litemap"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
