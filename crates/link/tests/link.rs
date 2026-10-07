@@ -192,10 +192,12 @@ fn wrong_token_and_wrong_version_are_closed_without_a_reply() -> TestResult {
         ClientMessage::Hello {
             protocol: PROTOCOL_VERSION,
             token: "nope".into(),
+            resume_from_event_id: None,
         },
         ClientMessage::Hello {
             protocol: PROTOCOL_VERSION + 1,
             token: server.endpoint().token.clone(),
+            resume_from_event_id: None,
         },
         ClientMessage::Ping,
     ] {
@@ -235,6 +237,7 @@ fn a_client_that_never_reads_is_dropped_and_publish_stays_fast() -> TestResult {
     stuck.write_all(&encode_message(&ClientMessage::Hello {
         protocol: PROTOCOL_VERSION,
         token: server.endpoint().token.clone(),
+        resume_from_event_id: None,
     })?)?;
     let until = Instant::now() + Duration::from_secs(2);
     while server.client_count() < 2 && Instant::now() < until {
@@ -321,6 +324,9 @@ fn an_extension_that_goes_silent_is_declared_dead() -> TestResult {
     held.write_all(&encode_message(&ServerMessage::Welcome {
         protocol: PROTOCOL_VERSION,
         extension_version: "silent".into(),
+        catalog_rev: 0,
+        setlist_rev: 0,
+        last_event_id: 0,
     })?)?;
     connected(&events);
     assert!(client.is_connected());

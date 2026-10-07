@@ -3,9 +3,11 @@
 
 mod client;
 mod endpoint;
+mod event_log;
 mod server;
 mod wire;
 
 pub use client::{ClientConfig, LinkClient, LinkEvent, SendError};
 pub use endpoint::{Endpoint, EndpointError};
+pub use event_log::{EventLog, Replay};
 pub use server::{CommandHandler, LinkServer, ServerError};

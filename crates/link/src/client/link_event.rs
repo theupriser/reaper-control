@@ -28,7 +28,12 @@ impl LinkEvent {
         match message {
             ServerMessage::State { state } => Some(Self::State(state)),
             ServerMessage::Ack { id, outcome } => Some(Self::Ack { id, outcome }),
-            ServerMessage::Welcome { .. } | ServerMessage::Pong => None,
+            ServerMessage::Welcome { .. }
+            | ServerMessage::Pong
+            | ServerMessage::Live(_)
+            | ServerMessage::Catalog(_)
+            | ServerMessage::Event(_)
+            | ServerMessage::EventsLost { .. } => None,
         }
     }
 }
