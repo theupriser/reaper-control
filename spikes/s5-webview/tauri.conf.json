@@ -1,0 +1,13 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "S5 webview spike",
+  "version": "0.0.0",
+  "identifier": "nl.upriser.reaper-control.s5",
+  "build": { "frontendDist": "./web" },
+  "app": {
+    "windows": [{ "title": "S5 webview spike", "width": 1280, "height": 800 }],
+    "security": { "csp": null },
+    "withGlobalTauri": true
+  },
+  "bundle": { "active": false }
+}

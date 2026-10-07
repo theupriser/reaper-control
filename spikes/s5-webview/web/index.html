@@ -1,0 +1,83 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>S5</title>
+<style>
+body{margin:0;background:#0E0F11;color:#F2F3F4;font-family:-apple-system,system-ui,sans-serif}
+main{padding:28px 32px;display:flex;flex-direction:column;gap:18px}
+.row{display:flex;gap:16px;align-items:center}
+#title{font-size:44px;font-weight:800}
+#time{font-size:96px;font-weight:800;font-variant-numeric:tabular-nums}
+#phase{background:#4CAF50;color:#0A1A0B;padding:6px 14px;border-radius:10px;font-weight:800}
+.bar{height:22px;background:#1E2125;border-radius:11px;overflow:hidden}
+#fill{height:100%;width:100%;background:#4CAF50;transform-origin:left;transform:scaleX(0);will-change:transform}
+.btn{height:88px;min-width:200px;border-radius:16px;border:0;background:#2A2E34;color:#F2F3F4;font-size:28px;font-weight:800}
+#list{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.item{padding:12px 16px;background:#17191C;border-radius:10px;font-size:18px}
+.item.on{background:#4CAF50;color:#0A1A0B}
+#out{color:#9AA1A9;font:14px ui-monospace,monospace}
+</style></head><body><main>
+<div class="row"><span id="phase">Playing</span><span id="title">Song</span></div>
+<div id="time">0:00</div>
+<div class="bar"><div id="fill"></div></div>
+<div class="row"><button class="btn">Previous</button><button class="btn">Pause</button><button class="btn">Next</button></div>
+<div id="list"></div>
+<div id="out">measuring…</div>
+</main>
+<script>
+const { invoke } = window.__TAURI__.core;
+const { listen } = window.__TAURI__.event;
+const $ = (id) => document.getElementById(id);
+const pct = (a, p) => { const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(s.length * p))]; };
+const fmt = (v) => Math.round(v * 100) / 100;
+const mmss = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+(async () => {
+  const cfg = await invoke("config");
+  const rows = cfg.mode === "heavy" ? 60 : 12;
+  $("list").innerHTML = Array.from({ length: rows }, (_, i) => `<div class="item" id="r${i}">Song ${i + 1}</div>`).join("");
+  const frames = [], latency = [], gaps = [], render = [], rtt = [];
+  let lastSeq = -1, missed = 0, lastRecv = 0, lastFrame = 0, active = -1;
+  const t0 = performance.now();
+
+  const slow = [];
+  const frame = (t) => { if (lastFrame) { frames.push(t - lastFrame); if (t - lastFrame > 25) slow.push([fmt((t - t0) / 1000), fmt(t - lastFrame)]); } lastFrame = t; requestAnimationFrame(frame); };
+  requestAnimationFrame(frame);
+
+  await listen("state", ({ payload: p }) => {
+    const recv = performance.now();
+    latency.push(Date.now() - p.sent / 1000);
+    if (lastRecv) gaps.push(recv - lastRecv);
+    lastRecv = recv;
+    if (lastSeq >= 0) missed += p.seq - lastSeq - 1;
+    lastSeq = p.seq;
+    $("time").textContent = mmss(p.position);
+    $("fill").style.transform = `scaleX(${p.position / p.length})`;
+    if (p.song !== active) { $("title").textContent = `Song ${p.song + 1}`; active = p.song; }
+    for (let i = 0; i < rows; i++) {
+      const el = $("r" + i);
+      el.classList.toggle("on", i === p.song);
+      if (cfg.mode === "heavy") el.textContent = `Song ${i + 1}  ${mmss(p.position + i)}`;
+    }
+    render.push(performance.now() - recv);
+  });
+
+  const ping = setInterval(async () => { const a = performance.now(); await invoke("config"); rtt.push(performance.now() - a); }, 250);
+
+  setTimeout(async () => {
+    clearInterval(ping);
+    const secs = (performance.now() - t0) / 1000;
+    const stats = {
+      mode: cfg.mode, seconds: fmt(secs), events: latency.length, missed,
+      frames: frames.length, fps: fmt(frames.length / secs),
+      frame_ms: { p50: fmt(pct(frames, .5)), p99: fmt(pct(frames, .99)), max: fmt(Math.max(...frames)) },
+      frames_over_25ms: frames.filter((f) => f > 25).length, frames_over_50ms: frames.filter((f) => f > 50).length,
+      event_gap_ms: { p50: fmt(pct(gaps, .5)), p99: fmt(pct(gaps, .99)), max: fmt(Math.max(...gaps)) },
+      push_latency_ms: { p50: fmt(pct(latency, .5)), p99: fmt(pct(latency, .99)), max: fmt(Math.max(...latency)) },
+      render_ms: { p50: fmt(pct(render, .5)), p99: fmt(pct(render, .99)), max: fmt(Math.max(...render)) },
+      invoke_rtt_ms: { p50: fmt(pct(rtt, .5)), p99: fmt(pct(rtt, .99)), max: fmt(Math.max(...rtt)) },
+      slow_frames_at_s: slow, ua: navigator.userAgent, dpr: devicePixelRatio,
+    };
+    $("out").textContent = JSON.stringify(stats);
+    await invoke("report", { stats });
+  }, cfg.seconds * 1000);
+})();
+</script></body></html>
