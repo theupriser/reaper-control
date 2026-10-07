@@ -1,16 +1,22 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import ComingSoon from "./components/ComingSoon.svelte";
-  import PerformerStub from "./components/PerformerStub.svelte";
+  import PerformerScreen from "./components/PerformerScreen.svelte";
   import Sidebar from "./components/Sidebar.svelte";
   import { currentState, dispatch } from "./lib/ipc";
   import { screenLabel, type ScreenId } from "./lib/screens";
+  import { fixtureFor } from "./lib/performer-fixtures";
+  import type { PerformerPhase } from "./lib/performer";
   import type { AppState, Command } from "./lib/types";
 
   let appState = $state<AppState>({ phase: "Idle" });
   let error = $state<string | null>(null);
   let screen = $state<ScreenId>("player");
   let performerMode = $state(false);
+
+  const phases: PerformerPhase[] = ["Idle", "Playing", "Paused", "CountingIn", "HardStopped"];
+  const forced = new URLSearchParams(location.search).get("phase") as PerformerPhase | null;
+  const view = $derived(fixtureFor(forced && phases.includes(forced) ? forced : appState.phase));
 
   const connection = { label: "Fake performance", detail: "no REAPER link yet", tone: "warn" } as const;
 
@@ -23,6 +29,8 @@
     }
   };
 
+  const playPause = () => send(appState.phase === "Playing" ? "Pause" : "Play");
+
   onMount(async () => {
     try {
       appState = await currentState();
@@ -33,13 +41,14 @@
 </script>
 
 {#if performerMode}
-  <PerformerStub state={appState} {error} onCommand={send} onBack={() => (performerMode = false)} />
+  <PerformerScreen {view} onPlayPause={playPause} onExit={() => (performerMode = false)} />
 {:else}
   <div class="layout">
     <Sidebar active={screen} onSelect={(id) => (screen = id)} onPerformer={() => (performerMode = true)} {connection} />
     <div class="content">
       {#if screen === "player"}
-        <PerformerStub state={appState} {error} onCommand={send} />
+        <PerformerScreen {view} onPlayPause={playPause} />
+        {#if error}<p class="error">{error}</p>{/if}
       {:else}
         <ComingSoon title={screenLabel(screen)} />
       {/if}
@@ -50,6 +59,10 @@
 <style>
   .layout {
     display: flex;
+  }
+  .error {
+    color: var(--red);
+    padding: 0 2rem;
   }
   .content {
     flex: 1;
