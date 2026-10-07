@@ -7,3 +7,7 @@ dist
 
 **/target
 .dev/
+
+# REAPER license keys must never be committed
+*.rk
+*.reapeaks
