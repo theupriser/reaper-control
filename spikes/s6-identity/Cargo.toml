@@ -1,0 +1,19 @@
+# Spike S6 (PLAN WP 1.6): does a region keep a stable identity (GUID) across edits, save and reload?
+# Deliberately NOT part of the main workspace (own empty [workspace] table below), so it
+# cannot affect CI or the lint wall. Throwaway code: results go into docs/adr/ADR-008.
+[package]
+name = "s6-identity"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+reaper-low = { git = "https://github.com/helgoboss/reaper-rs", rev = "659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23" }
+reaper-medium = { git = "https://github.com/helgoboss/reaper-rs", rev = "659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23" }
+reaper-macros = { git = "https://github.com/helgoboss/reaper-rs", rev = "659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23" }
+camino = "1"
+
+[workspace]
