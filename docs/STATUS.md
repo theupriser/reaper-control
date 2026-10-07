@@ -15,7 +15,7 @@ Last updated: 2026-10-07, after PR #12 (Spike S6); app shell (WP 0.1 UI half) on
 - Project commands `/start`, `/next`; `AGENTS.md`; v1 GitHub fallback pointer; `docs/STATUS.md`.
 
 ## In progress
-- App shell (WP 0.1, UI half), PR for review: `crates/app` (Tauri 2, one `dispatch` over a fake performance, 3 tests) and `ui/` (Svelte 5, Vite, Vitest, svelte-check). CI now installs, checks, tests and builds the UI before Rust (the app embeds `ui/dist` at compile time). The UI types in `ui/src/lib/types.ts` are hand-written for now, replaced by WP 0.4. Placeholder app icon. Owner to-do: the hosted canvas still needs the two placement sentences from SPEC §4.
+- App shell (WP 0.1, UI half), PR for review: `crates/app` (Tauri 2, one `dispatch` over a fake performance, 3 tests) and `ui/` (Svelte 5, Vite, Vitest, svelte-check). CI now installs, checks, tests and builds the UI before Rust (the app embeds `ui/dist` at compile time). The UI types in `ui/src/lib/types.ts` are hand-written for now, replaced by WP 0.4. App icon is the canvas logo (waveform on green), source `crates/app/app-icon.svg`. Owner to-do: the hosted canvas still needs the two placement sentences from SPEC §4.
 
 ## Next (proposed, confirm with the owner)
 - Next: S5 webview on the shell (after the shell PR is merged), then rest of S6/S7. S4 installer/signing needs questions first; Windows runs of S1/S2/S3/S6/S7 need a Windows machine.
