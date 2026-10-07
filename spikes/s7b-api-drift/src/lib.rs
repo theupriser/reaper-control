@@ -60,13 +60,33 @@ fn plugin_main(context: PluginContext) -> Result<(), Box<dyn Error>> {
     writeln!(f, "REAPER version string: {version}")?;
     let missing: Vec<_> = REQUIRED.iter().filter(|n| !available(&ctx, n)).collect();
     for n in REQUIRED {
-        writeln!(f, "required {n}: {}", if available(&ctx, n) { "present" } else { "MISSING" })?;
+        writeln!(
+            f,
+            "required {n}: {}",
+            if available(&ctx, n) {
+                "present"
+            } else {
+                "MISSING"
+            }
+        )?;
     }
     for n in OPTIONAL {
-        writeln!(f, "optional {n}: {}", if available(&ctx, n) { "present" } else { "absent" })?;
+        writeln!(
+            f,
+            "optional {n}: {}",
+            if available(&ctx, n) {
+                "present"
+            } else {
+                "absent"
+            }
+        )?;
     }
     if missing.is_empty() {
-        writeln!(f, "verdict: all {} required functions present", REQUIRED.len())?;
+        writeln!(
+            f,
+            "verdict: all {} required functions present",
+            REQUIRED.len()
+        )?;
     } else {
         writeln!(f, "verdict: REFUSE TO START, missing {missing:?}")?;
     }
