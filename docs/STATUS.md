@@ -2,7 +2,7 @@
 
 Single source for "where are we". `/start` and `/next` read this file first. Update it in the same PR whenever a feature, spike or bug completes (keep it short and true).
 
-Last updated: 2026-10-07, after PR #14 (Spike S5); canvas shell on `feature/canvas-shell` (this PR).
+Last updated: 2026-10-07, after PR #15 (canvas shell); Performer screen on `feature/performer-screen` (this PR).
 
 ## Done (merged to main)
 - Planning: `docs/SPEC.md` (draft 2), `docs/PLAN.md`, designs in `docs/design/` (canvas link in `docs/design/README.md`).
@@ -14,14 +14,15 @@ Last updated: 2026-10-07, after PR #14 (Spike S5); canvas shell on `feature/canv
 - Spike S6 (WP 1.6, first half): `docs/adr/ADR-008-song-identity.md` (Proposed): identity = region GUID, stable across rename/move/insert/delete/save/reload; projects without GUIDs get random ones on every load until saved. Not tested: hand edits and undo, ProjectId, v1 import mapping.
 - App shell (WP 0.1 UI half), PR #13: `crates/app` (Tauri 2, one `dispatch` over a fake performance) and `ui/` (Svelte 5, Vite, Vitest, svelte-check); CI builds, checks and tests the UI before Rust. UI types in `ui/src/lib/types.ts` are hand-written until WP 0.4. App icon is the canvas logo, source `crates/app/app-icon.svg`. The screens do not look like the canvas designs yet (stub only).
 - Spike S5 (WP 1.5, macOS half): `docs/adr/ADR-010-webview-performance.md` (Proposed): 30 Hz push into WKWebView, 59.8 fps, no missed events, handler 1 ms, `invoke` round trip about 2 ms, only start-up frames over 25 ms. Not tested: Windows/WebView2, Svelte on top, hidden window, touch.
+- Canvas shell, PR #15: `Sidebar`, screen list, Performer mode toggle, placeholder screens for Setlists, Pre-show check, Settings, Help.
 - Project commands `/start`, `/next`; `AGENTS.md`; v1 GitHub fallback pointer; `docs/STATUS.md`.
 
 ## In progress
-- Canvas shell PR (this one, for owner review): Sidebar from the canvas, Player screen (still the stub), Performer mode toggle, the other four screens as placeholders. Not clicked through by hand, only the first screen was seen.
+- Performer screen in the v1 look (this PR, for owner review): `PerformerScreen` and parts, fed by a hand-written `PerformerView` (`ui/src/lib/performer.ts`) with fixtures per phase (`performer-fixtures.ts`). In the app only Play/Pause go through `dispatch`; previous, next, rewind and the two toggles are shown but disabled until the performance core exists. `?phase=Idle|Playing|Paused|CountingIn|HardStopped` forces a phase for checking. Not yet: progress click-to-seek, record dot, system stats, keyboard controls, v1 hard-stop flash timing check.
 - Owner to-do: the hosted canvas still needs the two placement sentences from SPEC §4.
 
 ## Next (proposed, confirm with the owner)
-- Next: rest of S6/S7, or the real Performer screen in the v1 look. S4 installer/signing needs questions first; Windows runs of S1/S2/S3/S6/S7 need a Windows machine.
+- Next: rest of S6/S7. S4 installer/signing needs questions first; Windows runs of S1/S2/S3/S6/S7 need a Windows machine.
 - After parity (owner's wish): `!hardstop` (and maybe `!stop`) alias for the hard stop if no other default marker has that key (SPEC §4). SWS interplay for `!1008` still to verify.
 - Spike S4 (installer/signing). Rest of S6: stable ProjectId, v1 setlist import mapping, hand edits and undo.
 - Remaining Phase 0: Rust to TS type generation (0.4), ADRs 001/003/004 (0.5), licence decision (0.6), more sample projects (0.7), domain discovery (0.8).
