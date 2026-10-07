@@ -1,6 +1,6 @@
-use shared_kernel::Seconds;
+use shared_kernel::{Seconds, SongId};
 
-use crate::{Cue, Directives, InvalidSong, SongId};
+use crate::{Cue, Directives, InvalidSong};
 
 /// A region of the project that can be played as a song.
 #[derive(Debug, Clone, PartialEq)]

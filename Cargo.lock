@@ -3016,6 +3016,7 @@ dependencies = [
 name = "setlists"
 version = "0.0.0"
 dependencies = [
+ "proptest",
  "shared-kernel",
  "thiserror 2.0.21",
 ]

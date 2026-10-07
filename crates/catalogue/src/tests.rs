@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use serde::Deserialize;
-use shared_kernel::{Bpm, Seconds};
+use shared_kernel::{Bpm, Seconds, SongId};
 
 use super::*;
 

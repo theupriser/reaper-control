@@ -4,10 +4,12 @@
 mod bpm;
 mod invalid_value;
 mod seconds;
+mod song_id;
 
 pub use bpm::Bpm;
 pub use invalid_value::InvalidValue;
 pub use seconds::Seconds;
+pub use song_id::SongId;
 
 #[cfg(test)]
 mod tests {
