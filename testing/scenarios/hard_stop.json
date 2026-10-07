@@ -1,0 +1,17 @@
+{
+  "name": "A hard stop halts the show until the next Play",
+  "songs": [
+    { "id": "A", "start": 0, "end": 10 },
+    { "id": "B", "start": 10, "end": 20, "hard_stop": true },
+    { "id": "C", "start": 30, "end": 40 }
+  ],
+  "steps": [
+    { "do": "play" },
+    { "do": "advance", "seconds": 20.1 },
+    { "do": "expect", "phase": "HardStopped", "song": "B", "transport": "Paused", "position": 20, "events": ["PerformanceStarted", "HandOverStarted", "HandOverCompleted", "HardStopReached"] },
+    { "do": "play" },
+    { "do": "expect", "phase": "Playing", "song": "C", "transport": "Playing", "position": 30, "events": ["SeekPerformed"] },
+    { "do": "advance", "seconds": 10.1 },
+    { "do": "expect", "phase": "Finished", "transport": "Paused", "position": 40, "events": ["PerformanceFinished"] }
+  ]
+}

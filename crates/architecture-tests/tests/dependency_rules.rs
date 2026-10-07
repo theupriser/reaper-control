@@ -51,7 +51,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         krate: "reaper-port",
-        may_use_workspace: &["shared-kernel"],
+        may_use_workspace: &["shared-kernel", "performance"],
         must_not_use_external: HEAVY,
     },
     Rule {

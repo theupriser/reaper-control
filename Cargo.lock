@@ -2594,6 +2594,8 @@ dependencies = [
 name = "reaper-port"
 version = "0.0.0"
 dependencies = [
+ "performance",
+ "proptest",
  "serde",
  "serde_json",
  "shared-kernel",
