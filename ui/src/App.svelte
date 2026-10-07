@@ -1,12 +1,18 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import PhaseBadge from "./components/PhaseBadge.svelte";
-  import TransportBar from "./components/TransportBar.svelte";
+  import ComingSoon from "./components/ComingSoon.svelte";
+  import PerformerStub from "./components/PerformerStub.svelte";
+  import Sidebar from "./components/Sidebar.svelte";
   import { currentState, dispatch } from "./lib/ipc";
+  import { screenLabel, type ScreenId } from "./lib/screens";
   import type { AppState, Command } from "./lib/types";
 
   let appState = $state<AppState>({ phase: "Idle" });
   let error = $state<string | null>(null);
+  let screen = $state<ScreenId>("player");
+  let performerMode = $state(false);
+
+  const connection = { label: "Fake performance", detail: "no REAPER link yet", tone: "warn" } as const;
 
   const send = async (command: Command) => {
     try {
@@ -26,38 +32,27 @@
   });
 </script>
 
-<main>
-  <header>
-    <h1>Performer</h1>
-    <PhaseBadge phase={appState.phase} />
-  </header>
-  <p class="hint">App shell stub: commands go through one dispatch to a fake performance.</p>
-  <TransportBar onCommand={send} />
-  {#if error}<p class="error">{error}</p>{/if}
-</main>
+{#if performerMode}
+  <PerformerStub state={appState} {error} onCommand={send} onBack={() => (performerMode = false)} />
+{:else}
+  <div class="layout">
+    <Sidebar active={screen} onSelect={(id) => (screen = id)} onPerformer={() => (performerMode = true)} {connection} />
+    <div class="content">
+      {#if screen === "player"}
+        <PerformerStub state={appState} {error} onCommand={send} />
+      {:else}
+        <ComingSoon title={screenLabel(screen)} />
+      {/if}
+    </div>
+  </div>
+{/if}
 
 <style>
-  main {
-    padding: 28px 32px;
+  .layout {
     display: flex;
-    flex-direction: column;
-    gap: 20px;
   }
-  header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  h1 {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 800;
-  }
-  .hint {
-    color: var(--muted);
-    margin: 0;
-  }
-  .error {
-    color: var(--red);
+  .content {
+    flex: 1;
+    min-width: 0;
   }
 </style>

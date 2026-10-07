@@ -2,7 +2,7 @@
 
 Single source for "where are we". `/start` and `/next` read this file first. Update it in the same PR whenever a feature, spike or bug completes (keep it short and true).
 
-Last updated: 2026-10-07, after PR #13 (app shell); Spike S5 on `feature/spike-s5-webview` (this PR).
+Last updated: 2026-10-07, after PR #14 (Spike S5); canvas shell on `feature/canvas-shell` (this PR).
 
 ## Done (merged to main)
 - Planning: `docs/SPEC.md` (draft 2), `docs/PLAN.md`, designs in `docs/design/` (canvas link in `docs/design/README.md`).
@@ -17,10 +17,11 @@ Last updated: 2026-10-07, after PR #13 (app shell); Spike S5 on `feature/spike-s
 - Project commands `/start`, `/next`; `AGENTS.md`; v1 GitHub fallback pointer; `docs/STATUS.md`.
 
 ## In progress
-- Spike S5 PR (this one): measurements and ADR-010 done on macOS; the owner to-do remains: the hosted canvas still needs the two placement sentences from SPEC §4.
+- Canvas shell PR (this one, for owner review): Sidebar from the canvas, Player screen (still the stub), Performer mode toggle, the other four screens as placeholders. Not clicked through by hand, only the first screen was seen.
+- Owner to-do: the hosted canvas still needs the two placement sentences from SPEC §4.
 
 ## Next (proposed, confirm with the owner)
-- Next: rest of S6/S7, or the canvas shell (Sidebar plus Performer frame) as a feature PR if the owner wants to see the designs sooner. S4 installer/signing needs questions first; Windows runs of S1/S2/S3/S6/S7 need a Windows machine.
+- Next: rest of S6/S7, or the real Performer screen in the v1 look. S4 installer/signing needs questions first; Windows runs of S1/S2/S3/S6/S7 need a Windows machine.
 - After parity (owner's wish): `!hardstop` (and maybe `!stop`) alias for the hard stop if no other default marker has that key (SPEC §4). SWS interplay for `!1008` still to verify.
 - Spike S4 (installer/signing). Rest of S6: stable ProjectId, v1 setlist import mapping, hand edits and undo.
 - Remaining Phase 0: Rust to TS type generation (0.4), ADRs 001/003/004 (0.5), licence decision (0.6), more sample projects (0.7), domain discovery (0.8).
