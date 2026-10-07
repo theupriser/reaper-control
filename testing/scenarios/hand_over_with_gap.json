@@ -1,0 +1,12 @@
+{
+  "name": "A gap between songs: the hand-over seeks to the next song",
+  "songs": [
+    { "id": "A", "start": 0, "end": 10 },
+    { "id": "B", "start": 20, "end": 30 }
+  ],
+  "steps": [
+    { "do": "play" },
+    { "do": "advance", "seconds": 10.1 },
+    { "do": "expect", "phase": "Playing", "song": "B", "position": 20.1, "events": ["PerformanceStarted", "HandOverStarted", "HandOverCompleted"] }
+  ]
+}

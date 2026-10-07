@@ -1,0 +1,18 @@
+{
+  "name": "Next without autoplay waits paused at the next song",
+  "songs": [
+    { "id": "A", "start": 0, "end": 10 },
+    { "id": "B", "start": 20, "end": 30 }
+  ],
+  "steps": [
+    { "do": "next" },
+    { "do": "expect", "phase": "Paused", "song": "B", "transport": "Stopped", "position": 20 },
+    { "do": "play" },
+    { "do": "expect", "phase": "Playing", "transport": "Playing" },
+    { "do": "next" },
+    { "do": "expect", "song": "B", "events": ["CommandRejected"] },
+    { "do": "set_flag", "flag": "autoplay", "enabled": true },
+    { "do": "previous" },
+    { "do": "expect", "phase": "Playing", "song": "A", "position": 0, "events": ["FlagChanged", "SeekPerformed"] }
+  ]
+}
