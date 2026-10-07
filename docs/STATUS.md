@@ -2,7 +2,7 @@
 
 Single source for "where are we". `/start` and `/next` read this file first. Update it in the same PR whenever a feature, spike or bug completes (keep it short and true).
 
-Last updated: 2026-10-07, after PR #11; Spike S6 on `feature/spike-s6-identity` (this PR).
+Last updated: 2026-10-07, after PR #12 (Spike S6); app shell (WP 0.1 UI half) on `feature/app-shell` (this PR).
 
 ## Done (merged to main)
 - Planning: `docs/SPEC.md` (draft 2), `docs/PLAN.md`, designs in `docs/design/` (canvas link in `docs/design/README.md`).
@@ -15,13 +15,13 @@ Last updated: 2026-10-07, after PR #11; Spike S6 on `feature/spike-s6-identity` 
 - Project commands `/start`, `/next`; `AGENTS.md`; v1 GitHub fallback pointer; `docs/STATUS.md`.
 
 ## In progress
-- Nothing open. Owner to-do: the hosted canvas still needs the two placement sentences from SPEC §4.
+- App shell (WP 0.1, UI half), PR for review: `crates/app` (Tauri 2, one `dispatch` over a fake performance, 3 tests) and `ui/` (Svelte 5, Vite, Vitest, svelte-check). CI now installs, checks, tests and builds the UI before Rust (the app embeds `ui/dist` at compile time). The UI types in `ui/src/lib/types.ts` are hand-written for now, replaced by WP 0.4. Placeholder app icon. Owner to-do: the hosted canvas still needs the two placement sentences from SPEC §4.
 
 ## Next (proposed, confirm with the owner)
-- Next spike in my own order (S4 installer/signing needs questions first, S5 webview needs the Tauri shell); Windows runs of S1/S2/S3/S7 need a Windows machine.
+- Next: S5 webview on the shell (after the shell PR is merged), then rest of S6/S7. S4 installer/signing needs questions first; Windows runs of S1/S2/S3/S6/S7 need a Windows machine.
 - After parity (owner's wish): `!hardstop` (and maybe `!stop`) alias for the hard stop if no other default marker has that key (SPEC §4). SWS interplay for `!1008` still to verify.
-- Spike S4 (installer/signing), S5 (webview). Rest of S6: stable ProjectId, v1 setlist import mapping, hand edits and undo.
-- Remaining Phase 0: Svelte/Tauri app shell (0.1 UI), Rust to TS type generation (0.4), ADRs 001/003/004 (0.5), licence decision (0.6), more sample projects (0.7), domain discovery (0.8).
+- Spike S4 (installer/signing). Rest of S6: stable ProjectId, v1 setlist import mapping, hand edits and undo.
+- Remaining Phase 0: Rust to TS type generation (0.4), ADRs 001/003/004 (0.5), licence decision (0.6), more sample projects (0.7), domain discovery (0.8).
 - Update the designs for D7 (SPEC §10e): wizard, settings connection card, connection states, pre-show check.
 
 ## Gate 1 checklist (extension go/no-go)
