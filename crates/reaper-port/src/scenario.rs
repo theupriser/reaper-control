@@ -1,6 +1,18 @@
 use serde::Deserialize;
 
-use crate::{ScenarioError, ScenarioSong, Step};
+mod error;
+mod expectation;
+mod runner;
+mod song;
+mod step;
+mod trace;
+
+pub use error::ScenarioError;
+pub use expectation::Expectation;
+pub use runner::ScenarioRunner;
+pub use song::ScenarioSong;
+pub use step::Step;
+pub use trace::Trace;
 
 /// A replayable script: a small project, settings, and steps with checks.
 /// The same file runs in the extension tests, the simulator and the dry-run.
