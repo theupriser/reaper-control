@@ -25,11 +25,13 @@ macOS arm64, REAPER 7.82, isolated instance, `reaper-rs` rev 659b22b. Spike exte
 2. Keep our own `catch_unwind` for everything REAPER or the OS calls that `reaper-rs` does not wrap (our threads, any raw FFI we add). A panic hook sets the global Faulted flag, logs, and the extension stops acting but stays loaded.
 3. Safe-mode marker: write at start, remove from an `atexit` handler (not `close_no_reset`, not `Drop`). Windows equivalent still to verify.
 4. A native crash (segfault, abort, other plug-ins) cannot be contained from inside; the marker is how the next start finds out.
+5. API drift (`spikes/s7b-api-drift`): `reaper-rs` loads each REAPER function as an optional pointer and its convenience methods panic when the function is absent (documented in `reaper-low`). The extension therefore checks the whole list of functions it needs at load (`GetFunc` is null when absent) and refuses to start with a clear message instead of failing later in the tick. Measured on REAPER 7.82/macOS-arm64: all 21 functions of the planned list are present, and a made-up function and the SWS function `CF_GetSWSVersion` (SWS is not installed in the test config) are reported absent, so the check detects absence. The list is a placeholder until the performance core fixes its real API use.
 
 ## Not tested / open
 - Windows: `atexit` and DLL unload behaviour, CI only compiles.
 - A real native fault (SIGSEGV); `abort` stands in for it.
-- Panic in the audio hook, panic during project load, protocol fuzzing, REAPER API drift between versions (second half of WP 1.7), soak tests.
+- Panic in the audio hook, panic during project load, protocol fuzzing, soak tests.
+- API drift: only REAPER 7.82 was available, so no older version was run and the minimum REAPER version is not established (owner question in PLAN §16). reaper-rs has no per-function "since version" data. Needs older REAPER builds (download into the git-ignored `.dev/`, to be confirmed) or the REAPER API documentation.
 - False positives: any REAPER crash or force quit, also one caused by another plug-in, disables the extension on the next start. Needs an owner decision on how aggressive safe mode should be and how the one-click re-enable looks.
 - `get_play_state_ex(..).is_playing` read `false` in every run while the position advanced, so playback state must be read with care. To be checked before the performance core relies on it.
 - Logging from several threads is still unsynchronised.
