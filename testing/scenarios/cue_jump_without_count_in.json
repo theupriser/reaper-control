@@ -1,0 +1,12 @@
+{
+  "name": "A cue jump without count-in is a plain seek",
+  "songs": [
+    { "id": "A", "start": 0, "end": 60 }
+  ],
+  "steps": [
+    { "do": "play" },
+    { "do": "advance", "seconds": 20 },
+    { "do": "seek_cue", "position": 30, "lead_in": 4 },
+    { "do": "expect", "phase": "Playing", "position": 30, "count_in": false, "events": ["PerformanceStarted", "SeekPerformed"] }
+  ]
+}

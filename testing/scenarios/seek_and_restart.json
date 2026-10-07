@@ -1,0 +1,16 @@
+{
+  "name": "Seek stays inside the song and Restart goes back to its start",
+  "songs": [
+    { "id": "A", "start": 0, "end": 10 },
+    { "id": "B", "start": 20, "end": 30 }
+  ],
+  "steps": [
+    { "do": "play" },
+    { "do": "seek", "position": 7 },
+    { "do": "expect", "phase": "Playing", "position": 7, "events": ["PerformanceStarted", "SeekPerformed"] },
+    { "do": "seek", "position": 25 },
+    { "do": "expect", "phase": "Playing", "song": "A", "position": 7, "events": ["CommandRejected"] },
+    { "do": "restart" },
+    { "do": "expect", "phase": "Paused", "song": "A", "position": 0, "events": ["SeekPerformed"] }
+  ]
+}

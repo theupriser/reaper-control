@@ -83,7 +83,7 @@ fn scenario_files() -> Vec<PathBuf> {
 #[test]
 fn every_scenario_file_passes() {
     let files = scenario_files();
-    assert!(files.len() >= 5);
+    assert!(files.len() >= 15);
     for file in files {
         let scenario = Scenario::from_json(&std::fs::read_to_string(&file).unwrap()).unwrap();
         let trace =
