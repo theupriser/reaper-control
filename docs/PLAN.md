@@ -220,7 +220,7 @@ Code + tests + docs updated, clippy/eslint/svelte-check clean, layer check passe
 
 ## 16. Open questions (to resolve before/at Gate 0–1)
 0. ~~Targets~~ — decided (D8): macOS Apple Silicon + Windows x64; no Intel Macs. Still to confirm: Windows is x64 only (no Windows on ARM).
-1. Minimum supported REAPER version? (proposal: 7.x, verify what v1 users run)
+1. ~~Minimum supported REAPER version?~~ Decided 2026-10-07: only the newest REAPER build is supported (ADR-009).
 2. App name / branding / licence for the public release.
 3. ~~Languages at launch~~ — decided: English only in 2.0, NL in v2.1 (D6).
 4. Do you want anonymous opt-in crash reporting, or diagnostics export only (proposal: export only)?
