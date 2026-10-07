@@ -5,6 +5,7 @@ members = [
   "crates/performance",
   "crates/catalogue",
   "crates/setlists",
+  "crates/projections",
   "crates/protocol",
   "crates/link",
   "crates/reaper-port",
@@ -28,6 +29,7 @@ shared-kernel = { path = "crates/shared-kernel" }
 performance = { path = "crates/performance" }
 catalogue = { path = "crates/catalogue" }
 setlists = { path = "crates/setlists" }
+projections = { path = "crates/projections" }
 protocol = { path = "crates/protocol" }
 link = { path = "crates/link" }
 reaper-port = { path = "crates/reaper-port" }
