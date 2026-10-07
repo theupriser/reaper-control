@@ -7,6 +7,9 @@ use crate::InvalidValue;
 pub struct Seconds(f64);
 
 impl Seconds {
+    /// The start of the timeline.
+    pub const ZERO: Self = Self(0.0);
+
     /// Creates a value; rejects NaN and infinities.
     pub fn new(value: f64) -> Result<Self, InvalidValue> {
         if value.is_finite() {
