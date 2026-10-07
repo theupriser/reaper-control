@@ -336,6 +336,8 @@ dependencies = [
 name = "catalogue"
 version = "0.0.0"
 dependencies = [
+ "serde",
+ "serde_json",
  "shared-kernel",
  "thiserror 2.0.21",
 ]
