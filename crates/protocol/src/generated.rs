@@ -47,7 +47,9 @@ fn typescript_matches_the_rust_types() -> Result<(), Box<dyn std::error::Error>>
         std::fs::write(target(), &expected)?;
         return Ok(());
     }
-    let actual = std::fs::read_to_string(target()).unwrap_or_default();
+    let actual = std::fs::read_to_string(target())
+        .unwrap_or_default()
+        .replace("\r\n", "\n");
     assert_eq!(
         actual, expected,
         "ui/src/lib/generated/protocol.ts is stale: run `UPDATE_TYPES=1 cargo test -p protocol`"
