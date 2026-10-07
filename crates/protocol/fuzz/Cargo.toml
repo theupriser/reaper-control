@@ -1,0 +1,28 @@
+[package]
+name = "protocol-fuzz"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+protocol = { path = ".." }
+
+[workspace]
+
+[[bin]]
+name = "decoder"
+path = "fuzz_targets/decoder.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "messages"
+path = "fuzz_targets/messages.rs"
+test = false
+doc = false
+bench = false

@@ -4,11 +4,14 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+pub mod frame;
+pub mod message;
+
 #[cfg(test)]
 mod generated;
 
 /// Phases the stub knows about; a subset of SPEC §14.2.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, TS)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
 pub enum Phase {
     /// Nothing is playing.
     Idle,
@@ -19,7 +22,7 @@ pub enum Phase {
 }
 
 /// Everything the UI can ask for.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, TS)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
 pub enum Command {
     /// Start or resume playback.
     Play,
@@ -30,7 +33,7 @@ pub enum Command {
 }
 
 /// What the UI renders. The UI never infers it.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, TS)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
 pub struct AppState {
     /// Current phase.
     pub phase: Phase,

@@ -47,3 +47,22 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
       - name: Test (includes architecture rules)
         run: cargo test --workspace
+
+  fuzz:
+    name: Fuzz protocol (30 s per target)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Nightly toolchain (cargo-fuzz needs sanitizers)
+        run: rustup toolchain install nightly --profile minimal
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates/protocol/fuzz
+      - name: Install cargo-fuzz
+        run: cargo install cargo-fuzz --locked
+      - name: Fuzz decoder
+        run: cargo +nightly fuzz run decoder -- -max_total_time=30
+        working-directory: crates/protocol
+      - name: Fuzz messages
+        run: cargo +nightly fuzz run messages -- -max_total_time=30
+        working-directory: crates/protocol

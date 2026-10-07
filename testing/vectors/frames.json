@@ -1,0 +1,13 @@
+[
+  { "name": "one ping", "hex": "0000000f7b2274797065223a2250696e67227d", "frames": ["{\"type\":\"Ping\"}"], "error": null },
+  { "name": "two pings back to back", "hex": "0000000f7b2274797065223a2250696e67227d0000000f7b2274797065223a2250696e67227d", "frames": ["{\"type\":\"Ping\"}", "{\"type\":\"Ping\"}"], "error": null },
+  { "name": "nothing yet", "hex": "", "frames": [], "error": null },
+  { "name": "truncated header", "hex": "000000", "frames": [], "error": null },
+  { "name": "truncated payload", "hex": "0000000f7b22", "frames": [], "error": null },
+  { "name": "complete frame then a partial one", "hex": "000000017a0000000f7b22", "frames": ["z"], "error": null },
+  { "name": "empty frame", "hex": "00000000", "frames": [], "error": "Empty" },
+  { "name": "frame then empty frame", "hex": "000000017a00000000", "frames": ["z"], "error": "Empty" },
+  { "name": "length at the limit, payload missing", "hex": "00100000", "frames": [], "error": null },
+  { "name": "length one over the limit", "hex": "00100001", "frames": [], "error": "TooLarge" },
+  { "name": "length 4 GiB minus one", "hex": "ffffffff", "frames": [], "error": "TooLarge" }
+]
