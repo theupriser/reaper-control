@@ -31,7 +31,7 @@ macOS arm64, REAPER 7.82, isolated instance, `reaper-rs` rev 659b22b. Spike exte
 - Windows: `atexit` and DLL unload behaviour, CI only compiles.
 - A real native fault (SIGSEGV); `abort` stands in for it.
 - Panic in the audio hook, panic during project load, protocol fuzzing, soak tests.
-- API drift: only REAPER 7.82 was available, so no older version was run and the minimum REAPER version is not established (owner question in PLAN §16). reaper-rs has no per-function "since version" data. Needs older REAPER builds (download into the git-ignored `.dev/`, to be confirmed) or the REAPER API documentation.
+- API drift: owner decision (2026-10-07): only the newest REAPER build is supported (7.82 at the time of writing, the version all spikes ran on). No older builds are tested and no minimum version is derived. The load-time function check stays as the guard: an older REAPER that lacks a function is refused with a clear message. The supported version is stated per release.
 - False positives: any REAPER crash or force quit, also one caused by another plug-in, disables the extension on the next start. Needs an owner decision on how aggressive safe mode should be and how the one-click re-enable looks.
 - `get_play_state_ex(..).is_playing` read `false` in every run while the position advanced, so playback state must be read with care. To be checked before the performance core relies on it.
 - Logging from several threads is still unsynchronised.
