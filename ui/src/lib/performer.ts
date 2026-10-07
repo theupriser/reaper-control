@@ -1,3 +1,5 @@
+import type { Command } from "./generated/protocol";
+
 // Temporary hand-written view model for the Performer screen.
 // Replaced by generated types in WP 0.4; the performance core will fill it.
 export type PerformerPhase = "Idle" | "Playing" | "Paused" | "CountingIn" | "HardStopped";
@@ -14,6 +16,12 @@ export interface SongView {
   cues: CueMark[];
 }
 
+export interface SystemStatsView {
+  connected: boolean;
+  midiActive: boolean;
+  cpu: number;
+}
+
 export interface PerformerView {
   phase: PerformerPhase;
   setlistName: string | null;
@@ -24,6 +32,8 @@ export interface PerformerView {
   totalDuration: number;
   autoResume: boolean;
   countInOnMarker: boolean;
+  recordArmed: boolean;
+  stats: SystemStatsView;
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -46,4 +56,45 @@ export function progressPercent(position: number, duration: number): number {
 
 export function isWaitingAtHardStop(view: PerformerView): boolean {
   return view.phase === "HardStopped" && view.nextSong !== null;
+}
+
+export type UsageLevel = "low" | "medium" | "high";
+
+export function usageLevel(percent: number): UsageLevel {
+  if (percent < 50) return "low";
+  if (percent < 80) return "medium";
+  return "high";
+}
+
+// v1: a click within 10 px of a cue seeks to the cue itself.
+export const CUE_SNAP_PX = 10;
+const POPOVER_HALF_WIDTH = 30;
+
+export interface SeekTarget {
+  position: number;
+  onCue: boolean;
+}
+
+export function seekTarget(clickX: number, width: number, song: SongView): SeekTarget {
+  if (width <= 0 || song.duration <= 0) return { position: 0, onCue: false };
+  const fraction = Math.min(1, Math.max(0, clickX / width));
+  const cue = song.cues.find((c) => Math.abs(clickX - (c.position / song.duration) * width) <= CUE_SNAP_PX);
+  return cue ? { position: cue.position, onCue: true } : { position: fraction * song.duration, onCue: false };
+}
+
+export function popoverX(clickX: number, width: number): number {
+  return Math.min(Math.max(clickX, POPOVER_HALF_WIDTH), Math.max(POPOVER_HALF_WIDTH, width - POPOVER_HALF_WIDTH));
+}
+
+export function seekCommand(target: SeekTarget, countInOnMarker: boolean): Command {
+  return { Seek: { position: target.position, count_in: target.onCue && countInOnMarker } };
+}
+
+export type KeyIntent = "PlayPause" | "ToggleAutoResume";
+
+// v1 keys that exist in v2 so far. Arrow keys (previous/next song) wait for the setlist.
+export function keyIntent(key: string): KeyIntent | null {
+  if (key === " ") return "PlayPause";
+  if (key === "a") return "ToggleAutoResume";
+  return null;
 }

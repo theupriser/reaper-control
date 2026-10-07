@@ -2,9 +2,10 @@
 
 Single source for "where are we". `/start` and `/next` read this file first. Update it in the same PR whenever a feature, spike or bug completes (keep it short and true).
 
-Last updated: 2026-10-07, after PR #19 (S6 second round); WP 0.5b protocol framing on `feature/protocol-framing` (this PR).
+Last updated: 2026-10-07, after PR #20 (WP 0.5b); Performer extras on `feature/performer-extras` (this PR).
 
 ## Done (merged to main)
+- WP 0.5b protocol framing, PR #20: `crates/protocol` has length-prefixed framing (`frame.rs`, 1 MiB limit, errors as values), the message types and the Hello handshake (`message.rs`), test vectors in `testing/vectors/frames.json`, and two `cargo-fuzz` targets (`crates/protocol/fuzz`, nightly). 60 s per target locally: 6.9 M and 5.8 M runs, no crash. CI fuzzes 30 s per target. Not yet: a socket server or client, reconnect/replay, the real message set (Live, Catalog, Event).
 - Planning: `docs/SPEC.md` (draft 2), `docs/PLAN.md`, designs in `docs/design/` (canvas link in `docs/design/README.md`).
 - Phase 0: Cargo workspace with one crate per context and the lint wall (WP 0.1 Rust part); CI on macOS arm64 + Windows x64 (WP 0.2); executable dependency rules in `crates/architecture-tests` (WP 0.3).
 - Spike S1, macOS Apple Silicon half (WP 1.1): `docs/adr/ADR-002-extension-owned-playback.md`. Extension loads in REAPER 7.78/7.82, main-thread tick 30.0 ms, regions identical to v1's data path.
@@ -14,17 +15,17 @@ Last updated: 2026-10-07, after PR #19 (S6 second round); WP 0.5b protocol frami
 - Spike S6 (WP 1.6), PRs #17 and #19: `docs/adr/ADR-008-song-identity.md` (Proposed): identity = region GUID, stable across rename/move/insert/delete/save/reload and undo/redo; projects without GUIDs get random ones on every load until saved. ExtState ProjectId survives, copies share id and GUIDs, v1 import mapping proposed. Not tested: Region Manager UI, duplicate GUIDs in one project, a real v1 setlist file, Windows.
 - App shell (WP 0.1 UI half), PR #13: `crates/app` (Tauri 2, one `dispatch` over a fake performance) and `ui/` (Svelte 5, Vite, Vitest, svelte-check); CI builds, checks and tests the UI before Rust. UI types are generated since WP 0.4. App icon is the canvas logo, source `crates/app/app-icon.svg`. The screens do not look like the canvas designs yet (stub only).
 - Spike S5 (WP 1.5, macOS half): `docs/adr/ADR-010-webview-performance.md` (Proposed): 30 Hz push into WKWebView, 59.8 fps, no missed events, handler 1 ms, `invoke` round trip about 2 ms, only start-up frames over 25 ms. Not tested: Windows/WebView2, Svelte on top, hidden window, touch.
-- Performer screen, PR #16: `PerformerScreen` and parts in the v1 look, hand-written `PerformerView` (`ui/src/lib/performer.ts`) with fixtures per phase, `?phase=` override; only Play/Pause go through `dispatch`. Not yet: click-to-seek, record dot, system stats, keyboard controls, v1 hard-stop flash timing check.
+- Performer screen, PR #16: `PerformerScreen` and parts in the v1 look, hand-written `PerformerView` (`ui/src/lib/performer.ts`) with fixtures per phase, `?phase=` override; only Play/Pause go through `dispatch`. Click-to-seek, record dot, system stats and keys followed in the Performer extras PR.
 - WP 0.4 type generation, PR #18: `Phase`, `Command`, `AppState` live in `crates/protocol` (ts-rs); `ui/src/lib/generated/protocol.ts` is generated. `cargo test -p protocol` fails with a diff when the file is stale; `UPDATE_TYPES=1 cargo test -p protocol` rewrites it. The app crate may now depend on `protocol` (architecture rule, no ADR yet). `PerformerView` in `ui/src/lib/performer.ts` is still a hand-written view model.
 - Canvas shell, PR #15: `Sidebar`, screen list, Performer mode toggle, placeholder screens for Setlists, Pre-show check, Settings, Help.
 - Project commands `/start`, `/next`; `AGENTS.md`; v1 GitHub fallback pointer; `docs/STATUS.md`.
 
 ## In progress
-- WP 0.5b protocol framing (this PR, a feature, waits for review): `crates/protocol` has length-prefixed framing (`frame.rs`, 1 MiB limit, errors as values), the message types and the Hello handshake (`message.rs`), test vectors in `testing/vectors/frames.json`, and two `cargo-fuzz` targets (`crates/protocol/fuzz`, nightly). 60 s per target locally: 6.9 M and 5.8 M runs, no crash. CI fuzzes 30 s per target. Not yet: a socket server or client, reconnect/replay, the real message set (Live, Catalog, Event).
+- Performer extras (this PR, a feature, waits for review): click-to-seek with the time popover and snap to a cue within 10 px (v1 rule), record dot, system stats icons (MIDI, connection dot, CPU bar; stand-in values, no popover yet), clickable toggles, keyboard Space (play/pause) and `a` (auto-resume), all through `dispatch`. `Command` gained `Seek{position,count_in}`, `ToggleAutoResume`, `ToggleCountInOnMarker`, `ToggleRecordArm`; `AppState` gained `position` and the three flags (so `Eq` is gone from both). Checked: v1 hard-stop flash timing (2 s ease-in-out, #121212 to #2a0000, off for reduced motion) is asserted by a test against the component source. Not yet: Previous/Next/Rewind and the arrow keys (the fake performance has no songs; they come with the setlist), the system stats popover, real CPU/MIDI/connection data, count-in as a phase (the fake ignores `count_in`).
 - Owner to-do: the hosted canvas still needs the two placement sentences from SPEC §4. Owner decision open: how aggressive safe mode is.
 
 ## Next (proposed, confirm with the owner)
-- Next: the Performer extras (click-to-seek, record dot, system stats, keyboard controls, v1 hard-stop flash timing). After that the link server/client over `protocol`. S4 installer/signing needs questions first; Windows runs of S1/S2/S3/S6/S7 need a Windows machine.
+- Next: the link server/client over `protocol` (socket, reconnect, replay) and the real message set; the fuzz targets must cover each new message type. S4 installer/signing needs questions first; Windows runs of S1/S2/S3/S6/S7 need a Windows machine.
 - After parity (owner's wish): `!hardstop` (and maybe `!stop`) alias for the hard stop if no other default marker has that key (SPEC §4). SWS interplay for `!1008` still to verify.
 - Spike S4 (installer/signing).
 - Remaining Phase 0: ADRs 001/003/004 (0.5), licence decision (0.6), more sample projects (0.7), domain discovery (0.8).

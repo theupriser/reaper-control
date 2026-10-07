@@ -2,14 +2,34 @@
   import Clock from "./Clock.svelte";
   import PerformerControls from "./PerformerControls.svelte";
   import PerformerToggles from "./PerformerToggles.svelte";
+  import RecordDot from "./RecordDot.svelte";
   import SongProgress from "./SongProgress.svelte";
-  import { formatLongTime, formatTime, isWaitingAtHardStop, type PerformerView } from "../lib/performer";
+  import SystemStats from "./SystemStats.svelte";
+  import {
+    formatLongTime,
+    formatTime,
+    isWaitingAtHardStop,
+    type PerformerView,
+    type SeekTarget,
+  } from "../lib/performer";
 
   let {
     view,
     onPlayPause,
+    onSeek,
+    onToggleAutoResume,
+    onToggleCountIn,
+    onToggleRecord,
     onExit,
-  }: { view: PerformerView; onPlayPause: () => void; onExit?: () => void } = $props();
+  }: {
+    view: PerformerView;
+    onPlayPause: () => void;
+    onSeek: (target: SeekTarget) => void;
+    onToggleAutoResume: () => void;
+    onToggleCountIn: () => void;
+    onToggleRecord: () => void;
+    onExit?: () => void;
+  } = $props();
 
   const playing = $derived(view.phase === "Playing" || view.phase === "CountingIn");
   const waiting = $derived(isWaitingAtHardStop(view));
@@ -19,7 +39,11 @@
 <div class="performer" class:flash={waiting} data-phase={view.phase}>
   <header>
     <span class="setlist">{view.setlistName ? `Setlist: ${view.setlistName}` : ""}</span>
-    <span class="clock"><Clock /></span>
+    <span class="clock">
+      <RecordDot armed={view.recordArmed} onToggle={onToggleRecord} />
+      <Clock />
+      <SystemStats stats={view.stats} />
+    </span>
   </header>
 
   <div class="content">
@@ -36,7 +60,7 @@
         <span class="remaining">({formatLongTime(view.totalDuration - view.totalElapsed)})</span>
       </div>
     </div>
-    {#if view.song}<SongProgress song={view.song} position={view.songPosition} />{/if}
+    {#if view.song}<SongProgress song={view.song} position={view.songPosition} {onSeek} />{/if}
     {#if view.phase === "CountingIn"}<p class="count-in">Count-in</p>{/if}
 
     <div class="next">
@@ -53,7 +77,12 @@
     canPlay={view.song !== null && !(view.nextSong === null && view.phase === "HardStopped")}
     {onPlayPause}
   />
-  <PerformerToggles autoResume={view.autoResume} countInOnMarker={view.countInOnMarker} />
+  <PerformerToggles
+    autoResume={view.autoResume}
+    countInOnMarker={view.countInOnMarker}
+    onAutoResume={onToggleAutoResume}
+    onCountIn={onToggleCountIn}
+  />
   {#if onExit}<div class="exit"><button onclick={onExit}>Exit Performer Mode</button></div>{/if}
 </div>
 
@@ -88,6 +117,9 @@
     font-style: italic;
   }
   .clock {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-family: monospace;
   }
   .content {
