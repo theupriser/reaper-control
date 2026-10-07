@@ -1,0 +1,16 @@
+{
+  "name": "After the last song the show is finished until Play starts it again",
+  "songs": [
+    { "id": "A", "start": 0, "end": 10 },
+    { "id": "B", "start": 10, "end": 20 }
+  ],
+  "steps": [
+    { "do": "play" },
+    { "do": "advance", "seconds": 20.1 },
+    { "do": "expect", "phase": "Finished", "transport": "Paused", "position": 20, "events": ["PerformanceStarted", "HandOverStarted", "HandOverCompleted", "PerformanceFinished"] },
+    { "do": "advance", "seconds": 5 },
+    { "do": "expect", "phase": "Finished", "events": [] },
+    { "do": "play" },
+    { "do": "expect", "phase": "Playing", "song": "A", "transport": "Playing", "position": 0, "events": ["PerformanceStarted"] }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Pause stops where it is and Play resumes from there",
+  "songs": [
+    { "id": "A", "start": 0, "end": 10 }
+  ],
+  "steps": [
+    { "do": "play" },
+    { "do": "advance", "seconds": 5 },
+    { "do": "pause" },
+    { "do": "expect", "phase": "Paused", "transport": "Paused", "position": 5, "events": ["PerformanceStarted"] },
+    { "do": "advance", "seconds": 3 },
+    { "do": "expect", "phase": "Paused", "position": 5 },
+    { "do": "play" },
+    { "do": "expect", "phase": "Playing", "transport": "Playing", "position": 5 }
+  ]
+}

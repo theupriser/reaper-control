@@ -1,0 +1,13 @@
+{
+  "name": "A hard stop on a song with !length stops at the shortened end",
+  "songs": [
+    { "id": "A", "start": 0, "end": 10 },
+    { "id": "B", "start": 10, "end": 15, "hard_stop": true },
+    { "id": "C", "start": 20, "end": 30 }
+  ],
+  "steps": [
+    { "do": "play" },
+    { "do": "advance", "seconds": 15.1 },
+    { "do": "expect", "phase": "HardStopped", "song": "B", "transport": "Paused", "position": 15, "events": ["PerformanceStarted", "HandOverStarted", "HandOverCompleted", "HardStopReached"] }
+  ]
+}

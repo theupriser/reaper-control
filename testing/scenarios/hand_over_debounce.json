@@ -1,0 +1,17 @@
+{
+  "name": "A song that ends right after a hand-over waits for the debounce",
+  "songs": [
+    { "id": "A", "start": 0, "end": 10 },
+    { "id": "B", "start": 10, "end": 10.5 },
+    { "id": "C", "start": 10.5, "end": 20 }
+  ],
+  "steps": [
+    { "do": "play" },
+    { "do": "advance", "seconds": 10.1 },
+    { "do": "expect", "phase": "Playing", "song": "B", "events": ["PerformanceStarted", "HandOverStarted", "HandOverCompleted"] },
+    { "do": "advance", "seconds": 0.5 },
+    { "do": "expect", "song": "B", "events": [] },
+    { "do": "advance", "seconds": 0.5 },
+    { "do": "expect", "phase": "Playing", "song": "C", "events": ["HandOverStarted", "HandOverCompleted"] }
+  ]
+}

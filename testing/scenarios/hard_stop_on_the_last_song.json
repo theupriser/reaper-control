@@ -1,0 +1,11 @@
+{
+  "name": "A hard stop on the last song finishes the show",
+  "songs": [
+    { "id": "A", "start": 0, "end": 10, "hard_stop": true }
+  ],
+  "steps": [
+    { "do": "play" },
+    { "do": "advance", "seconds": 10.1 },
+    { "do": "expect", "phase": "Finished", "transport": "Paused", "position": 10, "events": ["PerformanceStarted", "HardStopReached", "PerformanceFinished"] }
+  ]
+}

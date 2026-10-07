@@ -1,0 +1,13 @@
+{
+  "name": "A count-in never starts before the beginning of the timeline",
+  "songs": [
+    { "id": "A", "start": 0, "end": 60 }
+  ],
+  "count_in": true,
+  "steps": [
+    { "do": "play" },
+    { "do": "advance", "seconds": 10 },
+    { "do": "seek_cue", "position": 2, "lead_in": 4 },
+    { "do": "expect", "phase": "CountingIn", "position": 0, "count_in": true }
+  ]
+}
