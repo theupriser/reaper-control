@@ -31,6 +31,9 @@ Tick summary during all of this: average 30.0 ms. The only large values (129 ms,
 - Main thread: `try_send` / `try_recv` only. All socket I/O on other threads. Per-client bounded queue; a slow client is dropped, never waited for. Shut the socket down when a client is dropped.
 - Commands from the app are handled in the next tick (about 15 ms on average, 30 ms worst case at this tick rate).
 
+## Framing in the real implementation (2026-10-07)
+The spike used newline-terminated text lines. The real protocol follows SPEC §2.2: 4-byte big-endian length plus one JSON document, at most 1 MiB, handshake `Hello{protocol, token}` as the first message (`crates/protocol`). The measurements above were taken with lines; a frame adds 4 bytes and no extra copy, so they are expected to hold, but they were not repeated.
+
 ## Not tested (do before Gate 1 or in the real implementation)
 - Windows: only compiled by CI, never run (needs a machine). Named pipes / Unix sockets were not compared; TCP worked, so no reason to switch yet.
 - Firewall or antivirus prompts for a loopback listener (macOS and Windows).

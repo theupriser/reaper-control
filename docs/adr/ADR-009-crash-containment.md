@@ -32,7 +32,7 @@ macOS arm64, REAPER 7.82, isolated instance, `reaper-rs` rev 659b22b. Spike exte
 
 ## Not tested / open
 - Windows: `atexit` and DLL unload behaviour, CI only compiles.
-- Protocol fuzzing: `crates/protocol` is still empty, so there is no parser to fuzz yet. It belongs with the protocol work (WP 0.4 and later). `cargo-fuzz` is not installed.
+- Protocol fuzzing (2026-10-07): the frame decoder and the message parser now exist in `crates/protocol` (`frame.rs`, `message.rs`) with two `cargo-fuzz` targets (`crates/protocol/fuzz`, nightly toolchain). 60 s each on macOS arm64: decoder 6,927,668 runs, messages 5,799,901 runs, no crash, no panic, no oversized frame, same result for any chunking. CI runs 30 s per target. Short runs, not a campaign: the long campaign stays in WP 7.7, and later message types must be added to the targets.
 - Soak tests.
 - API drift: owner decision (2026-10-07): only the newest REAPER build is supported (7.82 at the time of writing, the version all spikes ran on). No older builds are tested and no minimum version is derived. The load-time function check stays as the guard: an older REAPER that lacks a function is refused with a clear message. The supported version is stated per release.
 - False positives: any REAPER crash or force quit, also one caused by another plug-in, disables the extension on the next start. Needs an owner decision on how aggressive safe mode should be and how the one-click re-enable looks.

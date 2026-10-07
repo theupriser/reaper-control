@@ -11,3 +11,7 @@ dist
 # REAPER license keys must never be committed
 *.rk
 *.reapeaks
+
+# cargo-fuzz output
+crates/protocol/fuzz/corpus/
+crates/protocol/fuzz/artifacts/
