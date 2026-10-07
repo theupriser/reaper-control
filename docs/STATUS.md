@@ -17,6 +17,7 @@ Last updated: 2026-10-07, after PR #6; directive placement docs fix in review.
 
 ## Next (proposed, confirm with the owner)
 - Close S2's open items (manual menu/dialog check with the owner, one audio recording).
+- After parity (owner's wish): `!stop` alias for the hard stop if no other default marker has that key (SPEC §4). SWS interplay for `!1008` still to verify.
 - Spike S4 (installer/signing), S5 (webview), S6 (identity), S7 (crash containment).
 - Remaining Phase 0: Svelte/Tauri app shell (0.1 UI), Rust to TS type generation (0.4), ADRs 001/003/004 (0.5), licence decision (0.6), more sample projects (0.7), domain discovery (0.8).
 - Update the designs for D7 (SPEC §10e): wizard, settings connection card, connection states, pre-show check.
