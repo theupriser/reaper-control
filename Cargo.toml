@@ -6,6 +6,7 @@ members = [
   "crates/catalogue",
   "crates/setlists",
   "crates/protocol",
+  "crates/link",
   "crates/reaper-port",
   "crates/reaper-extension",
   "crates/app",
@@ -27,6 +28,7 @@ performance = { path = "crates/performance" }
 catalogue = { path = "crates/catalogue" }
 setlists = { path = "crates/setlists" }
 protocol = { path = "crates/protocol" }
+link = { path = "crates/link" }
 reaper-port = { path = "crates/reaper-port" }
 
 [workspace.lints.rust]

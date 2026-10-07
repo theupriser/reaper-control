@@ -2,9 +2,10 @@
 
 Single source for "where are we". `/start` and `/next` read this file first. Update it in the same PR whenever a feature, spike or bug completes (keep it short and true).
 
-Last updated: 2026-10-07, after PR #20 (WP 0.5b); Performer extras on `feature/performer-extras` (this PR).
+Last updated: 2026-10-07, after PR #21 (Performer extras); link server and client on `feature/link-server-client` (this PR).
 
 ## Done (merged to main)
+- Performer extras, PR #21: click-to-seek with the time popover and snap to a cue within 10 px, record dot, system stats icons (stand-in values, no popover), clickable toggles, keys Space and `a`, all through `dispatch`; `Command` gained `Seek`, `ToggleAutoResume`, `ToggleCountInOnMarker`, `ToggleRecordArm`; `AppState` gained `position` and the flags. All against the fake performance, nothing talks to REAPER. Not yet: Previous/Next/Rewind and arrow keys (need the setlist), stats popover, real CPU/MIDI/connection data, count-in as a phase.
 - WP 0.5b protocol framing, PR #20: `crates/protocol` has length-prefixed framing (`frame.rs`, 1 MiB limit, errors as values), the message types and the Hello handshake (`message.rs`), test vectors in `testing/vectors/frames.json`, and two `cargo-fuzz` targets (`crates/protocol/fuzz`, nightly). 60 s per target locally: 6.9 M and 5.8 M runs, no crash. CI fuzzes 30 s per target. Not yet: a socket server or client, reconnect/replay, the real message set (Live, Catalog, Event).
 - Planning: `docs/SPEC.md` (draft 2), `docs/PLAN.md`, designs in `docs/design/` (canvas link in `docs/design/README.md`).
 - Phase 0: Cargo workspace with one crate per context and the lint wall (WP 0.1 Rust part); CI on macOS arm64 + Windows x64 (WP 0.2); executable dependency rules in `crates/architecture-tests` (WP 0.3).
@@ -21,11 +22,11 @@ Last updated: 2026-10-07, after PR #20 (WP 0.5b); Performer extras on `feature/p
 - Project commands `/start`, `/next`; `AGENTS.md`; v1 GitHub fallback pointer; `docs/STATUS.md`.
 
 ## In progress
-- Performer extras (this PR, a feature, waits for review): click-to-seek with the time popover and snap to a cue within 10 px (v1 rule), record dot, system stats icons (MIDI, connection dot, CPU bar; stand-in values, no popover yet), clickable toggles, keyboard Space (play/pause) and `a` (auto-resume), all through `dispatch`. `Command` gained `Seek{position,count_in}`, `ToggleAutoResume`, `ToggleCountInOnMarker`, `ToggleRecordArm`; `AppState` gained `position` and the three flags (so `Eq` is gone from both). Checked: v1 hard-stop flash timing (2 s ease-in-out, #121212 to #2a0000, off for reduced motion) is asserted by a test against the component source. Not yet: Previous/Next/Rewind and the arrow keys (the fake performance has no songs; they come with the setlist), the system stats popover, real CPU/MIDI/connection data, count-in as a phase (the fake ignores `count_in`).
+- Link server and client (WP 4.2, first part; this PR, a feature, waits for review): new crate `crates/link` (std threads, no async runtime). `LinkServer` for the extension: loopback port and a 256-bit token from the OS random source, handshake through `check_hello` (bad peers are closed without a reply), the current state is replayed to every new client, `publish` never blocks (a client that cannot keep up is dropped), a panicking command handler becomes `Rejected`. `LinkClient` for the app: reconnect with back-off, endpoint file re-read on every attempt (a restarted extension has a new port and token), ping/dead detection, commands are refused while the link is down, never queued. 11 integration tests over real sockets. Not yet: the extension and the app do not use it (the app still runs the fake performance), the real message set (Live, Catalog, Event) and replay by event id (only the latest state is replayed), health model Degraded/Dead with causes (WP 4.6), the fuzz targets cover no new message type yet, Windows.
 - Owner to-do: the hosted canvas still needs the two placement sentences from SPEC §4. Owner decision open: how aggressive safe mode is.
 
 ## Next (proposed, confirm with the owner)
-- Next: the link server/client over `protocol` (socket, reconnect, replay) and the real message set; the fuzz targets must cover each new message type. S4 installer/signing needs questions first; Windows runs of S1/S2/S3/S6/S7 need a Windows machine.
+- Next: wire the link into the extension (WP 3.x) and the app (replace the fake performance), then the real message set (Live, Catalog, Event) with replay by event id; the fuzz targets must cover each new message type. S4 installer/signing needs questions first; Windows runs of S1/S2/S3/S6/S7 need a Windows machine.
 - After parity (owner's wish): `!hardstop` (and maybe `!stop`) alias for the hard stop if no other default marker has that key (SPEC §4). SWS interplay for `!1008` still to verify.
 - Spike S4 (installer/signing).
 - Remaining Phase 0: ADRs 001/003/004 (0.5), licence decision (0.6), more sample projects (0.7), domain discovery (0.8).
