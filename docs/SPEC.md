@@ -98,7 +98,7 @@ Rules (ported from v1, now deterministic):
 **Threading rule:** REAPER API calls happen on REAPER's main thread (timer callback). An audio-hook may only read atomics and enqueue a request on a lock-free queue for the main thread; it never allocates, locks or calls the REAPER API. **Open spike S2:** timer-driven vs audio-hook-triggered vs native region playlist hand-over.
 
 ## 4. Special markers — one parser
-One grammar, implemented once in Rust (`performance`/`catalogue` shared crate). The extension parses marker and region names and publishes the parsed directives in the catalog; the app uses the same crate for the marker helper (Help screen) and tests. Tokens `!1008`, `!length:<float>`, `!bpm:<float>` in any order, whitespace-separated, in a marker or region name. v1's six-way regex cascade is replaced by tokenise-and-classify. A marker consisting only of tokens is hidden from the timeline.
+One grammar, implemented once in Rust (`performance`/`catalogue` shared crate). The extension parses marker and region names and publishes the parsed directives in the catalog; the app uses the same crate for the marker helper (Help screen) and tests. Tokens `!1008`, `!length:<float>`, `!bpm:<float>` in any order, whitespace-separated, in a marker or region name. v1's six-way regex cascade is replaced by tokenise-and-classify. A marker consisting only of tokens is hidden from the timeline. **Placement:** `!1008` counts when the marker lies anywhere inside the song's window; `!bpm` is read at the song's start edge (the tempo at start + 0.00002 s), so put it at the very start of the song.
 Test vectors live in `testing/vectors/markers.json`.
 
 ## 5. App (Tauri 2 + Rust + Svelte 5)

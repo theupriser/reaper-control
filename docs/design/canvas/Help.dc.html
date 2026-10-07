@@ -83,9 +83,9 @@ class Component extends DCLogic {
 renderVals() {
 const toc = ['Songs and markers', 'Special markers', 'Marker name helper', 'MIDI control', 'Troubleshooting'].map((l, i) => ({ label: l, bg: i === 1 ? '#1E2125' : 'transparent', color: i === 1 ? '#4CAF50' : '#C5CAD0' }));
 const directives = [
-{ code: '!1008', title: 'Hard stop', text: 'Playback stops at the end of the song and waits. Press play to continue with the next song.', tint: '#FF5252', tintBg: 'rgba(255,82,82,0.14)' },
+{ code: '!1008', title: 'Hard stop', text: 'Playback stops at the end of the song and waits. Press play to continue with the next song. Place the marker anywhere inside the song.', tint: '#FF5252', tintBg: 'rgba(255,82,82,0.14)' },
 { code: '!length:45', title: 'Custom length', text: 'The song ends after 45 seconds. Use it together with a hard stop.', tint: '#FFC107', tintBg: 'rgba(255,193,7,0.14)' },
-{ code: '!bpm:120', title: 'Starting tempo', text: 'Tells the app the tempo for count-in when the tempo cannot be read yet.', tint: '#5AA9F0', tintBg: 'rgba(90,169,240,0.14)' }
+{ code: '!bpm:120', title: 'Starting tempo', text: 'Tells the app the tempo for count-in when the tempo cannot be read yet. Place the marker at the very start of the song.', tint: '#5AA9F0', tintBg: 'rgba(90,169,240,0.14)' }
 ];
 const faq = [
 { q: 'The app does not connect to REAPER' },
