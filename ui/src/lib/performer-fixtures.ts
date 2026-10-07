@@ -22,6 +22,8 @@ const base: PerformerView = {
   totalDuration: 1325,
   autoResume: true,
   countInOnMarker: false,
+  recordArmed: false,
+  stats: { connected: true, midiActive: false, cpu: 23 },
 };
 
 const positions: Record<PerformerPhase, number> = {

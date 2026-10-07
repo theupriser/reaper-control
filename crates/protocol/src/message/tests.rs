@@ -21,7 +21,10 @@ fn every_message_survives_a_round_trip() -> Result<(), Box<dyn std::error::Error
         },
         ClientMessage::Command {
             id: u64::MAX,
-            command: Command::Pause,
+            command: Command::Seek {
+                position: 12.25,
+                count_in: true,
+            },
         },
         ClientMessage::Ping,
     ] {
@@ -35,6 +38,8 @@ fn every_message_survives_a_round_trip() -> Result<(), Box<dyn std::error::Error
         ServerMessage::State {
             state: AppState {
                 phase: Phase::Playing,
+                position: 72.5,
+                ..AppState::default()
             },
         },
         ServerMessage::Ack {

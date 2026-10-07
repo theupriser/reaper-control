@@ -10,7 +10,7 @@ use crate::{AppState, Command};
 pub const PROTOCOL_VERSION: u32 = 1;
 
 /// App to extension.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum ClientMessage {
     /// First message on a connection.
@@ -32,7 +32,7 @@ pub enum ClientMessage {
 }
 
 /// Extension to app.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum ServerMessage {
     /// Answer to an accepted Hello.
