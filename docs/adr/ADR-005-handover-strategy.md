@@ -1,6 +1,6 @@
 # ADR-005: Hand-over is a seek issued from the extension's main-thread tick
 
-Status: **Proposed**. Spike S2 is positive for the timing, with two open items (below). Gate 1 stays open until they are closed.
+Status: **Proposed**. Spike S2 is positive for the timing, with one open item (below). Gate 1 stays open until it is closed.
 Date: 2026-10-07. Related: ADR-002, SPEC §5 (hand-over), PLAN WP 1.2, risk R12.
 
 ## Question (S2)
@@ -30,12 +30,16 @@ When a song ends, how precisely can the extension start the next song, which met
 
 ## Not tested
 - **Native region playlist:** REAPER's API has no region-playlist functions (none in `reaper-low`), so it cannot be driven programmatically. v1 also builds its own playlist. Not an option.
-- **Menus and modal dialogs:** could not be automated (no accessibility access for scripted clicks). On macOS a menu or dialog may pause the timer that drives `run()`; this is the main risk to a main-thread trigger.
 - **Real audio:** the audible gap was not recorded; the numbers are position-based.
+
+## Menus and modal dialogs (measured 2026-10-07, REAPER 7.82, macOS arm64)
+Method: the S2 spike ran a Seek hand-over (lead 15 ms) while a script (macOS Accessibility API, Terminal granted Accessibility) opened a menu or dialog in the isolated test REAPER about 1.5 s into the run, held it past the trigger, then closed it.
+- **File menu held open across the trigger** (run 1): 237 log lines, ticks stay at about 30 ms. One gap of 112.7 ms when the menu opened. Trigger at pos 10.0107, next tick reads 12.0320.
+- **Project Settings dialog (modal, AX reports `modal=1`) held open across the trigger** (runs 2 and 3): 230 ticks each, ticks stay at about 30 ms. One gap when the dialog opened (135.1 ms and 95.1 ms). Run 2 trigger at pos 9.9893, next tick reads 12.0320.
+- Conclusion: on macOS the main-thread tick keeps running with a menu or a modal dialog open and the hand-over fires on time. The only effect seen is one tick delayed by 95–135 ms at the moment the menu or dialog opens. A hand-over that falls in that single gap would be late by that much (not measured). Other dialogs and Windows are untested.
 
 ## Decision (proposed)
 The extension decides in its tick and issues a seek-while-playing with a lead of about 15 ms (a tunable constant, not a user setting). One hand-over code path.
 
 ## Open items before Gate 1
-1. Manual check with the test REAPER: open a menu and a modal dialog during a hand-over and read the tick log. If ticks stop, evaluate a trigger that does not depend on the main thread, or accept and document it.
-2. Record the audio output once (loopback or a render of the click project) to confirm the audible gap against the position-based numbers.
+1. Record the audio output once (loopback or a render of the click project) to confirm the audible gap against the position-based numbers.
