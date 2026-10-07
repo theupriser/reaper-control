@@ -17,6 +17,9 @@ macOS arm64, REAPER 7.82, isolated instance, `reaper-rs` rev 659b22b. Spike exte
 | Start with a stale marker (after the abort death and after SIGTERM) | `SAFE MODE` logged, extension stayed disabled, no ticks |
 | Clean quit (Cmd+Q equivalent) | `close_no_reset` not called, `Drop` of the control surface not called, marker stayed. A C `atexit` handler ran and removed the marker |
 | SIGTERM to REAPER | No hook ran, marker stayed (treated as unclean) |
+| Panic in the audio hook (second round, 2026-10-07), unwind build | REAPER alive, hook logged the panic and set Faulted, the audio callback kept being called (`audio_calls` 1414 to 3110) and play position kept advancing. Clean quit afterwards removed the marker |
+| Panic in the project-marker callback while `Main_openProject` ran (project load), unwind build | REAPER alive, `Main_openProject` returned, Faulted set, ticks of the extension idle afterwards |
+| Real SIGSEGV (null write) in the main-thread tick | REAPER died at once, no panic hook ran, no Faulted line, marker stayed, REAPER wrote a crash report. Next start logged `SAFE MODE` and stayed disabled |
 
 `reaper-rs` already wraps its entry point, control-surface callbacks, hooks and similar in `catch_unwind` (`firewall` in `reaper-low/src/util.rs`). The containment in the first row therefore comes from the library plus `panic = "unwind"`.
 
@@ -29,9 +32,9 @@ macOS arm64, REAPER 7.82, isolated instance, `reaper-rs` rev 659b22b. Spike exte
 
 ## Not tested / open
 - Windows: `atexit` and DLL unload behaviour, CI only compiles.
-- A real native fault (SIGSEGV); `abort` stands in for it.
-- Panic in the audio hook, panic during project load, protocol fuzzing, soak tests.
+- Protocol fuzzing: `crates/protocol` is still empty, so there is no parser to fuzz yet. It belongs with the protocol work (WP 0.4 and later). `cargo-fuzz` is not installed.
+- Soak tests.
 - API drift: owner decision (2026-10-07): only the newest REAPER build is supported (7.82 at the time of writing, the version all spikes ran on). No older builds are tested and no minimum version is derived. The load-time function check stays as the guard: an older REAPER that lacks a function is refused with a clear message. The supported version is stated per release.
 - False positives: any REAPER crash or force quit, also one caused by another plug-in, disables the extension on the next start. Needs an owner decision on how aggressive safe mode should be and how the one-click re-enable looks.
-- `get_play_state_ex(..).is_playing` read `false` in every run while the position advanced, so playback state must be read with care. To be checked before the performance core relies on it.
+- `is_playing` (checked 2026-10-07): it reads `false` with raw state 0 while REAPER is stopped and `true` with raw state 1 once playback runs (started with action 1007). The earlier `false` readings came from runs where nothing was playing; the position readout moved anyway, so position alone does not say whether REAPER plays. Use the play state.
 - Logging from several threads is still unsynchronised.
