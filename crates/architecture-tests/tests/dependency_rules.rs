@@ -63,7 +63,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         krate: "app",
-        may_use_workspace: &["shared-kernel"],
+        may_use_workspace: &["shared-kernel", "protocol"],
         must_not_use_external: &[],
     },
 ];

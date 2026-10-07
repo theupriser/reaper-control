@@ -1,42 +1,7 @@
 //! Stand-in for the performance core until the extension link exists (Phase 2).
 //! One pure reducer: every UI intent becomes a [`Command`] and passes through [`dispatch`].
 
-use serde::{Deserialize, Serialize};
-
-/// Phases the stub knows about; a subset of SPEC §14.2.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-pub enum Phase {
-    /// Nothing is playing.
-    Idle,
-    /// Playing a song.
-    Playing,
-    /// Playback is paused.
-    Paused,
-}
-
-/// Everything the UI can ask for.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
-pub enum Command {
-    /// Start or resume playback.
-    Play,
-    /// Pause playback.
-    Pause,
-    /// Stop playback.
-    Stop,
-}
-
-/// What the UI renders. The UI never infers it.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-pub struct AppState {
-    /// Current phase.
-    pub phase: Phase,
-}
-
-impl Default for AppState {
-    fn default() -> Self {
-        Self { phase: Phase::Idle }
-    }
-}
+pub use protocol::{AppState, Command, Phase};
 
 /// The single entry point for every mutation.
 #[must_use]
