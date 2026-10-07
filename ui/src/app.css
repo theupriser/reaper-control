@@ -1,0 +1,20 @@
+:root {
+  --bg: #0e0f11;
+  --panel: #17191c;
+  --line: #2a2e34;
+  --text: #f2f3f4;
+  --muted: #9aa1a9;
+  --green: #4caf50;
+  --amber: #ffc107;
+  --red: #ff5252;
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+button {
+  font-family: inherit;
+}

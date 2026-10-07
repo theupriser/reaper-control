@@ -80,6 +80,9 @@ source ~/.cargo/env
 cargo fmt --all
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace      # includes the architecture rules
+pnpm --dir ui install && pnpm --dir ui build   # first: the app embeds ui/dist at compile time
+pnpm --dir ui check && pnpm --dir ui test
+cd crates/app && ../../ui/node_modules/.bin/tauri dev   # run the app window
 ```
 
 ## Project commands (`.claude/commands/`)

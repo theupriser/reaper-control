@@ -61,6 +61,11 @@ const RULES: &[Rule] = &[
         ],
         must_not_use_external: HEAVY,
     },
+    Rule {
+        krate: "app",
+        may_use_workspace: &["shared-kernel"],
+        must_not_use_external: &[],
+    },
 ];
 
 fn normal_dependency_names(package: &Package) -> BTreeSet<String> {
