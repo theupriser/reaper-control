@@ -5,6 +5,11 @@
 //!   edit <id> <region|marker> <start> <end> <name...>   change position/name (SetProjectMarker4)
 //!   insert <start> <end> <name...>    new region (AddProjectMarker2)
 //!   delete <id> <region|marker>
+//!   ublock <command...>               run edit/insert/delete inside one undo block
+//!   action <id>                       run a REAPER action (hand-edit code paths)
+//!   tsel <start> <end>                set the time selection
+//!   undo | redo                       actions 40029 / 40030
+//!   extset <key> <value> | extget <key>   project ExtState section RC2S6
 //!   save | reload <path> | quit
 #![allow(unsafe_code)] // spike only
 
@@ -131,6 +136,51 @@ impl Spike {
                     low.DeleteProjectMarker(proj, id.parse().unwrap_or(-1), *kind == "region")
                 };
                 self.log(&format!("delete {line} -> {ok}"));
+            }
+            ("ublock", [sub @ ..]) if !sub.is_empty() => {
+                unsafe { low.Undo_BeginBlock2(proj) };
+                self.run_command(&sub.join(" "));
+                let d = CString::new("s6 edit").unwrap_or_default();
+                unsafe { self.reaper.low().Undo_EndBlock2(proj, d.as_ptr(), -1) };
+            }
+            ("action", [id]) => {
+                self.reaper.main_on_command_ex(
+                    CommandId::new(id.parse().unwrap_or(0)),
+                    0,
+                    ProjectContext::CurrentProject,
+                );
+                self.log(&format!("action {id} run"));
+            }
+            ("undo", _) => {
+                self.reaper.main_on_command_ex(CommandId::new(40029), 0, ProjectContext::CurrentProject);
+                self.log("undo run");
+            }
+            ("redo", _) => {
+                self.reaper.main_on_command_ex(CommandId::new(40030), 0, ProjectContext::CurrentProject);
+                self.log("redo run");
+            }
+            ("tsel", [a, b]) => {
+                let (mut s, mut e) = (a.parse().unwrap_or(0.0), b.parse().unwrap_or(0.0));
+                unsafe { low.GetSet_LoopTimeRange2(proj, true, false, &mut s, &mut e, false) };
+                self.log(&format!("tsel {s} {e}"));
+            }
+            ("extset", [key, value @ ..]) => {
+                let (s, k, v) = (
+                    CString::new("RC2S6").unwrap_or_default(),
+                    CString::new(*key).unwrap_or_default(),
+                    CString::new(value.join(" ")).unwrap_or_default(),
+                );
+                let r = unsafe { low.SetProjExtState(proj, s.as_ptr(), k.as_ptr(), v.as_ptr()) };
+                self.log(&format!("extset {key} -> {r}"));
+            }
+            ("extget", [key]) => {
+                let (s, k) = (CString::new("RC2S6").unwrap_or_default(), CString::new(*key).unwrap_or_default());
+                let mut buf = vec![0 as std::os::raw::c_char; 256];
+                let n = unsafe {
+                    low.GetProjExtState(proj, s.as_ptr(), k.as_ptr(), buf.as_mut_ptr(), 256)
+                };
+                let v = unsafe { CStr::from_ptr(buf.as_ptr()) }.to_string_lossy().into_owned();
+                self.log(&format!("extget {key} -> {n} {v:?}"));
             }
             ("save", _) => {
                 self.reaper.main_on_command_ex(CommandId::new(40026), 0, ProjectContext::CurrentProject);

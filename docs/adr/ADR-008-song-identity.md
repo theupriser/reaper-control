@@ -20,14 +20,33 @@ REAPER 7.82, macOS arm64, isolated test instance, a copy of a small sample proje
 | Region number (`id`) of a new region | Collided with an existing marker's number (both `id=3`). Numbers are not unique across regions and markers |
 | Project file without GUIDs (written by an old REAPER, `MARKER n pos "name" flags`) | REAPER invents a GUID on load, and **a different one on every load** until the project is saved |
 
+## Second round (2026-10-07): undo, hand-edit action, ProjectId, copies
+Same setup; the spike gained `ublock` (an edit inside one undo block), `action`, `undo`/`redo` (actions 40029/40030), `tsel`, and project ExtState get/set. Log: `.dev/reaper-test/RC2/spike-s6.log` (not committed).
+| Step | Result |
+|---|---|
+| Delete a region in an undo block, undo, redo | Undo brings the region back with the **same GUID** (`{359BDBB5-…}`), redo removes it again |
+| Move and rename a region, undo | Position and name back, GUID unchanged throughout |
+| Insert a region, undo, redo | Undo removes it, redo brings it back with the **same GUID** (`{98E75CF2-…}`), not a new one |
+| Region insert through a REAPER action (40306, the same code path as the UI), undo | New region got a new GUID, existing GUIDs unchanged, undo removed it. The action opens a modal "Edit Region" dialog and blocks the tick until it is closed (the extension must never run such actions) |
+| Project ExtState (`RC2S6`) set, save, reload | Value survives (`PID proj-1234` in an `<EXTSTATE>` block of the file) |
+| Copy the saved `.rpp`, open the copy | ExtState value **and all region GUIDs identical** to the original |
+
+Not driven: the Region/Marker Manager and copy and paste of regions in the UI (no way to automate them; the action above is the same API path). Duplicate GUIDs inside one project were not produced.
+
+v1 reference (read-only): v1 setlist items hold `regionId` (the region number) and `name`; a setlist holds a `projectId`, a random `project-<time>-<random>` string that v1 keeps in the project ExtState (`reaperConnector.ts`, `ProjectId`). v1 never stored GUIDs.
+
 ## Proposed decision
 1. A Song's identity is the region GUID. Region numbers and enumeration indexes are never stored in a setlist. Entries in D2 storage hold `{guid, name, start}` (name and start only as fallback).
 2. A setlist entry is resolved by GUID first. If no GUID matches (deleted region, or a project without stored GUIDs), fall back to exact name, then to start time within 1 ms; an entry that still does not resolve is shown as broken and offered for repair (R13), never silently dropped or guessed.
 3. Saving a setlist into a project that REAPER has not saved since loading GUID-less markers must also make the GUIDs permanent: the extension asks for a project save before it writes the setlist (or warns that the project must be saved). Otherwise the stored GUIDs are lost on the next load.
 4. Cues and directives are matched by GUID the same way; a marker and a region can share a number, so never key on the number alone.
 
+5. Undo and redo are safe: they restore the same GUID, so a setlist never breaks because of undo.
+6. `ProjectId` is a random id kept in the project ExtState, as v1 does. It is only the key for the app's restore-only mirror (D2); the setlist itself lives in the project. A copied project file carries the same id and GUIDs, so the extension also records the project path next to the id; when the path differs it treats the project as a copy and offers a new id.
+7. v1 import: for every v1 item find the region whose number equals `regionId` among **regions only** (numbers collide with markers), check that its name equals the v1 name, store the GUID; on a mismatch fall back to name, then show the entry as broken for repair. v1's own `ProjectId` from the project ExtState is matched to the v1 setlist's `projectId`. Not run against a real v1 setlist file yet.
+
 ## Not tested
-- Edits made by hand in the REAPER UI (Region/Marker Manager, copy and paste of regions, ripple edit, undo and redo): only API edits were run. Undo may resurrect or change GUIDs.
-- Duplicate GUIDs (a project pasted into another project, template use).
-- Deriving a stable `ProjectId` and the v1 setlist import mapping (rest of WP 1.6 and WP 3.x).
+- Region/Marker Manager, copy and paste of regions and ripple edit in the UI (only the API and one action were run).
+- Duplicate GUIDs inside one project (a project pasted into another, template use).
+- The v1 import mapping against a real v1 setlist file, and the copy-detection path check (WP 3.x).
 - Windows.
