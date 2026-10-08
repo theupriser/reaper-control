@@ -1,30 +1,36 @@
-//! Tauri glue: holds the state and exposes `dispatch` and `current_state` to the UI.
+//! Tauri glue: holds the link, exposes `dispatch` and `current_view` to the UI and tells it when the view changes.
 
-use std::sync::Mutex;
+use tauri::{Emitter, Manager, State};
 
-use tauri::State;
+use protocol::{Command, LinkView};
 
-use crate::fake_performance::{self, AppState, Command};
+use crate::endpoint_location::endpoint_file;
+use crate::link_connection::LinkConnection;
 
-type Shared = Mutex<AppState>;
+const VIEW_CHANGED: &str = "link-view";
 
 #[tauri::command]
-fn current_state(shared: State<'_, Shared>) -> Result<AppState, String> {
-    shared.lock().map(|s| *s).map_err(|e| e.to_string())
+fn current_view(link: State<'_, LinkConnection>) -> LinkView {
+    link.view()
 }
 
 #[tauri::command]
-fn dispatch(shared: State<'_, Shared>, command: Command) -> Result<AppState, String> {
-    let mut guard = shared.lock().map_err(|e| e.to_string())?;
-    *guard = fake_performance::dispatch(*guard, command);
-    Ok(*guard)
+fn dispatch(link: State<'_, LinkConnection>, command: Command) -> Result<(), String> {
+    link.send(command).map_err(|error| error.to_string())
 }
 
 /// Starts the window and blocks until it closes.
 pub fn run() {
     let result = tauri::Builder::default()
-        .manage(Shared::default())
-        .invoke_handler(tauri::generate_handler![current_state, dispatch])
+        .setup(|app| {
+            let handle = app.handle().clone();
+            let file = endpoint_file().ok_or("the home folder is unknown")?;
+            app.manage(LinkConnection::start(file, move |view| {
+                let _ = handle.emit(VIEW_CHANGED, view);
+            }));
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![current_view, dispatch])
         .run(tauri::generate_context!());
     if let Err(error) = result {
         eprintln!("reaper control failed to start: {error}");

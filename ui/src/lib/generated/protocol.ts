@@ -273,3 +273,25 @@ catalog_revision: number,
  * Revision of the setlists this state belongs to.
  */
 setlist_revision: number, };
+
+/**
+ * Whether the app is talking to the extension.
+ */
+export type LinkStatus = "NotRunning" | { "Connected": { 
+/**
+ * Version of the extension build.
+ */
+extension_version: string, } };
+
+/**
+ * Everything the UI shows about the link: the connection and the last state the extension pushed.
+ */
+export type LinkView = { 
+/**
+ * Connection to the extension.
+ */
+status: LinkStatus, 
+/**
+ * Last pushed state; the default while nothing has been pushed.
+ */
+state: AppState, };
