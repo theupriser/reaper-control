@@ -74,11 +74,6 @@ impl CommandQueue {
         expired
     }
 
-    /// Forgets everything in flight (the link is gone, so no answer will come).
-    pub fn clear(&mut self) {
-        self.pending.clear();
-    }
-
     /// How many commands wait for an answer.
     #[must_use]
     pub fn waiting(&self) -> usize {

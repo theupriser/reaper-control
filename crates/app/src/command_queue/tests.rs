@@ -59,11 +59,3 @@ fn only_commands_past_the_timeout_expire_and_they_expire_once() {
     assert!(queue.expire().is_empty());
     assert_eq!(queue.waiting(), 1);
 }
-
-#[test]
-fn clearing_forgets_everything_in_flight() {
-    let (_clock, mut queue) = queue(QueueSettings::default());
-    queue.track(1, Command::Play);
-    queue.clear();
-    assert_eq!(queue.waiting(), 0);
-}

@@ -16,7 +16,7 @@ use crate::queue_settings::QueueSettings;
 
 /// The one way a command leaves the app: UI, keyboard and MIDI all call `dispatch`. Commands
 /// leave in the order they arrive; rapid repeats are dropped, and a command REAPER does not
-/// answer is reported.
+/// answer (also when the link is lost meanwhile: it may or may not have run) is reported.
 pub struct CommandBus {
     driver: Arc<dyn Driver>,
     events: Arc<EventBus>,
@@ -25,7 +25,7 @@ pub struct CommandBus {
 
 impl CommandBus {
     /// A bus that sends through `driver` and reports on `events`. It listens there for the
-    /// extension's answers and for the link being lost.
+    /// extension's answers.
     #[must_use]
     pub fn new(
         driver: Arc<dyn Driver>,
@@ -43,7 +43,6 @@ impl CommandBus {
                 AppEvent::CommandAcknowledged { id } | AppEvent::ExtensionRefused { id, .. } => {
                     queue.acknowledge(*id);
                 }
-                AppEvent::LinkLost => queue.clear(),
                 _ => {}
             }
         });

@@ -41,6 +41,17 @@ pub fn run() {
                 AppEvent::ExtensionRefused { id, reason } => {
                     eprintln!("command {id} refused by the extension: {reason}");
                 }
+                AppEvent::CommandSent(command) => eprintln!("command {command:?} sent"),
+                AppEvent::CommandDropped(command) => {
+                    eprintln!("command {command:?} dropped as a rapid repeat");
+                }
+                AppEvent::CommandQueueFull(command) => {
+                    eprintln!("command {command:?} refused: too many commands are waiting");
+                }
+                AppEvent::CommandAcknowledged { id } => eprintln!("command {id} done"),
+                AppEvent::CommandTimedOut { id, command } => {
+                    eprintln!("command {id} ({command:?}) was not answered in time");
+                }
                 _ => {}
             });
             let link = Arc::new(LinkConnection::start(file, events.clone(), move |view| {

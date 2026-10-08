@@ -177,7 +177,7 @@ fn a_command_without_an_answer_times_out_once_and_an_answer_prevents_it() {
 }
 
 #[test]
-fn losing_the_link_forgets_the_commands_in_flight() {
+fn a_command_in_flight_when_the_link_is_lost_is_still_reported_when_it_times_out() {
     let driver = Arc::new(FakeDriver::default());
     let events = Arc::new(EventBus::default());
     let seen = recorded(&events);
@@ -187,7 +187,7 @@ fn losing_the_link_forgets_the_commands_in_flight() {
     clock.advance(Duration::from_secs(6));
     bus.expire();
     assert!(
-        !heard(&seen)
+        heard(&seen)
             .iter()
             .any(|e| matches!(e, AppEvent::CommandTimedOut { .. }))
     );
