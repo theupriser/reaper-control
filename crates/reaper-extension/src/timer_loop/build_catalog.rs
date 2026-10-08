@@ -3,11 +3,15 @@ use performance::PlannedSong;
 use protocol::{Catalog, CueInfo, SongInfo};
 use reaper_port::{Marker, Region};
 
+use super::project_setlists::ProjectSetlists;
+
 /// The catalog the app is shown. Its songs are the planned songs, in the same order, so the index
 /// the app is told (`AppState::current_song`) points at the same song in both. Markers that only
 /// carry commands are not cues.
 pub(super) fn build_catalog(
     revision: u64,
+    setlist_revision: u64,
+    project_setlists: &ProjectSetlists,
     planned: &[PlannedSong],
     regions: &[Region],
     markers: &[Marker],
@@ -18,7 +22,7 @@ pub(super) fn build_catalog(
         .collect();
     Catalog {
         revision,
-        setlist_revision: 0,
+        setlist_revision,
         songs: planned
             .iter()
             .filter_map(|song| regions.iter().find(|r| r.id.as_str() == song.song_id))
@@ -34,7 +38,8 @@ pub(super) fn build_catalog(
                 position: marker.position.get(),
             })
             .collect(),
-        setlists: Vec::new(),
+        setlists: project_setlists.setlists().to_vec(),
+        active_setlist: project_setlists.active().map(str::to_string),
     }
 }
 

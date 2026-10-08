@@ -2761,6 +2761,7 @@ dependencies = [
  "reaper-macros",
  "reaper-medium",
  "reaper-port",
+ "serde_json",
  "setlists",
  "shared-kernel",
  "thiserror 2.0.21",

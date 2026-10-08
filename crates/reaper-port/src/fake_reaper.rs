@@ -117,6 +117,5 @@ impl ReaperPort for FakeReaper {
     fn set_ext_state(&mut self, section: &str, key: &str, value: &str) {
         self.ext_state
             .insert((section.to_string(), key.to_string()), value.to_string());
-        self.change_count += 1;
     }
 }

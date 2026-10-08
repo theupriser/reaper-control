@@ -51,6 +51,21 @@ impl Probe {
                 timer_loop.phase(),
                 timer_loop.rebuilds()
             )),
+            ["catalog"] => {
+                let catalog = timer_loop.catalog();
+                let songs: Vec<&str> = catalog
+                    .songs
+                    .iter()
+                    .map(|song| song.name.as_str())
+                    .collect();
+                log.line(&format!(
+                    "probe: catalog revision {}, setlist revision {}, songs {songs:?}, played setlist {:?}, current song {:?}",
+                    catalog.revision,
+                    catalog.setlist_revision,
+                    catalog.active_setlist,
+                    timer_loop.app_state().current_song
+                ));
+            }
             _ => log.line("probe: unknown perf command"),
         }
     }

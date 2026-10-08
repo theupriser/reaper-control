@@ -208,7 +208,7 @@ revision: number,
  */
 setlist_revision: number, 
 /**
- * Songs in timeline order.
+ * Songs in playing order: the played setlist's, or timeline order without one. `AppState::current_song` indexes this list.
  */
 songs: Array<SongInfo>, 
 /**
@@ -218,7 +218,11 @@ cues: Array<CueInfo>,
 /**
  * The setlists of the project.
  */
-setlists: Array<SetlistInfo>, };
+setlists: Array<SetlistInfo>, 
+/**
+ * The id of the setlist being played, if any.
+ */
+active_setlist: string | null, };
 
 /**
  * The state that changes all the time. Pushed on change (at most ~30 Hz while playing)

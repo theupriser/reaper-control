@@ -33,6 +33,7 @@ const link = (current: number | null, position = 0): LinkView => ({
       { id: "cue-1", name: "Outro", position: 50 },
     ],
     setlists: [],
+    active_setlist: null,
   },
 });
 
@@ -64,5 +65,15 @@ describe("performerView", () => {
     expect(performerView(link(null)).song).toBeNull();
     const down: LinkView = { ...link(0), status: "NotRunning" };
     expect(performerView(down).stats.connected).toBe(false);
+  });
+
+  it("names the played setlist and shows nothing for an unknown one", () => {
+    const view = link(0);
+    view.catalog.setlists = [{ id: "friday", name: "Friday", revision: 1, entries: [] }];
+    expect(performerView(view).setlistName).toBeNull();
+    view.catalog.active_setlist = "friday";
+    expect(performerView(view).setlistName).toBe("Friday");
+    view.catalog.active_setlist = "gone";
+    expect(performerView(view).setlistName).toBeNull();
   });
 });
