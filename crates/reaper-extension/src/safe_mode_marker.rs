@@ -24,8 +24,8 @@ impl SafeModeMarker {
                     path: path.to_path_buf(),
                 }))
             }
-            Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(StartUp::SafeMode),
-            Err(e) => Err(e),
+            Err(error) if error.kind() == ErrorKind::AlreadyExists => Ok(StartUp::SafeMode),
+            Err(error) => Err(error),
         }
     }
 

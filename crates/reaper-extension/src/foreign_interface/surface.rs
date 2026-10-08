@@ -13,16 +13,16 @@ pub(super) struct Surface {
     fault: &'static Fault,
     log: &'static Log,
     #[cfg_attr(not(feature = "fault-injection"), allow(dead_code))]
-    dir: PathBuf,
+    directory: PathBuf,
     ticks: u64,
 }
 
 impl Surface {
-    pub(super) fn new(fault: &'static Fault, log: &'static Log, dir: PathBuf) -> Self {
+    pub(super) fn new(fault: &'static Fault, log: &'static Log, directory: PathBuf) -> Self {
         Self {
             fault,
             log,
-            dir,
+            directory,
             ticks: 0,
         }
     }
@@ -33,7 +33,7 @@ impl Surface {
             self.log.line(&format!("tick {}", self.ticks));
         }
         #[cfg(feature = "fault-injection")]
-        if std::fs::remove_file(self.dir.join("panic-main")).is_ok() {
+        if std::fs::remove_file(self.directory.join("panic-main")).is_ok() {
             self.log.line("injecting a panic in the tick");
             #[allow(clippy::panic)] // fault injection is the point of this feature
             {

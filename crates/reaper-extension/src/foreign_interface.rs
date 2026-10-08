@@ -44,14 +44,14 @@ fn plugin_main(context: PluginContext) -> Result<(), Box<dyn Error>> {
 
 fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
     let mut session = ReaperSession::load(context);
-    let resource = session.reaper().get_resource_path(|p| p.to_string());
-    let dir = PathBuf::from(resource).join("RC2");
-    std::fs::create_dir_all(&dir)?;
+    let resource = session.reaper().get_resource_path(|path| path.to_string());
+    let directory = PathBuf::from(resource).join("RC2");
+    std::fs::create_dir_all(&directory)?;
 
-    let log = LOG.get_or_init(|| Log::new(dir.join("extension.log")));
+    let log = LOG.get_or_init(|| Log::new(directory.join("extension.log")));
     FAULT.install_panic_hook(log);
 
-    match SafeModeMarker::claim(&dir.join("running"))? {
+    match SafeModeMarker::claim(&directory.join("running"))? {
         StartUp::SafeMode => {
             log.line("SAFE MODE: REAPER did not shut down cleanly last time; extension disabled");
             session
@@ -67,7 +67,7 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
     let registered = unsafe { atexit(on_exit) };
     log.line(&format!("started, atexit registered: {registered}"));
 
-    session.plugin_register_add_csurf_inst(Box::new(Surface::new(&FAULT, log, dir)))?;
+    session.plugin_register_add_csurf_inst(Box::new(Surface::new(&FAULT, log, directory)))?;
     Box::leak(Box::new(session));
     Ok(())
 }
