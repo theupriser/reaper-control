@@ -54,6 +54,12 @@ describe("performerView", () => {
     expect(view.song?.cues).toEqual([{ name: "Chorus", position: 30 }]);
   });
 
+  it("allows Previous only after the first song", () => {
+    expect(performerView(link(0)).hasPrevious).toBe(false);
+    expect(performerView(link(1)).hasPrevious).toBe(true);
+    expect(performerView(link(null)).hasPrevious).toBe(false);
+  });
+
   it("shows no song while the extension reports none or is not running", () => {
     expect(performerView(link(null)).song).toBeNull();
     const down: LinkView = { ...link(0), status: "NotRunning" };

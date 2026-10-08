@@ -16,6 +16,9 @@
   let {
     view,
     onPlayPause,
+    onPrevious,
+    onRewind,
+    onNext,
     onSeek,
     onToggleAutoResume,
     onToggleCountIn,
@@ -24,6 +27,9 @@
   }: {
     view: PerformerView;
     onPlayPause: () => void;
+    onPrevious: () => void;
+    onRewind: () => void;
+    onNext: () => void;
     onSeek: (target: SeekTarget) => void;
     onToggleAutoResume: () => void;
     onToggleCountIn: () => void;
@@ -72,10 +78,14 @@
 
   <PerformerControls
     {playing}
-    canPrevious={false}
-    canNext={false}
+    canPrevious={view.hasPrevious}
+    canNext={view.nextSong !== null}
+    canRewind={view.song !== null}
     canPlay={view.song !== null && !(view.nextSong === null && view.phase === "HardStopped")}
     {onPlayPause}
+    {onPrevious}
+    {onRewind}
+    {onNext}
   />
   <PerformerToggles
     autoResume={view.autoResume}

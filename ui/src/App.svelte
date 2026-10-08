@@ -44,6 +44,9 @@
   };
 
   const playPause = () => send(appState.phase === "Playing" ? "Pause" : "Play");
+  const previous = () => send("Previous");
+  const rewind = () => send("RestartSong");
+  const next = () => send("Next");
   const seek = (target: SeekTarget) => send(seekCommand(target, appState.count_in_on_marker));
   const toggleAutoResume = () => send("ToggleAutoResume");
 
@@ -53,6 +56,8 @@
     if (!intent) return;
     event.preventDefault();
     if (intent === "PlayPause") playPause();
+    else if (intent === "Previous") previous();
+    else if (intent === "Next") next();
     else toggleAutoResume();
   }
 
@@ -72,6 +77,9 @@
   <PerformerScreen
     {view}
     onPlayPause={playPause}
+    onPrevious={previous}
+    onRewind={rewind}
+    onNext={next}
     onSeek={seek}
     onToggleAutoResume={toggleAutoResume}
     onToggleCountIn={() => send("ToggleCountInOnMarker")}
@@ -86,6 +94,9 @@
         <PerformerScreen
           {view}
           onPlayPause={playPause}
+    onPrevious={previous}
+    onRewind={rewind}
+    onNext={next}
           onSeek={seek}
           onToggleAutoResume={toggleAutoResume}
           onToggleCountIn={() => send("ToggleCountInOnMarker")}

@@ -28,6 +28,7 @@ export function performerView(link: LinkView): PerformerView {
     phase: performerPhase(state.phase),
     setlistName: SETLIST_NAME,
     song: song ? songView(song, catalog) : null,
+    hasPrevious: index !== null && index > 0,
     nextSong: next ? { name: next.name, duration: songLength(next) } : null,
     songPosition: state.position,
     totalElapsed: elapsedBefore + state.position,
