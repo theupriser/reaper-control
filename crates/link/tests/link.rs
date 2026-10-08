@@ -49,6 +49,7 @@ fn client_that_waits(
     config.min_backoff = Duration::from_millis(30);
     config.max_backoff = Duration::from_millis(100);
     config.ping_after = Duration::from_millis(150);
+    config.quiet_after = Duration::from_millis(300);
     config.dead_after = dead_after;
     LinkClient::start(config)
 }
@@ -347,6 +348,7 @@ fn an_extension_that_goes_silent_is_declared_dead() -> TestResult {
     let endpoint = Arc::new(Mutex::new(Some(Endpoint {
         port,
         token: "t".into(),
+        protocol: PROTOCOL_VERSION,
     })));
     let (client, events) = client_for(&endpoint);
     let (mut held, _) = listener.accept()?;
@@ -376,11 +378,79 @@ fn endpoint_file_round_trips_and_tokens_differ() -> TestResult {
     let endpoint = Endpoint {
         port: 4711,
         token: Endpoint::new_token()?,
+        protocol: PROTOCOL_VERSION,
     };
     endpoint.write(&path)?;
     assert_eq!(Endpoint::read(&path)?, endpoint);
     assert_eq!(endpoint.token.len(), 64);
     assert_ne!(endpoint.token, Endpoint::new_token()?);
     std::fs::remove_dir_all(&dir)?;
+    Ok(())
+}
+
+#[test]
+fn an_endpoint_with_another_protocol_is_reported_once_and_not_connected_to() -> TestResult {
+    let listener = std::net::TcpListener::bind("127.0.0.1:0")?;
+    listener.set_nonblocking(true)?;
+    let endpoint = Arc::new(Mutex::new(Some(Endpoint {
+        port: listener.local_addr()?.port(),
+        token: "t".into(),
+        protocol: 0,
+    })));
+    let (_client, events) = client_for(&endpoint);
+    let first = expect(&events, "Outdated", |e| {
+        matches!(e, LinkEvent::Outdated { .. })
+    });
+    assert_eq!(first, LinkEvent::Outdated { found: 0 });
+    std::thread::sleep(Duration::from_millis(400));
+    assert!(
+        events
+            .try_iter()
+            .all(|e| !matches!(e, LinkEvent::Outdated { .. })),
+        "reported again on a retry"
+    );
+    assert!(listener.accept().is_err(), "the client connected anyway");
+    Ok(())
+}
+
+#[test]
+fn a_quiet_extension_is_reported_and_then_recovers() -> TestResult {
+    let listener = std::net::TcpListener::bind("127.0.0.1:0")?;
+    let endpoint = Arc::new(Mutex::new(Some(Endpoint {
+        port: listener.local_addr()?.port(),
+        token: "t".into(),
+        protocol: PROTOCOL_VERSION,
+    })));
+    let (client, events) = client_that_waits(&endpoint, Duration::from_secs(5));
+    let (mut held, _) = listener.accept()?;
+    let mut hello = [0u8; 256];
+    held.set_read_timeout(Some(Duration::from_secs(2)))?;
+    let _ = held.read(&mut hello)?;
+    held.write_all(&encode_message(&ServerMessage::Welcome {
+        protocol: PROTOCOL_VERSION,
+        extension_version: "quiet".into(),
+        catalog_revision: 0,
+        setlist_revision: 0,
+        last_event_id: 0,
+    })?)?;
+    connected(&events);
+    expect(&events, "Quiet", |e| *e == LinkEvent::Quiet);
+    held.write_all(&encode_message(&ServerMessage::Pong)?)?;
+    expect(&events, "Recovered", |e| *e == LinkEvent::Recovered);
+    assert!(client.is_connected());
+    Ok(())
+}
+
+#[test]
+fn an_idle_extension_that_answers_its_pings_is_never_quiet() -> TestResult {
+    let (server, endpoint) = started()?;
+    let (_client, events) = client_for(&endpoint);
+    connected(&events);
+    std::thread::sleep(Duration::from_millis(1200));
+    assert!(
+        events.try_iter().all(|e| e != LinkEvent::Quiet),
+        "a healthy idle link was reported quiet"
+    );
+    drop(server);
     Ok(())
 }

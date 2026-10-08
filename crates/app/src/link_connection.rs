@@ -11,6 +11,7 @@ use crate::apply_event::apply_event;
 use crate::driver::Driver;
 use crate::driver_error::DriverError;
 use crate::event_bus::EventBus;
+use crate::health_monitor::HealthMonitor;
 use crate::link_session::LinkSession;
 
 /// The app's one connection to the extension, and what the UI shows about it.
@@ -27,6 +28,7 @@ impl LinkConnection {
     pub fn start(
         endpoint_file: PathBuf,
         events: Arc<EventBus>,
+        health: Arc<HealthMonitor>,
         on_change: impl Fn(LinkView) + Send + 'static,
     ) -> Self {
         let config = ClientConfig::new(move || Endpoint::read(&endpoint_file).ok());
@@ -38,6 +40,7 @@ impl LinkConnection {
             .spawn(move || {
                 let mut session = LinkSession::default();
                 for event in link_events {
+                    health.observe(&event);
                     if let Some(announcement) = session.observe(&event) {
                         events.publish(&announcement);
                     }

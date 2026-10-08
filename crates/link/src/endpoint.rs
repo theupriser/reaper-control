@@ -16,6 +16,9 @@ pub struct Endpoint {
     pub port: u16,
     /// Shared secret for the Hello.
     pub token: String,
+    /// Protocol version the extension speaks; 0 when the file has none (an older extension).
+    #[serde(default)]
+    pub protocol: u32,
 }
 
 impl Endpoint {

@@ -5,6 +5,8 @@ use std::sync::mpsc::Sender;
 use std::thread;
 use std::time::{Duration, Instant};
 
+use protocol::message::PROTOCOL_VERSION;
+
 use super::handshake::Handshake;
 use super::link::{Link, POLL};
 use super::session::{CommandQueue, Heartbeat, Session};
@@ -18,6 +20,8 @@ pub(super) struct Worker {
     pub(super) connected: Arc<AtomicBool>,
     pub(super) stop: Arc<AtomicBool>,
     pub(super) last_event_id: Cell<Option<u64>>,
+    /// The protocol version already reported as outdated, so a retry does not repeat it.
+    pub(super) reported_outdated: Cell<Option<u32>>,
 }
 
 impl Worker {
@@ -46,6 +50,15 @@ impl Worker {
         let Some(endpoint) = (self.config.endpoint)() else {
             return false;
         };
+        if endpoint.protocol != PROTOCOL_VERSION {
+            if self.reported_outdated.replace(Some(endpoint.protocol)) != Some(endpoint.protocol) {
+                let _ = self.events.send(LinkEvent::Outdated {
+                    found: endpoint.protocol,
+                });
+            }
+            return false;
+        }
+        self.reported_outdated.set(None);
         let Some(mut link) = Link::open(&endpoint) else {
             return false;
         };
@@ -69,12 +82,17 @@ impl Worker {
         });
         Session {
             link,
-            heartbeat: Heartbeat::new(self.config.ping_after, self.config.dead_after),
+            heartbeat: Heartbeat::new(
+                self.config.ping_after,
+                self.config.quiet_after,
+                self.config.dead_after,
+            ),
             queue: &self.commands,
             events: &self.events,
             stop: &self.stop,
             last_event_id: &self.last_event_id,
             welcomed_last,
+            quiet: false,
         }
         .run();
         true

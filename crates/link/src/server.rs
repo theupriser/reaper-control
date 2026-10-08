@@ -16,7 +16,7 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 
-use protocol::message::{ServerMessage, encode_message};
+use protocol::message::{PROTOCOL_VERSION, ServerMessage, encode_message};
 use protocol::{Catalog, Live, WireEvent};
 
 use crate::Endpoint;
@@ -42,6 +42,7 @@ impl LinkServer {
         let endpoint = Endpoint {
             port: listener.local_addr()?.port(),
             token: Endpoint::new_token()?,
+            protocol: PROTOCOL_VERSION,
         };
         let shared = Arc::new(Shared {
             token: endpoint.token.clone(),
