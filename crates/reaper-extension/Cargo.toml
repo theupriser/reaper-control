@@ -18,10 +18,13 @@ reaper-port.workspace = true
 reaper-low = { git = "https://github.com/helgoboss/reaper-rs", rev = "659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23" }
 reaper-medium = { git = "https://github.com/helgoboss/reaper-rs", rev = "659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23" }
 reaper-macros = { git = "https://github.com/helgoboss/reaper-rs", rev = "659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23" }
+thiserror.workspace = true
 
 [features]
 # Test builds only: trigger files make the tick panic, to prove the guard in a real REAPER.
 fault-injection = []
+# Test builds only: a `probe-command` file makes the adapter read and act, to check it in a real REAPER.
+probe = []
 
 # The only crate that may contain unsafe code (FFI boundary to REAPER, SPEC S-9).
 # Keep it confined to one module; everything else stays safe.

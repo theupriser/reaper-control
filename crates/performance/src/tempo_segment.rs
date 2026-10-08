@@ -26,6 +26,11 @@ impl TempoSegment {
         self.start
     }
 
+    /// The segment's tempo.
+    pub fn bpm(&self) -> Bpm {
+        self.bpm
+    }
+
     /// The segment's time signature.
     pub fn signature(&self) -> TimeSignature {
         self.signature

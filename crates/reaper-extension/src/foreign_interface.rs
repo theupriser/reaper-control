@@ -1,5 +1,10 @@
 //! The one module that talks to REAPER and the C runtime. Everything else in the crate is safe.
 
+mod missing_functions;
+#[cfg(feature = "probe")]
+mod probe;
+mod reaper_rs_adapter;
+mod required_functions;
 mod surface;
 
 use std::error::Error;
@@ -14,6 +19,8 @@ use crate::fault::Fault;
 use crate::log::Log;
 use crate::safe_mode_marker::SafeModeMarker;
 use crate::start_up::StartUp;
+use missing_functions::MissingFunctions;
+use reaper_rs_adapter::ReaperRsAdapter;
 use surface::Surface;
 
 static FAULT: Fault = Fault::new();
@@ -51,6 +58,14 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
     let log = LOG.get_or_init(|| Log::new(directory.join("extension.log")));
     FAULT.install_panic_hook(log);
 
+    if let Err(missing) = MissingFunctions::check(context) {
+        log.line(&format!("REFUSING TO START: {missing}"));
+        session.reaper().show_console_msg(format!(
+            "RC2: extension disabled, this REAPER is too old: {missing}\n"
+        ));
+        return Ok(());
+    }
+
     match SafeModeMarker::claim(&directory.join("running"))? {
         StartUp::SafeMode => {
             log.line("SAFE MODE: REAPER did not shut down cleanly last time; extension disabled");
@@ -67,7 +82,12 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
     let registered = unsafe { atexit(on_exit) };
     log.line(&format!("started, atexit registered: {registered}"));
 
-    session.plugin_register_add_csurf_inst(Box::new(Surface::new(&FAULT, log, directory)))?;
+    session.plugin_register_add_csurf_inst(Box::new(Surface::new(
+        &FAULT,
+        log,
+        directory,
+        ReaperRsAdapter::new(session.reaper().clone()),
+    )))?;
     Box::leak(Box::new(session));
     Ok(())
 }
