@@ -1,5 +1,5 @@
 {
-  "name": "Jumping to a cue with count-in starts earlier and ends in normal play",
+  "name": "Jumping to a cue with count-in holds the playhead on the cue, then plays normally",
   "songs": [
     { "id": "A", "start": 0, "end": 60 }
   ],
@@ -7,9 +7,11 @@
   "steps": [
     { "do": "play" },
     { "do": "advance", "seconds": 20 },
-    { "do": "seek_cue", "position": 30, "lead_in": 4 },
-    { "do": "expect", "phase": "CountingIn", "position": 26, "count_in": true },
-    { "do": "advance", "seconds": 4.05 },
-    { "do": "expect", "phase": "Playing", "position": 30.05, "count_in": false }
+    { "do": "seek_cue", "position": 30 },
+    { "do": "expect", "phase": "CountingIn", "transport": "Playing", "position": 30, "count_in": true },
+    { "do": "advance", "seconds": 3.9 },
+    { "do": "expect", "phase": "CountingIn", "position": 30, "count_in": true },
+    { "do": "advance", "seconds": 0.25 },
+    { "do": "expect", "phase": "Playing", "position": 30.15, "count_in": false }
   ]
 }

@@ -67,7 +67,7 @@ impl Performance {
             Input::Previous => self.step_by(-1, &mut out),
             Input::RestartSong => self.restart(&mut out),
             Input::Seek { position } => self.seek(position, &mut out),
-            Input::SeekCue { position, lead_in } => self.seek_cue(position, lead_in, &mut out),
+            Input::SeekCue { position } => self.seek_cue(position, &mut out),
             Input::SetFlag { flag, enabled } => self.set_flag(flag, enabled, &mut out),
         }
         out
@@ -214,21 +214,21 @@ impl Performance {
         }
     }
 
-    fn seek_cue(&mut self, position: Seconds, lead_in: Seconds, out: &mut Output) {
+    /// REAPER counts in only when playback starts from a pause, not on a jump while playing, so a
+    /// counted-in jump is: pause, move to the cue, arm the count-in, play. REAPER holds the playhead
+    /// on the cue while it counts in (measured in REAPER 7.82).
+    fn seek_cue(&mut self, position: Seconds, out: &mut Output) {
         if !self.flags.count_in {
             return self.seek(position, out);
         }
         if !self.check_jump(position, out) {
             return;
         }
-        let from = (position.get() - lead_in.get()).max(0.0);
-        let Ok(from) = Seconds::new(from) else {
-            return self.reject(Rejection::OutsideSong, out);
-        };
         if self.phase == Phase::Idle {
             out.events.push(Event::PerformanceStarted);
         }
-        out.effects.push(Effect::SeekTo(from));
+        out.effects.push(Effect::Pause);
+        out.effects.push(Effect::SeekTo(position));
         out.effects.push(Effect::SetCountIn(true));
         out.effects.push(Effect::Play);
         out.events.push(Event::SeekPerformed { to: position });
@@ -248,7 +248,7 @@ impl Performance {
     fn finish_count_in(&mut self, position: Seconds, out: &mut Output) {
         let reached = self
             .count_in_target
-            .is_none_or(|target| position.get() >= target.get());
+            .is_none_or(|target| position.get() > target.get());
         if reached {
             self.cancel_count_in(out);
             self.phase = Phase::Playing;

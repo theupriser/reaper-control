@@ -299,46 +299,27 @@ fn cue_jump_counts_in_when_enabled() {
         count_in: true,
     });
     p.step(Input::Play);
-    let out = p.step(Input::SeekCue {
-        position: t(6.0),
-        lead_in: t(4.0),
-    });
+    let out = p.step(Input::SeekCue { position: t(6.0) });
     assert_eq!(
         out.effects,
         vec![
-            Effect::SeekTo(t(2.0)),
+            Effect::Pause,
+            Effect::SeekTo(t(6.0)),
             Effect::SetCountIn(true),
             Effect::Play
         ]
     );
     assert_eq!(p.phase(), Phase::CountingIn);
-    assert_eq!(tick(&mut p, 1.0, 5.9), Output::default());
-    let out = tick(&mut p, 1.1, 6.0);
+    assert_eq!(tick(&mut p, 1.0, 6.0), Output::default());
+    let out = tick(&mut p, 1.1, 6.05);
     assert_eq!(out.effects, vec![Effect::SetCountIn(false)]);
     assert_eq!(p.phase(), Phase::Playing);
 }
 
 #[test]
-fn count_in_never_starts_before_the_timeline() {
-    let mut p = performance(Flags {
-        autoplay: false,
-        count_in: true,
-    });
-    p.step(Input::Play);
-    let out = p.step(Input::SeekCue {
-        position: t(1.0),
-        lead_in: t(4.0),
-    });
-    assert_eq!(out.effects.first(), Some(&Effect::SeekTo(t(0.0))));
-}
-
-#[test]
 fn cue_jump_without_the_flag_is_a_plain_seek() {
     let mut p = playing_at_song(0);
-    let out = p.step(Input::SeekCue {
-        position: t(6.0),
-        lead_in: t(4.0),
-    });
+    let out = p.step(Input::SeekCue { position: t(6.0) });
     assert_eq!(out.effects, vec![Effect::SeekTo(t(6.0))]);
     assert_eq!(p.phase(), Phase::Playing);
 }
@@ -362,10 +343,7 @@ fn pausing_a_count_in_cancels_it() {
         count_in: true,
     });
     p.step(Input::Play);
-    p.step(Input::SeekCue {
-        position: t(6.0),
-        lead_in: t(4.0),
-    });
+    p.step(Input::SeekCue { position: t(6.0) });
     let out = p.step(Input::Pause);
     assert_eq!(out.effects, vec![Effect::SetCountIn(false), Effect::Pause]);
     assert_eq!(p.phase(), Phase::Paused);

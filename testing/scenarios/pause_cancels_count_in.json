@@ -7,7 +7,7 @@
   "steps": [
     { "do": "play" },
     { "do": "advance", "seconds": 20 },
-    { "do": "seek_cue", "position": 30, "lead_in": 4 },
+    { "do": "seek_cue", "position": 30 },
     { "do": "expect", "phase": "CountingIn", "count_in": true },
     { "do": "pause" },
     { "do": "expect", "phase": "Paused", "transport": "Paused", "count_in": false }

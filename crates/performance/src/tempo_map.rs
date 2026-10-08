@@ -1,6 +1,5 @@
 use shared_kernel::{Bpm, Seconds};
 
-use crate::tempo_segment::bar_seconds;
 use crate::{InvalidTempoMap, TempoSegment, TimeSignature};
 
 /// A snapshot of the project's tempo and time signature changes.
@@ -63,13 +62,6 @@ impl TempoMap {
         } else {
             cue.get() - at
         };
-        Seconds::new(span.clamp(0.0, cue.get().max(0.0))).unwrap_or(Seconds::ZERO)
-    }
-
-    /// Like `bars_before`, but at a fixed tempo (the `!bpm` directive) and the
-    /// signature in force at the cue.
-    pub fn bars_before_at(&self, cue: Seconds, bars: u32, bpm: Bpm) -> Seconds {
-        let span = f64::from(bars) * bar_seconds(self.signature_at(cue), bpm);
         Seconds::new(span.clamp(0.0, cue.get().max(0.0))).unwrap_or(Seconds::ZERO)
     }
 }

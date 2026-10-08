@@ -17,6 +17,8 @@ use shared_kernel::Seconds;
 pub(super) struct ReaperRsAdapter {
     reaper: Reaper<MainThreadScope>,
     started: Instant,
+    /// The user's metronome settings while a count-in is armed.
+    saved_metronome: Option<i32>,
 }
 
 impl ReaperRsAdapter {
@@ -24,6 +26,7 @@ impl ReaperRsAdapter {
         Self {
             reaper,
             started: Instant::now(),
+            saved_metronome: None,
         }
     }
 
@@ -84,7 +87,7 @@ impl ReaperPort for ReaperRsAdapter {
     }
 
     fn count_in(&self) -> bool {
-        count_in::read(&self.reaper)
+        count_in::read(&self.reaper, self.saved_metronome)
     }
 
     fn regions(&self) -> Vec<Region> {
@@ -129,7 +132,7 @@ impl ReaperPort for ReaperRsAdapter {
     }
 
     fn set_count_in(&mut self, enabled: bool) {
-        count_in::write(&self.reaper, enabled);
+        count_in::write(&self.reaper, &mut self.saved_metronome, enabled);
     }
 
     fn set_ext_state(&mut self, section: &str, key: &str, value: &str) {

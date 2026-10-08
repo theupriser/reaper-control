@@ -42,7 +42,7 @@ enum Op {
     Previous,
     RestartSong,
     Seek(f64),
-    SeekCue { position: f64, lead_in: f64 },
+    SeekCue { position: f64 },
     SetFlag(bool, bool),
 }
 
@@ -56,7 +56,7 @@ fn op() -> impl Strategy<Value = Op> {
         1 => Just(Op::Previous),
         1 => Just(Op::RestartSong),
         1 => position.clone().prop_map(Op::Seek),
-        1 => (position, 0.0..20.0_f64).prop_map(|(position, lead_in)| Op::SeekCue { position, lead_in }),
+        1 => position.prop_map(|position| Op::SeekCue { position }),
         1 => (any::<bool>(), any::<bool>()).prop_map(|(a, b)| Op::SetFlag(a, b)),
     ]
 }
@@ -82,9 +82,8 @@ fn input(op: &Op, now: &mut f64) -> Input {
         Op::Seek(position) => Input::Seek {
             position: t(position),
         },
-        Op::SeekCue { position, lead_in } => Input::SeekCue {
+        Op::SeekCue { position } => Input::SeekCue {
             position: t(position),
-            lead_in: t(lead_in),
         },
         Op::SetFlag(autoplay, enabled) => Input::SetFlag {
             flag: if autoplay {

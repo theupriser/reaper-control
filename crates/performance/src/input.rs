@@ -31,8 +31,6 @@ pub enum Input {
     SeekCue {
         /// Cue position.
         position: Seconds,
-        /// Length of the count-in (two bars at the tempo there).
-        lead_in: Seconds,
     },
     /// Switch a playback setting.
     SetFlag {

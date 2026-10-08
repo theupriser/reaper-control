@@ -23,7 +23,7 @@ Non-goals for v2.0: cloud, telemetry, event sourcing; remote clients are a *stre
 | F7 | Autoplay (auto-resume) toggle; count-in toggle; record-arm toggle | playbackStore |
 | F8 | Special markers `!1008` hard stop, `!length:N`, `!bpm:N` (combinable) | markerUtils, bpmUtils |
 | F9 | BPM display (from REAPER tempo map / `!bpm`) + time signature | bpmUtils |
-| F10 | Count-in: seek 2 bars before the target and play with count-in. **v1 semantics: count-in applies only when jumping to a marker/cue (toggle is labelled "Count-in when pressing marker"); song-to-song navigation never counts in** | regionService |
+| F10 | Count-in: jump to the cue and start playback with REAPER's count-in (REAPER holds the playhead on the cue for its own count-in measures). **v1 semantics: count-in applies only when jumping to a marker/cue (toggle is labelled "Count-in when pressing marker"); song-to-song navigation never counts in** | regionService |
 | F11 | Performer mode: song title, song time + remaining, total set elapsed/remaining, next song + duration, hard-stop prompt, clock, record dot, toggles, exit | PerformerMode |
 | F18 | Timeline click-to-seek with time popover (player and performer) | handleProgressBarClick |
 | F12 | MIDI input: device select/hotplug, channel filter, note→action mapping, debounce | midiService |
@@ -92,7 +92,7 @@ Rules (ported from v1, now deterministic):
 2. Next entry exists → seek-while-playing to `next.start` (no pause/resume; falls back to stop/seek/play if REAPER requires it). If the next song is physically contiguous, do nothing.
 3. Song has `!1008` → stop at the hard stop (song end or `!length`) → `HardStopped`; Play resumes into the next entry.
 4. No next entry → pause → `Finished`.
-5. Count-in (cue jumps only, per F10): seek to `target − 2 bars` (tempo map), enable count-in, play → `CountingIn` → `Playing`.
+5. Count-in (cue jumps only, per F10): pause, seek to the cue, arm the count-in, play → `CountingIn` (REAPER holds the playhead on the cue for its count-in measures) → `Playing` when the playhead moves past the cue. Measured in REAPER 7.82: it counts in only when playback starts from a stop or pause (not on a jump while playing), and only with "Enable metronome" on, so the extension arms metronome + count-in without the click during playback and puts the user's settings back afterwards. The count-in uses REAPER's tempo and "Count-in measures"; a `!bpm` directive cannot change it.
 6. Manual Next/Previous: honour setlist; autoplay flag decides whether to resume playing; never counts in.
 7. Debounce: ignore a hand-over if one fired < 1 s ago (kept from v1).
 **Threading rule:** REAPER API calls happen on REAPER's main thread (timer callback). An audio-hook may only read atomics and enqueue a request on a lock-free queue for the main thread; it never allocates, locks or calls the REAPER API. **Open spike S2:** timer-driven vs audio-hook-triggered vs native region playlist hand-over.

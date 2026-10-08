@@ -18,9 +18,8 @@ pub(super) fn input_of(step: &Step) -> Result<Option<Input>, ScenarioError> {
         Step::Seek { position } => Input::Seek {
             position: secs(*position)?,
         },
-        Step::SeekCue { position, lead_in } => Input::SeekCue {
+        Step::SeekCue { position } => Input::SeekCue {
             position: secs(*position)?,
-            lead_in: secs(*lead_in)?,
         },
         Step::SetFlag { flag, enabled } => Input::SetFlag {
             flag: flag_named(flag)?,
