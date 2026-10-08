@@ -11,7 +11,7 @@ pub struct SetlistView {
     /// Its name.
     pub name: String,
     /// The revision to pass back when editing.
-    pub rev: Revision,
+    pub revision: Revision,
     /// The rows, in order.
     pub entries: Vec<EntryView>,
 }
@@ -37,7 +37,7 @@ impl SetlistView {
         Self {
             id: setlist.id().clone(),
             name: setlist.name().to_string(),
-            rev: setlist.rev(),
+            revision: setlist.revision(),
             entries,
         }
     }

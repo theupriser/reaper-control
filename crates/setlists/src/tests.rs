@@ -17,7 +17,7 @@ fn add(list: &mut Setlist, name: &str, at: Option<usize>) -> EntryId {
         song: song(name),
         at,
     };
-    match list.edit(list.rev(), edit).unwrap() {
+    match list.edit(list.revision(), edit).unwrap() {
         SetlistEvent::EntryAdded { entry, .. } => entry,
         other => panic!("unexpected {other:?}"),
     }
@@ -34,7 +34,7 @@ fn a_setlist_needs_a_name() {
         Some(InvalidSetlist::EmptyName)
     );
     assert_eq!(setlist().name(), "Main set");
-    assert_eq!(setlist().rev(), Revision::INITIAL);
+    assert_eq!(setlist().revision(), Revision::INITIAL);
 }
 
 #[test]
@@ -44,14 +44,14 @@ fn add_inserts_and_appends() {
     add(&mut list, "c", None);
     add(&mut list, "b", Some(1));
     assert_eq!(names(&list), ["a", "b", "c"]);
-    assert_eq!(list.rev(), Revision::new(3));
+    assert_eq!(list.revision(), Revision::new(3));
 }
 
 #[test]
 fn entry_ids_are_not_reused() {
     let mut list = setlist();
     let first = add(&mut list, "a", None);
-    list.edit(list.rev(), Edit::Remove(first)).unwrap();
+    list.edit(list.revision(), Edit::Remove(first)).unwrap();
     assert_ne!(add(&mut list, "a", None), first);
 }
 
@@ -61,7 +61,7 @@ fn move_puts_the_entry_at_the_index_of_the_result() {
     let a = add(&mut list, "a", None);
     add(&mut list, "b", None);
     add(&mut list, "c", None);
-    let event = list.edit(list.rev(), Edit::Move { entry: a, to: 2 });
+    let event = list.edit(list.revision(), Edit::Move { entry: a, to: 2 });
     assert_eq!(
         event,
         Ok(SetlistEvent::EntryMoved {
@@ -78,7 +78,7 @@ fn refused_edits_change_nothing() {
     let mut list = setlist();
     let a = add(&mut list, "a", None);
     let before = list.clone();
-    let rev = list.rev();
+    let revision = list.revision();
     let cases = [
         (Edit::Rename(" ".into()), Rejection::EmptyName),
         (Edit::Rename("Main set".into()), Rejection::NoChange),
@@ -97,7 +97,7 @@ fn refused_edits_change_nothing() {
         (Edit::Move { entry: a, to: 0 }, Rejection::NoChange),
     ];
     for (edit, why) in cases {
-        assert_eq!(list.edit(rev, edit), Err(why));
+        assert_eq!(list.edit(revision, edit), Err(why));
         assert_eq!(list, before);
     }
 }
@@ -120,7 +120,7 @@ fn a_stale_edit_is_refused() {
 #[test]
 fn rename_trims() {
     let mut list = setlist();
-    let event = list.edit(list.rev(), Edit::Rename("  Encore ".into()));
+    let event = list.edit(list.revision(), Edit::Rename("  Encore ".into()));
     assert_eq!(
         event,
         Ok(SetlistEvent::Renamed {
@@ -157,7 +157,7 @@ fn restore_checks_ids_and_continues_after_the_highest() {
     )
     .unwrap();
     assert_eq!(add(&mut list, "n", None), EntryId::new(8));
-    assert_eq!(list.rev(), Revision::new(5));
+    assert_eq!(list.revision(), Revision::new(5));
 }
 
 #[test]

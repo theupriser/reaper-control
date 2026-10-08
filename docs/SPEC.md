@@ -67,7 +67,7 @@ No REAPER web interface and no Lua script are used (decision D7). Fallback desig
 
 ### 2.3 State model (single definition in Rust, generated to TS; field names follow the glossary §14.2)
 ```
-Live    { seq, ts, extensionVersion, status: Stopped|Playing|Paused|Recording, position,
+Live    { sequence, timestamp, extensionVersion, status: Stopped|Playing|Paused|Recording, position,
           performance: { setlistId|null, phase, currentEntry|null, nextEntry|null },
           flags { autoplay, countIn, recordArmed }, catalogRev, setlistRev }
 Catalog { project{id,name}, songs[{id,name,start,end,colour}], cues[{id,name,pos}],

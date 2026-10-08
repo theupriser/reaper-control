@@ -34,14 +34,14 @@ proptest! {
         for (edit, fresh) in steps {
             let before = list.clone();
             let expected = if fresh {
-                list.rev()
+                list.revision()
             } else {
-                Revision::new(list.rev().get() + 1)
+                Revision::new(list.revision().get() + 1)
             };
             match list.edit(expected, edit) {
                 Ok(event) => {
                     prop_assert!(fresh);
-                    prop_assert_eq!(list.rev().get(), before.rev().get() + 1);
+                    prop_assert_eq!(list.revision().get(), before.revision().get() + 1);
                     prop_assert!(list.entries() != before.entries() || list.name() != before.name());
                     if let SetlistEvent::EntryAdded { entry, at, .. } = event {
                         prop_assert!(ever_used.insert(entry), "entry id reused");
@@ -67,7 +67,7 @@ proptest! {
         let mut list = Setlist::new(SetlistId::new("p"), "Start").unwrap();
         for edit in steps {
             let before = ids(&list);
-            let Ok(event) = list.edit(list.rev(), edit) else { continue };
+            let Ok(event) = list.edit(list.revision(), edit) else { continue };
             let after = ids(&list);
             let mut expected = before.clone();
             match event {

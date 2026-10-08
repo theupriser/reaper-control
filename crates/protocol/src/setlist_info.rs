@@ -12,7 +12,7 @@ pub struct SetlistInfo {
     pub name: String,
     /// Raised by one on every accepted edit; saving needs the revision you last saw.
     #[ts(type = "number")]
-    pub rev: u64,
+    pub revision: u64,
     /// The entries in playing order.
     pub entries: Vec<EntryInfo>,
 }

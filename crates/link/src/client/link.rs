@@ -18,8 +18,8 @@ pub(super) struct Link {
 
 impl Link {
     pub(super) fn open(endpoint: &Endpoint) -> Option<Self> {
-        let addr = SocketAddr::from((Ipv4Addr::LOCALHOST, endpoint.port));
-        let stream = TcpStream::connect_timeout(&addr, Duration::from_secs(1)).ok()?;
+        let address = SocketAddr::from((Ipv4Addr::LOCALHOST, endpoint.port));
+        let stream = TcpStream::connect_timeout(&address, Duration::from_secs(1)).ok()?;
         stream.set_nodelay(true).ok()?;
         stream.set_read_timeout(Some(POLL)).ok()?;
         stream

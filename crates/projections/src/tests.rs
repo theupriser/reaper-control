@@ -26,9 +26,9 @@ fn song(id: &str, start: f64, end: f64) -> Song {
 fn setlist(ids: &[&str]) -> Setlist {
     let mut list = Setlist::new(SetlistId::new("main"), "Friday").unwrap();
     for id in ids {
-        let rev = list.rev();
+        let revision = list.revision();
         list.edit(
-            rev,
+            revision,
             Edit::Add {
                 song: SongId::new(*id),
                 at: None,
@@ -109,7 +109,7 @@ fn setlist_view_resolves_rows_and_keeps_dangling_ones() {
     ];
     let view = SetlistView::of(&setlist(&["A", "gone", "B"]), &songs, &cues);
     assert_eq!(view.name, "Friday");
-    assert_eq!(view.rev, Revision::new(3));
+    assert_eq!(view.revision, Revision::new(3));
     let rows: Vec<_> = view
         .entries
         .iter()
@@ -139,7 +139,7 @@ fn feed_drops_duplicates_and_late_updates() {
     assert_eq!(feed.accept(5, secs(0.1)), Applied::Ignored);
     assert_eq!(feed.accept(4, secs(0.1)), Applied::Ignored);
     assert_eq!(feed.accept(9, secs(0.2)), Applied::Accepted);
-    assert_eq!(feed.seq(), Some(9));
+    assert_eq!(feed.sequence(), Some(9));
 }
 
 #[test]
@@ -168,7 +168,7 @@ fn player_view_carries_the_feed_state() {
     let mut feed = LiveFeed::new();
     feed.accept(7, secs(3.0));
     let view = PlayerView::new(PerformanceView::of(&run, &[]), secs(12.5), &feed, secs(3.5));
-    assert_eq!((view.seq, view.freshness), (Some(7), Freshness::Fresh));
+    assert_eq!((view.sequence, view.freshness), (Some(7), Freshness::Fresh));
     assert_eq!(view.position, secs(12.5));
     let late = PlayerView::new(PerformanceView::of(&run, &[]), secs(12.5), &feed, secs(9.0));
     assert_eq!(late.freshness, Freshness::Stale);

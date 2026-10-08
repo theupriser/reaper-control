@@ -36,7 +36,7 @@ impl Acceptor {
         }
         let shared = Arc::clone(&self.shared);
         let spawned = thread::Builder::new()
-            .name("link-conn".into())
+            .name("link-connection".into())
             .spawn(move || {
                 let _ = catch_unwind(AssertUnwindSafe(|| {
                     let _ = Connection {

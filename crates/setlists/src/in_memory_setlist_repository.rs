@@ -15,7 +15,7 @@ impl InMemorySetlistRepository {
     }
 
     fn stored_rev(&self, id: &SetlistId) -> Option<Revision> {
-        self.stored.get(id).map(Setlist::rev)
+        self.stored.get(id).map(Setlist::revision)
     }
 }
 

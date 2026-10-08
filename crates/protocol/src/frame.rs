@@ -8,25 +8,26 @@ pub use decoder::FrameDecoder;
 pub use error::FrameError;
 
 /// Largest payload a frame may carry (1 MiB). Anything bigger is a protocol error.
-pub const MAX_FRAME_LEN: usize = 1 << 20;
+pub const MAX_FRAME_LENGTH: usize = 1 << 20;
 
-const HEADER_LEN: usize = 4;
+const HEADER_LENGTH: usize = 4;
 
 /// Prefix `payload` with its length.
 pub fn encode(payload: &[u8]) -> Result<Vec<u8>, FrameError> {
-    check_len(payload.len())?;
-    let len =
-        u32::try_from(payload.len()).map_err(|_| FrameError::TooLarge { len: payload.len() })?;
-    let mut out = Vec::with_capacity(HEADER_LEN + payload.len());
-    out.extend_from_slice(&len.to_be_bytes());
+    check_length(payload.len())?;
+    let length = u32::try_from(payload.len()).map_err(|_| FrameError::TooLarge {
+        length: payload.len(),
+    })?;
+    let mut out = Vec::with_capacity(HEADER_LENGTH + payload.len());
+    out.extend_from_slice(&length.to_be_bytes());
     out.extend_from_slice(payload);
     Ok(out)
 }
 
-fn check_len(len: usize) -> Result<(), FrameError> {
-    match len {
+fn check_length(length: usize) -> Result<(), FrameError> {
+    match length {
         0 => Err(FrameError::Empty),
-        l if l > MAX_FRAME_LEN => Err(FrameError::TooLarge { len: l }),
+        l if l > MAX_FRAME_LENGTH => Err(FrameError::TooLarge { length: l }),
         _ => Ok(()),
     }
 }

@@ -35,8 +35,8 @@ impl Hub {
         let welcome = ServerMessage::Welcome {
             protocol: PROTOCOL_VERSION,
             extension_version: extension_version.to_owned(),
-            catalog_rev: 0,
-            setlist_rev: 0,
+            catalog_revision: 0,
+            setlist_revision: 0,
             last_event_id: 0,
         };
         for message in [welcome, ServerMessage::State { state: self.state }] {

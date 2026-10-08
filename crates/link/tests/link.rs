@@ -86,7 +86,7 @@ fn started() -> Result<Started, Box<dyn std::error::Error>> {
 }
 
 fn raw_connect(server: &LinkServer) -> std::io::Result<TcpStream> {
-    let stream = TcpStream::connect(server.addr())?;
+    let stream = TcpStream::connect(server.address())?;
     stream.set_read_timeout(Some(Duration::from_secs(2)))?;
     Ok(stream)
 }
@@ -336,8 +336,8 @@ fn an_extension_that_goes_silent_is_declared_dead() -> TestResult {
     held.write_all(&encode_message(&ServerMessage::Welcome {
         protocol: PROTOCOL_VERSION,
         extension_version: "silent".into(),
-        catalog_rev: 0,
-        setlist_rev: 0,
+        catalog_revision: 0,
+        setlist_revision: 0,
         last_event_id: 0,
     })?)?;
     connected(&events);

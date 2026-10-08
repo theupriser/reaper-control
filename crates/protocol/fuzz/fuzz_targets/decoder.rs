@@ -3,7 +3,7 @@
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
-use protocol::frame::{FrameDecoder, MAX_FRAME_LEN};
+use protocol::frame::{FrameDecoder, MAX_FRAME_LENGTH};
 
 fn run(data: &[u8], chunk: usize) -> (Vec<Vec<u8>>, bool) {
     let mut decoder = FrameDecoder::new();
@@ -13,7 +13,7 @@ fn run(data: &[u8], chunk: usize) -> (Vec<Vec<u8>>, bool) {
         loop {
             match decoder.next_frame() {
                 Ok(Some(f)) => {
-                    assert!(!f.is_empty() && f.len() <= MAX_FRAME_LEN);
+                    assert!(!f.is_empty() && f.len() <= MAX_FRAME_LENGTH);
                     frames.push(f);
                 }
                 Ok(None) => break,

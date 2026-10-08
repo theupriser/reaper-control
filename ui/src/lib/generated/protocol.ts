@@ -185,7 +185,7 @@ name: string,
 /**
  * Raised by one on every accepted edit; saving needs the revision you last saw.
  */
-rev: number, 
+revision: number, 
 /**
  * The entries in playing order.
  */
@@ -198,11 +198,11 @@ export type Catalog = {
 /**
  * Raised whenever songs or cues change.
  */
-rev: number, 
+revision: number, 
 /**
  * Raised whenever a setlist changes.
  */
-setlist_rev: number, 
+setlist_revision: number, 
 /**
  * Songs in timeline order.
  */
@@ -224,11 +224,11 @@ export type Live = {
 /**
  * Counts up per sender run; the receiver drops anything not newer than the last one.
  */
-seq: number, 
+sequence: number, 
 /**
  * Sender clock in seconds, for latency figures only.
  */
-ts: number, 
+timestamp: number, 
 /**
  * What REAPER's transport does.
  */
@@ -268,8 +268,8 @@ record_armed: boolean,
 /**
  * Revision of the catalog this state belongs to.
  */
-catalog_rev: number, 
+catalog_revision: number, 
 /**
  * Revision of the setlists this state belongs to.
  */
-setlist_rev: number, };
+setlist_revision: number, };
