@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 use app::link_connection::LinkConnection;
 use link::{CommandHandler, LinkServer, SendError};
 use protocol::message::Outcome;
-use protocol::{AppState, Command, LinkStatus, LinkView, Phase};
+use protocol::{Command, LinkStatus, LinkView, Live, Phase};
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
 
@@ -57,10 +57,10 @@ fn it_follows_the_extension_and_sends_commands_to_it() -> TestResult {
     let (sender, received) = channel();
     let mut server = LinkServer::start("9.9.9", Recorder(Mutex::new(sender)))?;
     server.endpoint().write(&file)?;
-    server.publish(AppState {
+    server.publish(Live {
         phase: Phase::Playing,
         position: 7.5,
-        ..AppState::default()
+        ..Live::default()
     });
 
     let changes = Arc::new(Mutex::new(0u32));
@@ -71,7 +71,11 @@ fn it_follows_the_extension_and_sends_commands_to_it() -> TestResult {
         }
     });
     wait_for(&connection, "connected with state", |view| {
-        matches!(view.status, LinkStatus::Connected { .. }) && view.state.phase == Phase::Playing
+        matches!(view.status, LinkStatus::Connected { .. })
+            && view
+                .live
+                .as_ref()
+                .is_some_and(|live| live.phase == Phase::Playing)
     });
     assert_eq!(
         connection.view().status,
@@ -79,7 +83,7 @@ fn it_follows_the_extension_and_sends_commands_to_it() -> TestResult {
             extension_version: "9.9.9".into()
         }
     );
-    assert!((connection.view().state.position - 7.5).abs() < f64::EPSILON);
+    assert!((connection.view().live.unwrap_or_default().position - 7.5).abs() < f64::EPSILON);
     assert!(changes.lock().map_err(|e| e.to_string())?.gt(&0));
 
     connection.send(Command::Next)?;

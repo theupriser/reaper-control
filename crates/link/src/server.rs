@@ -17,7 +17,7 @@ use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 
 use protocol::message::{ServerMessage, encode_message};
-use protocol::{AppState, Catalog};
+use protocol::{Catalog, Live};
 
 use crate::Endpoint;
 use acceptor::Acceptor;
@@ -79,13 +79,13 @@ impl LinkServer {
         self.shared.hub().client_count()
     }
 
-    /// Remember `state` for clients that connect later and push it to everyone now.
+    /// Remember `live` for clients that connect later and push it to everyone now.
     /// A client that cannot take it at once is dropped; the caller never waits.
-    pub fn publish(&self, state: AppState) {
-        let Ok(frame) = encode_message(&ServerMessage::State { state }) else {
+    pub fn publish(&self, live: Live) {
+        let Ok(frame) = encode_message(&ServerMessage::Live(live.clone())) else {
             return;
         };
-        self.shared.hub().broadcast(state, &Arc::new(frame));
+        self.shared.hub().broadcast(live, &Arc::new(frame));
     }
 
     /// Remember `catalog` for clients that connect later and push it to everyone now.

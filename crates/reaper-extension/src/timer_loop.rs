@@ -5,7 +5,7 @@ mod project_setlists;
 
 use performance::{Effect, Flags, HandOverPolicy, Input, Performance, Phase, PlannedSong};
 use protocol::message::Outcome;
-use protocol::{AppState, Catalog, Command};
+use protocol::{Catalog, Command, Live, Transport};
 use reaper_port::{Marker, ReaperPort, Region};
 
 use build_catalog::build_catalog;
@@ -83,20 +83,37 @@ impl<Port: ReaperPort> TimerLoop<Port> {
         }
     }
 
-    /// What the app shows: the phase, the position in the current song and the settings.
-    pub fn app_state(&self) -> AppState {
+    /// The state that changes all the time. The sender stamps `sequence` and `timestamp`.
+    pub fn live(&self) -> Live {
         let flags = self.performance.flags();
-        AppState {
+        let index = self.performance.current_index();
+        let song = |index: usize| u32::try_from(index).ok();
+        Live {
+            transport: match self.port.transport() {
+                reaper_port::Transport::Stopped => Transport::Stopped,
+                reaper_port::Transport::Playing => Transport::Playing,
+                reaper_port::Transport::Paused => Transport::Paused,
+            },
+            position: self.port.position().get(),
             phase: map_phase(self.performance.phase()),
-            position: (self.port.position().get() - self.song_start().get()).max(0.0),
-            auto_resume: flags.autoplay,
-            count_in_on_marker: flags.count_in,
+            setlist_id: self.catalog.active_setlist.clone(),
+            current_song: index.and_then(song),
+            next_song: index
+                .map(|index| index + 1)
+                .filter(|next| *next < self.catalog.songs.len())
+                .and_then(song),
+            autoplay: flags.autoplay,
+            count_in: flags.count_in,
             record_armed: false,
-            current_song: self
-                .performance
-                .current_index()
-                .and_then(|index| u32::try_from(index).ok()),
+            catalog_revision: self.catalog.revision,
+            setlist_revision: self.catalog.setlist_revision,
+            ..Live::default()
         }
+    }
+
+    /// REAPER's clock in seconds.
+    pub fn now(&self) -> f64 {
+        self.port.now().get()
     }
 
     /// The songs and cues of the project; the revision rises whenever they change.

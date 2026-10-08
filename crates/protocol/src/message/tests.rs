@@ -1,8 +1,8 @@
 use super::*;
 use crate::frame::FrameDecoder;
 use crate::{
-    AppState, Catalog, Command, CueInfo, EntryInfo, EventRecord, Live, Phase, SetlistInfo, Setting,
-    SongInfo, Transport, WireEvent,
+    Catalog, Command, CueInfo, EntryInfo, EventRecord, Live, Phase, SetlistInfo, Setting, SongInfo,
+    Transport, WireEvent,
 };
 use serde::{Serialize, de::DeserializeOwned};
 
@@ -43,13 +43,6 @@ fn every_message_survives_a_round_trip() -> Result<(), Box<dyn std::error::Error
             catalog_revision: 3,
             setlist_revision: 5,
             last_event_id: 99,
-        },
-        ServerMessage::State {
-            state: AppState {
-                phase: Phase::Playing,
-                position: 72.5,
-                ..AppState::default()
-            },
         },
         ServerMessage::Ack {
             id: 7,
@@ -136,8 +129,8 @@ fn live() -> Live {
         position: 72.25,
         phase: Phase::HandingOver,
         setlist_id: Some("set-1".into()),
-        current_entry: Some(2),
-        next_entry: None,
+        current_song: Some(2),
+        next_song: None,
         autoplay: true,
         count_in: false,
         record_armed: true,
@@ -230,7 +223,7 @@ fn a_phase_and_a_transport_travel_by_name() -> Result<(), serde_json::Error> {
     assert_eq!(json["type"], "Live");
     assert_eq!(json["phase"], "HandingOver");
     assert_eq!(json["transport"], "Playing");
-    assert_eq!(json["next_entry"], serde_json::Value::Null);
+    assert_eq!(json["next_song"], serde_json::Value::Null);
     Ok(())
 }
 

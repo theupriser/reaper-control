@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 
 use link::{ClientConfig, CommandHandler, Endpoint, LinkClient, LinkEvent, LinkServer, SendError};
 use protocol::message::{ClientMessage, Outcome, PROTOCOL_VERSION, ServerMessage, encode_message};
-use protocol::{AppState, Catalog, Command, Phase};
+use protocol::{Catalog, Command, Live, Phase};
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
 type Started = (LinkServer, Arc<Mutex<Option<Endpoint>>>);
@@ -28,11 +28,11 @@ impl CommandHandler for Handler {
     }
 }
 
-fn playing(position: f64) -> AppState {
-    AppState {
+fn playing(position: f64) -> Live {
+    Live {
         phase: Phase::Playing,
         position,
-        ..AppState::default()
+        ..Live::default()
     }
 }
 
@@ -111,8 +111,8 @@ fn new_client_gets_welcome_then_the_current_state() -> TestResult {
         }
     );
     assert_eq!(
-        expect(&events, "State", |e| matches!(e, LinkEvent::State(_))),
-        LinkEvent::State(playing(12.5))
+        expect(&events, "Live", |e| matches!(e, LinkEvent::Live(_))),
+        LinkEvent::Live(playing(12.5))
     );
     Ok(())
 }
@@ -147,7 +147,7 @@ fn published_state_reaches_every_client() -> TestResult {
     server.publish(playing(3.0));
     for events in [&events_a, &events_b] {
         expect(events, "pushed state", |e| {
-            *e == LinkEvent::State(playing(3.0))
+            *e == LinkEvent::Live(playing(3.0))
         });
     }
     Ok(())
@@ -255,7 +255,7 @@ fn garbage_and_oversized_frames_close_only_that_connection() -> TestResult {
     assert_eq!(server.client_count(), 1);
     server.publish(playing(1.0));
     expect(&events, "state after bad peers", |e| {
-        *e == LinkEvent::State(playing(1.0))
+        *e == LinkEvent::Live(playing(1.0))
     });
     Ok(())
 }
@@ -328,7 +328,7 @@ fn client_reconnects_to_a_restarted_extension_with_a_new_port_and_token() -> Tes
     );
     connected(&events);
     expect(&events, "replayed state", |e| {
-        *e == LinkEvent::State(playing(40.0))
+        *e == LinkEvent::Live(playing(40.0))
     });
     let id = client.send(Command::Play)?;
     expect(&events, "Ack", |e| {

@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use ts_rs::{Config, TS};
 
 use crate::{
-    AppState, Catalog, Command, CueInfo, EntryInfo, EventRecord, LinkStatus, LinkView, Live, Phase,
+    Catalog, Command, CueInfo, EntryInfo, EventRecord, LinkStatus, LinkView, Live, Phase,
     SetlistInfo, Setting, SongInfo, Transport, WireEvent,
 };
 
@@ -20,7 +20,6 @@ fn render() -> Result<String, ts_rs::ExportError> {
     for declaration in [
         Phase::export_to_string(&config)?,
         Command::export_to_string(&config)?,
-        AppState::export_to_string(&config)?,
         Transport::export_to_string(&config)?,
         Setting::export_to_string(&config)?,
         WireEvent::export_to_string(&config)?,

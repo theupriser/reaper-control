@@ -1,16 +1,23 @@
 import { describe, expect, it } from "vitest";
-import type { AppState } from "./generated/protocol";
+import type { Live } from "./generated/protocol";
 
-describe("AppState", () => {
-  it("starts idle", () => {
-    const state: AppState = {
-      phase: "Idle",
+describe("Live", () => {
+  it("names songs by their index in the catalog", () => {
+    const live: Live = {
+      sequence: 1,
+      timestamp: 0,
+      transport: "Stopped",
       position: 0,
-      auto_resume: true,
-      count_in_on_marker: false,
-      record_armed: false,
+      phase: "Idle",
+      setlist_id: null,
       current_song: null,
+      next_song: null,
+      autoplay: true,
+      count_in: false,
+      record_armed: false,
+      catalog_revision: 0,
+      setlist_revision: 0,
     };
-    expect(state.phase).toBe("Idle");
+    expect(live.phase).toBe("Idle");
   });
 });

@@ -45,13 +45,13 @@ fn a_command_over_the_link_moves_the_performance_and_the_state_comes_back() -> T
             sent = true;
         }
         while let Ok(event) = events.try_recv() {
-            if matches!(event, LinkEvent::State(state) if state.phase == Phase::Playing) {
+            if matches!(event, LinkEvent::Live(live) if live.phase == Phase::Playing) {
                 playing = true;
             }
         }
         std::thread::sleep(Duration::from_millis(10));
     }
-    assert!(playing, "no Playing state arrived over the link");
+    assert!(playing, "no Playing live state arrived over the link");
     drop(bridge);
     assert!(!directory.join("endpoint.json").exists());
     std::fs::remove_dir_all(&directory)?;

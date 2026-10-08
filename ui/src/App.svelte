@@ -13,14 +13,7 @@
 
   let link = $state<LinkView>({
     status: "NotRunning",
-    state: {
-      phase: "Idle",
-      position: 0,
-      auto_resume: true,
-      count_in_on_marker: false,
-      record_armed: false,
-      current_song: null,
-    },
+    live: null,
     catalog: { revision: 0, setlist_revision: 0, songs: [], cues: [], setlists: [], active_setlist: null },
   });
   let error = $state<string | null>(null);
@@ -29,7 +22,7 @@
 
   const phases: PerformerPhase[] = ["Idle", "Playing", "Paused", "CountingIn", "HardStopped"];
   const forced = new URLSearchParams(location.search).get("phase") as PerformerPhase | null;
-  const appState = $derived(link.state);
+  const live = $derived(link.live);
   const view = $derived(forced && phases.includes(forced) ? fixtureFor(forced) : performerView(link));
 
   const connection = $derived(connectionBadge(link.status));
@@ -43,11 +36,11 @@
     }
   };
 
-  const playPause = () => send(appState.phase === "Playing" ? "Pause" : "Play");
+  const playPause = () => send(live?.phase === "Playing" ? "Pause" : "Play");
   const previous = () => send("Previous");
   const rewind = () => send("RestartSong");
   const next = () => send("Next");
-  const seek = (target: SeekTarget) => send(seekCommand(target, appState.count_in_on_marker));
+  const seek = (target: SeekTarget) => send(seekCommand(target, live?.count_in ?? false));
   const toggleAutoResume = () => send("ToggleAutoResume");
 
   function onKeydown(event: KeyboardEvent) {

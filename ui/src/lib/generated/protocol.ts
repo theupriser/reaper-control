@@ -19,35 +19,6 @@ position: number,
 count_in: boolean, } } | "ToggleAutoResume" | "ToggleCountInOnMarker" | "ToggleRecordArm";
 
 /**
- * What the UI renders. The UI never infers it.
- */
-export type AppState = { 
-/**
- * Current phase.
- */
-phase: Phase, 
-/**
- * Seconds from the start of the current song.
- */
-position: number, 
-/**
- * "Auto-resume playback".
- */
-auto_resume: boolean, 
-/**
- * "Count-in when pressing marker".
- */
-count_in_on_marker: boolean, 
-/**
- * Recording is armed.
- */
-record_armed: boolean, 
-/**
- * Index into the songs of the last [`crate::Catalog`] of the song the performance is on.
- */
-current_song: number | null, };
-
-/**
  * What REAPER's transport is doing.
  */
 export type Transport = "Stopped" | "Playing" | "Paused" | "Recording";
@@ -208,7 +179,7 @@ revision: number,
  */
 setlist_revision: number, 
 /**
- * Songs in playing order: the played setlist's, or timeline order without one. `AppState::current_song` indexes this list.
+ * Songs in playing order: the played setlist's, or timeline order without one. `Live::current_song` indexes this list.
  */
 songs: Array<SongInfo>, 
 /**
@@ -254,13 +225,13 @@ phase: Phase,
  */
 setlist_id: string | null, 
 /**
- * Entry that is playing now.
+ * Index into `Catalog.songs` of the song the performance is on.
  */
-current_entry: number | null, 
+current_song: number | null, 
 /**
- * Entry that follows.
+ * Index into `Catalog.songs` of the song that follows.
  */
-next_entry: number | null, 
+next_song: number | null, 
 /**
  * "Auto-resume playback".
  */
@@ -300,9 +271,9 @@ export type LinkView = {
  */
 status: LinkStatus, 
 /**
- * Last pushed state; the default while nothing has been pushed.
+ * Last pushed live state; none while nothing has been pushed.
  */
-state: AppState, 
+live: Live | null, 
 /**
  * Last pushed catalog; empty while nothing has been pushed.
  */
