@@ -1,6 +1,6 @@
 //! The machine stats: mapped from the source, kept, and really readable.
 
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use app::fake_stats_source::FakeStatsSource;
 use app::periodic_thread::PeriodicThread;
@@ -36,7 +36,10 @@ fn a_periodic_thread_refreshes_the_service() {
     let thread = PeriodicThread::start("stats-test", Duration::from_millis(20), move || {
         refreshing.refresh()
     });
-    std::thread::sleep(Duration::from_millis(200));
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while service.latest().memory_total_megabytes != 1 && Instant::now() < deadline {
+        std::thread::sleep(Duration::from_millis(10));
+    }
     assert_eq!(service.latest().memory_total_megabytes, 1);
     assert!(thread.map(PeriodicThread::stop).unwrap_or(false));
 }
