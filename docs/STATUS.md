@@ -41,7 +41,7 @@ Last updated: 2026-10-08, after PR #35 (WP 3.2 `ReaperRsAdapter`); WP 3.3 timer 
 
 ## Next (proposed, confirm with the owner)
 - Next: the local server wired into the extension (WP 3.4: listener, endpoint file, commands from the app into `TimerLoop::command`, `Live` pushes) and the app (replace the fake performance), using the message set from WP 2.9 (the stub `State`/`AppState` go away then). The Player screen (WP 6.1) follows the UI foundation (Phase 5). S4 installer/signing needs questions first; Windows runs of S1/S2/S3/S6/S7 need a Windows machine.
-- After parity (owner's wish): `!hardstop` (and maybe `!stop`) alias for the hard stop if no other default marker has that key (SPEC §4). SWS interplay for `!1008` still to verify.
+- `!hardstop` is accepted as an alias of `!1008` (bugfix/hardstop-marker, owner's request). SWS interplay for `!1008` still to verify.
 - Spike S4 (installer/signing).
 - Remaining Phase 0: ADRs 001/003/004 (0.5), licence decision (0.6), more sample projects (0.7), domain discovery (0.8).
 - Update the designs for D7 (SPEC §10e): wizard, settings connection card, connection states, pre-show check.
