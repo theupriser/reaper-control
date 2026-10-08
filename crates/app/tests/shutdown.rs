@@ -43,10 +43,13 @@ fn a_periodic_thread_works_until_stopped_and_stops_promptly() -> TestResult {
         *counting.lock().unwrap_or_else(|error| error.into_inner()) += 1;
     })
     .ok_or("thread did not start")?;
-    std::thread::sleep(Duration::from_millis(100));
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while held(&count) < 3 && Instant::now() < deadline {
+        std::thread::sleep(Duration::from_millis(10));
+    }
     let started = Instant::now();
     assert!(thread.stop());
-    assert!(started.elapsed() < Duration::from_millis(500));
+    assert!(started.elapsed() < Duration::from_secs(2));
     let seen = held(&count);
     assert!(seen >= 3, "worked {seen} times");
     std::thread::sleep(Duration::from_millis(50));

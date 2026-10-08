@@ -9,7 +9,7 @@ use ts_rs::{Config, TS};
 use crate::{
     Catalog, Command, CueInfo, EntryInfo, EventRecord, ImportOffer, LinkStatus, LinkView, Live,
     NoteMapping, Notice, NoticeLevel, Phase, SetlistInfo, SetlistTransferView, Setting, Settings,
-    SettingsView, SongInfo, Transport, WireEvent,
+    SettingsView, SongInfo, SystemStats, Transport, WireEvent,
 };
 
 const HEADER: &str =
@@ -40,6 +40,7 @@ fn render() -> Result<String, ts_rs::ExportError> {
         SettingsView::export_to_string(&config)?,
         ImportOffer::export_to_string(&config)?,
         SetlistTransferView::export_to_string(&config)?,
+        SystemStats::export_to_string(&config)?,
     ] {
         out.push('\n');
         out.push_str(&strip_imports(&declaration));

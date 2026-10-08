@@ -5,7 +5,7 @@ use tauri::{Emitter, Manager, State};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use protocol::{Command, LinkView, SetlistTransferView, Settings, SettingsView};
+use protocol::{Command, LinkView, SetlistTransferView, Settings, SettingsView, SystemStats};
 
 use crate::app_event::AppEvent;
 use crate::app_fault::AppFault;
@@ -40,8 +40,10 @@ use crate::setlist_transfer::SetlistTransfer;
 use crate::settings_service::SettingsService;
 use crate::shutdown_sequence::ShutdownSequence;
 use crate::start_link::start_link;
+use crate::sysinfo_stats_source::SysinfoStatsSource;
 use crate::system_clock::SystemClock;
 use crate::system_process_check::SystemProcessCheck;
+use crate::system_stats_service::SystemStatsService;
 
 const VIEW_CHANGED: &str = "link-view";
 const NOTICE: &str = "notice";
@@ -58,6 +60,11 @@ fn current_problem(
     fault: State<'_, Arc<AppFault>>,
 ) -> Option<String> {
     fault.message().or_else(|| link_problem(&health.health()))
+}
+
+#[tauri::command]
+fn current_system_stats(stats: State<'_, Arc<SystemStatsService>>) -> SystemStats {
+    stats.latest()
 }
 
 #[tauri::command]
@@ -257,6 +264,14 @@ pub fn run() {
                 Duration::from_secs(1),
                 move || ticking.tick(),
             ));
+            let stats = Arc::new(SystemStatsService::new(SysinfoStatsSource::default()));
+            let measuring = stats.clone();
+            threads.extend(PeriodicThread::start(
+                "system-stats",
+                Duration::from_secs(2),
+                move || measuring.refresh(),
+            ));
+            app.manage(stats);
             app.manage(Mutex::new(threads));
             app.manage(health);
             app.manage(bus);
@@ -266,6 +281,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             current_view,
             current_problem,
+            current_system_stats,
             current_settings,
             save_settings,
             current_transfer,

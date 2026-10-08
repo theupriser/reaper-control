@@ -437,3 +437,28 @@ imports: Array<ImportOffer>,
  * Why nothing is offered, when the project is unknown or a file is unusable.
  */
 problem: string | null, };
+
+/**
+ * How busy the machine is, for the stats popover. Memory is in megabytes.
+ */
+export type SystemStats = { 
+/**
+ * CPU use of the whole machine, 0 to 100.
+ */
+machine_cpu_percent: number, 
+/**
+ * Memory in use on the machine.
+ */
+memory_used_megabytes: number, 
+/**
+ * Memory installed in the machine.
+ */
+memory_total_megabytes: number, 
+/**
+ * Memory used by this app.
+ */
+app_memory_megabytes: number, 
+/**
+ * Memory used by REAPER, or none when no REAPER process was found.
+ */
+reaper_memory_megabytes: number | null, };
