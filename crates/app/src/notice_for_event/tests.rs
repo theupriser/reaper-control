@@ -38,7 +38,7 @@ fn health_changes_share_one_key_so_the_newest_wins() {
         health: LinkHealth::Connected,
     });
     assert_eq!(
-        dead.as_ref().map(|n| n.text.as_str()),
+        dead.as_ref().map(|n| n.title.as_str()),
         Some("REAPER is not running")
     );
     assert_eq!(dead.map(|n| n.key), back.map(|n| n.key));

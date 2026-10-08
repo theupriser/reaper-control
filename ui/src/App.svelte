@@ -6,7 +6,7 @@
   import Sidebar from "./components/Sidebar.svelte";
   import { connectionBadge } from "./lib/connection";
   import { currentView, dispatch, onNotice, onViewChange } from "./lib/ipc";
-  import { addNotice, expireNotices, type ShownNotice } from "./lib/notices";
+  import { addNotice, dismissNotice, expireNotices, type ShownNotice } from "./lib/notices";
   import { screenLabel, type ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
   import { keyIntent, seekCommand, type PerformerPhase, type SeekTarget } from "./lib/performer";
@@ -73,7 +73,7 @@
 
 <svelte:window onkeydown={onKeydown} />
 
-<Notices {notices} />
+<Notices {notices} onDismiss={(key) => (notices = dismissNotice(notices, key))} />
 
 {#if performerMode}
   <PerformerScreen

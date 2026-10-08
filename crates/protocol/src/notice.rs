@@ -10,6 +10,8 @@ pub struct Notice {
     pub key: String,
     /// How much it matters.
     pub level: NoticeLevel,
-    /// What to show.
+    /// What happened, in a few words.
+    pub title: String,
+    /// What it means or what to do.
     pub text: String,
 }

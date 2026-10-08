@@ -10,76 +10,94 @@ use crate::link_health::LinkHealth;
 #[must_use]
 pub fn notice_for_event(event: &AppEvent) -> Option<Notice> {
     match event {
-        AppEvent::CommandRefused { error, .. } => Some(notice(
-            "command",
+        AppEvent::CommandRefused { error, .. } => Some(command_notice(
             NoticeLevel::Warning,
-            format!("Command not sent: {error}"),
+            "Command not sent",
+            capitalised(&error.to_string()),
         )),
-        AppEvent::CommandInvalid { refusal, .. } => Some(notice(
-            "command",
+        AppEvent::CommandInvalid { refusal, .. } => Some(command_notice(
             NoticeLevel::Warning,
-            format!("Command not sent: {refusal}"),
+            "Command not sent",
+            capitalised(&refusal.to_string()),
         )),
-        AppEvent::CommandQueueFull(_) => Some(notice(
-            "command",
+        AppEvent::CommandQueueFull(_) => Some(command_notice(
             NoticeLevel::Warning,
-            "Command not sent: too many commands are waiting for REAPER".into(),
+            "Command not sent",
+            "Too many commands are waiting for REAPER.".into(),
         )),
-        AppEvent::CommandDropped(_) => Some(notice(
-            "command",
+        AppEvent::CommandDropped(_) => Some(command_notice(
             NoticeLevel::Info,
-            "Repeated command ignored".into(),
+            "Repeat ignored",
+            "The same command was just sent.".into(),
         )),
-        AppEvent::CommandTimedOut { .. } => Some(notice(
-            "command",
+        AppEvent::CommandTimedOut { .. } => Some(command_notice(
             NoticeLevel::Error,
-            "REAPER did not answer a command in time".into(),
+            "REAPER did not answer",
+            "A command was not confirmed in time.".into(),
         )),
-        AppEvent::ExtensionRefused { reason, .. } => Some(notice(
-            "command",
+        AppEvent::ExtensionRefused { reason, .. } => Some(command_notice(
             NoticeLevel::Warning,
-            format!("REAPER refused the command: {reason}"),
+            "REAPER refused the command",
+            capitalised(reason),
         )),
-        AppEvent::IntentRefused { refusal, .. } => Some(notice(
-            "command",
+        AppEvent::IntentRefused { refusal, .. } => Some(command_notice(
             NoticeLevel::Warning,
+            "Not possible now",
             capitalised(&refusal.to_string()),
         )),
         AppEvent::LinkHealthChanged { health } => Some(health_notice(health)),
         AppEvent::EventsMissed { .. } => Some(notice(
             "events",
             NoticeLevel::Warning,
-            "Some performance events were missed while the link was down".into(),
+            "Events missed",
+            "Some performance events were missed while the link was down.",
         )),
         _ => None,
     }
 }
 
 fn health_notice(health: &LinkHealth) -> Notice {
-    let (level, text) = match health {
-        LinkHealth::Connected => (NoticeLevel::Info, "Connected to REAPER"),
-        LinkHealth::Degraded => (NoticeLevel::Warning, "REAPER is slow to answer"),
-        LinkHealth::Lost => (NoticeLevel::Error, "The link to REAPER is lost"),
-        LinkHealth::Dead(LinkCause::ReaperNotRunning) => {
-            (NoticeLevel::Error, "REAPER is not running")
-        }
+    let (level, title, text) = match health {
+        LinkHealth::Connected => (NoticeLevel::Info, "Connected to REAPER", "The link works."),
+        LinkHealth::Degraded => (
+            NoticeLevel::Warning,
+            "REAPER is slow to answer",
+            "The link is still up.",
+        ),
+        LinkHealth::Lost => (
+            NoticeLevel::Error,
+            "Could not reach REAPER",
+            "Check that REAPER is open. We keep trying.",
+        ),
+        LinkHealth::Dead(LinkCause::ReaperNotRunning) => (
+            NoticeLevel::Error,
+            "REAPER is not running",
+            "Open REAPER. We keep trying.",
+        ),
         LinkHealth::Dead(LinkCause::ExtensionNotLoaded) => (
             NoticeLevel::Error,
-            "REAPER is running but the extension is not loaded",
+            "The extension is not loaded",
+            "REAPER is running but the Reaper Control extension does not answer.",
         ),
         LinkHealth::Dead(LinkCause::ExtensionOutdated { .. }) => (
             NoticeLevel::Error,
-            "The extension in REAPER is a different version than this app",
+            "The extension is another version",
+            "Update the extension in REAPER to match this app.",
         ),
     };
-    notice("link", level, text.into())
+    notice("link", level, title, text)
 }
 
-fn notice(key: &str, level: NoticeLevel, text: String) -> Notice {
+fn command_notice(level: NoticeLevel, title: &str, text: String) -> Notice {
+    notice("command", level, title, &text)
+}
+
+fn notice(key: &str, level: NoticeLevel, title: &str, text: &str) -> Notice {
     Notice {
         key: key.into(),
         level,
-        text,
+        title: title.into(),
+        text: text.into(),
     }
 }
 

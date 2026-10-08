@@ -321,6 +321,10 @@ key: string,
  */
 level: NoticeLevel, 
 /**
- * What to show.
+ * What happened, in a few words.
+ */
+title: string, 
+/**
+ * What it means or what to do.
  */
 text: string, };

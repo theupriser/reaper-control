@@ -1,19 +1,28 @@
 <script lang="ts">
   import type { Notice } from "../lib/generated/protocol";
 
-  let { notices }: { notices: Notice[] } = $props();
+  let { notices, onDismiss }: { notices: Notice[]; onDismiss: (key: string) => void } = $props();
 </script>
 
 {#if notices.length > 0}
-  <ul aria-live="polite">
+  <div class="stack">
     {#each notices as notice (notice.key)}
-      <li class={notice.level.toLowerCase()}>{notice.text}</li>
+      <div class="notice" role="status">
+        <span class="dot {notice.level.toLowerCase()}"></span>
+        <div class="words">
+          <div class="title">{notice.title}</div>
+          <div class="text">{notice.text}</div>
+        </div>
+        <button aria-label="Dismiss" onclick={() => onDismiss(notice.key)}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
     {/each}
-  </ul>
+  </div>
 {/if}
 
 <style>
-  ul {
+  .stack {
     position: fixed;
     right: 16px;
     bottom: 16px;
@@ -21,25 +30,59 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    width: min(360px, calc(100vw - 32px));
   }
-  li {
-    padding: 10px 14px;
+  .notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
     border: 1px solid var(--line);
-    border-left-width: 4px;
-    border-radius: 6px;
-    background: var(--panel);
-    font-weight: 600;
+    border-radius: 12px;
+    background: #1e2125;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    margin-top: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
   .info {
-    border-left-color: var(--green);
+    background: #5aa9f0;
   }
   .warning {
-    border-left-color: var(--amber);
+    background: var(--amber);
   }
   .error {
-    border-left-color: var(--red);
+    background: var(--red);
+  }
+  .words {
+    flex: 1;
+    min-width: 0;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .text {
+    margin-top: 2px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    flex-shrink: 0;
   }
 </style>
