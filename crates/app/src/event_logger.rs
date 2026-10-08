@@ -21,6 +21,9 @@ pub fn log_event(event: &AppEvent) {
         AppEvent::CommandInvalid { command, refusal } => {
             warn!(?command, %refusal, "command refused");
         }
+        AppEvent::IntentRefused { intent, refusal } => {
+            warn!(?intent, %refusal, "intent refused");
+        }
         AppEvent::CommandTimedOut { id, command } => {
             warn!(id, ?command, "command was not answered in time");
         }
