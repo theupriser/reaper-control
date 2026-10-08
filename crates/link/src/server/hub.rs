@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::sync::mpsc::SyncSender;
 
 use protocol::message::{PROTOCOL_VERSION, ServerMessage, encode_message};
-use protocol::{AppState, Catalog};
+use protocol::{Catalog, Live};
 
 use crate::wire::ReadError;
 
@@ -15,7 +15,7 @@ pub(super) use connected_client::Frame;
 /// The latest state and everyone who is listening.
 #[derive(Default)]
 pub(super) struct Hub {
-    state: AppState,
+    live: Option<Live>,
     catalog: Option<Catalog>,
     clients: Vec<ConnectedClient>,
     next_id: u64,
@@ -40,7 +40,8 @@ impl Hub {
             setlist_revision: 0,
             last_event_id: 0,
         };
-        let mut messages = vec![welcome, ServerMessage::State { state: self.state }];
+        let mut messages = vec![welcome];
+        messages.extend(self.live.clone().map(ServerMessage::Live));
         messages.extend(self.catalog.clone().map(ServerMessage::Catalog));
         for message in messages {
             outbox
@@ -60,9 +61,9 @@ impl Hub {
         self.clients.retain(|c| c.id != id);
     }
 
-    /// Remember `state` and push it to everyone; a client that cannot take it at once is dropped.
-    pub(super) fn broadcast(&mut self, state: AppState, frame: &Frame) {
-        self.state = state;
+    /// Remember `live` and push it to everyone; a client that cannot take it at once is dropped.
+    pub(super) fn broadcast(&mut self, live: Live, frame: &Frame) {
+        self.live = Some(live);
         self.send_to_all(frame);
     }
 

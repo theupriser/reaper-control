@@ -6,7 +6,7 @@ use reaper_port::{Marker, Region};
 use super::project_setlists::ProjectSetlists;
 
 /// The catalog the app is shown. Its songs are the planned songs, in the same order, so the index
-/// the app is told (`AppState::current_song`) points at the same song in both. Markers that only
+/// the app is told (`Live::current_song`) points at the same song in both. Markers that only
 /// carry commands are not cues.
 pub(super) fn build_catalog(
     revision: u64,

@@ -18,24 +18,26 @@ function songView(song: SongInfo, catalog: Catalog): SongView {
 }
 
 export function performerView(link: LinkView): PerformerView {
-  const { catalog, state, status } = link;
-  const index = state.current_song;
+  const { catalog, live, status } = link;
+  const index = live?.current_song ?? null;
   const song = index === null ? undefined : catalog.songs[index];
-  const next = index === null ? undefined : catalog.songs[index + 1];
+  const nextIndex = live?.next_song ?? null;
+  const next = nextIndex === null ? undefined : catalog.songs[nextIndex];
+  const songPosition = song && live ? Math.max(0, live.position - song.start) : 0;
   const before = index === null ? [] : catalog.songs.slice(0, index);
   const elapsedBefore = before.reduce((sum, earlier) => sum + songLength(earlier), 0);
   return {
-    phase: performerPhase(state.phase),
+    phase: performerPhase(live?.phase ?? "Idle"),
     setlistName: setlistName(catalog),
     song: song ? songView(song, catalog) : null,
     hasPrevious: index !== null && index > 0,
     nextSong: next ? { name: next.name, duration: songLength(next) } : null,
-    songPosition: state.position,
-    totalElapsed: elapsedBefore + state.position,
+    songPosition,
+    totalElapsed: elapsedBefore + songPosition,
     totalDuration: catalog.songs.reduce((sum, each) => sum + songLength(each), 0),
-    autoResume: state.auto_resume,
-    countInOnMarker: state.count_in_on_marker,
-    recordArmed: state.record_armed,
+    autoResume: live?.autoplay ?? true,
+    countInOnMarker: live?.count_in ?? false,
+    recordArmed: live?.record_armed ?? false,
     stats: { connected: status !== "NotRunning", midiActive: false, cpu: 0 },
   };
 }

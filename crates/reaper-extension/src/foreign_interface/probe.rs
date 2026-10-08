@@ -63,7 +63,7 @@ impl Probe {
                     catalog.revision,
                     catalog.setlist_revision,
                     catalog.active_setlist,
-                    timer_loop.app_state().current_song
+                    timer_loop.live().current_song
                 ));
             }
             _ => log.line("probe: unknown perf command"),

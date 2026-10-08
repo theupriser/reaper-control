@@ -10,7 +10,7 @@ use std::sync::mpsc::{Receiver, channel};
 
 use link::LinkServer;
 use protocol::message::Outcome;
-use protocol::{AppState, Command};
+use protocol::{Command, Live};
 use reaper_port::ReaperPort;
 
 use crate::log::Log;
@@ -22,7 +22,8 @@ pub struct LinkBridge {
     server: LinkServer,
     commands: Receiver<Command>,
     endpoint_file: PathBuf,
-    published: Option<AppState>,
+    published: Option<Live>,
+    sequence: u64,
     published_revisions: Option<(u64, u64)>,
 }
 
@@ -42,6 +43,7 @@ impl LinkBridge {
             commands,
             endpoint_file,
             published: None,
+            sequence: 0,
             published_revisions: None,
         })
     }
@@ -59,10 +61,15 @@ impl LinkBridge {
             self.server.publish_catalog(catalog.clone());
             self.published_revisions = Some(revisions);
         }
-        let state = timer_loop.app_state();
-        if self.published != Some(state) {
-            self.server.publish(state);
-            self.published = Some(state);
+        let live = timer_loop.live();
+        if self.published.as_ref() != Some(&live) {
+            self.sequence += 1;
+            self.published = Some(live.clone());
+            self.server.publish(Live {
+                sequence: self.sequence,
+                timestamp: timer_loop.now(),
+                ..live
+            });
         }
     }
 }

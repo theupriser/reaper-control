@@ -116,31 +116,32 @@ fn a_region_without_length_is_not_a_song() {
 }
 
 #[test]
-fn a_link_play_starts_the_transport_and_shows_in_the_app_state() {
+fn a_link_play_starts_the_transport_and_shows_in_the_live_state() {
     let mut timer_loop = TimerLoop::new(fake(two_songs(), vec![]));
     let outcome = timer_loop.link_command(protocol::Command::Play);
     timer_loop.tick();
     assert_eq!(outcome, protocol::message::Outcome::Done);
-    assert_eq!(timer_loop.app_state().phase, protocol::Phase::Playing);
+    assert_eq!(timer_loop.live().phase, protocol::Phase::Playing);
 }
 
 #[test]
-fn a_link_seek_is_counted_from_the_start_of_the_current_song() {
+fn a_link_seek_is_counted_from_the_start_of_the_current_song_and_live_shows_the_timeline() {
     let mut timer_loop = TimerLoop::new(fake(two_songs(), vec![]));
     timer_loop.command(Input::Next);
     timer_loop.link_command(protocol::Command::Seek {
         position: 3.0,
         count_in: false,
     });
-    assert!((timer_loop.app_state().position - 3.0).abs() < 1e-9);
+    let start = timer_loop.catalog().songs[1].start;
+    assert!((timer_loop.live().position - start - 3.0).abs() < 1e-9);
 }
 
 #[test]
 fn a_link_toggle_flips_the_setting_and_a_count_in_seek_is_refused() {
     let mut timer_loop = TimerLoop::new(fake(two_songs(), vec![]));
-    let before = timer_loop.app_state().auto_resume;
+    let before = timer_loop.live().autoplay;
     timer_loop.link_command(protocol::Command::ToggleAutoResume);
-    assert_ne!(timer_loop.app_state().auto_resume, before);
+    assert_ne!(timer_loop.live().autoplay, before);
     let refused = timer_loop.link_command(protocol::Command::Seek {
         position: 1.0,
         count_in: true,
@@ -170,11 +171,19 @@ fn the_catalog_lists_the_songs_and_only_the_cues_with_a_label() {
 }
 
 #[test]
+fn live_names_the_next_song_and_has_none_after_the_last() {
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    assert_eq!(timer_loop.live().next_song, Some(1));
+    timer_loop.command(Input::Next);
+    assert_eq!(timer_loop.live().next_song, None);
+}
+
+#[test]
 fn the_current_song_is_an_index_into_the_catalog() {
     let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
-    assert_eq!(timer_loop.app_state().current_song, Some(0));
+    assert_eq!(timer_loop.live().current_song, Some(0));
     timer_loop.command(Input::Next);
-    assert_eq!(timer_loop.app_state().current_song, Some(1));
+    assert_eq!(timer_loop.live().current_song, Some(1));
 }
 
 #[test]
@@ -221,9 +230,9 @@ fn the_played_setlist_sets_the_order_and_skips_songs_the_project_lost() {
 #[test]
 fn the_performance_plays_the_setlist_order() {
     let mut timer_loop = with_setlist(FRIDAY, "friday");
-    assert_eq!(timer_loop.app_state().current_song, Some(0));
+    assert_eq!(timer_loop.live().current_song, Some(0));
     timer_loop.link_command(protocol::Command::Next);
-    assert_eq!(timer_loop.app_state().current_song, Some(1));
+    assert_eq!(timer_loop.live().current_song, Some(1));
     // The second entry is song A, which starts at the top of the timeline.
     assert_eq!(timer_loop.port_mut().position().get(), 0.0);
 }

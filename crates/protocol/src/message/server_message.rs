@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::Outcome;
-use crate::{AppState, Catalog, EventRecord, Live};
+use crate::{Catalog, EventRecord, Live};
 
 /// Extension to app.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -31,11 +31,6 @@ pub enum ServerMessage {
     EventsLost {
         /// The oldest event id still available.
         oldest_available: u64,
-    },
-    /// Pushed whenever the state changes.
-    State {
-        /// The new state.
-        state: AppState,
     },
     /// Answer to a Command.
     Ack {

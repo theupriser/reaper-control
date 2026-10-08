@@ -14,20 +14,30 @@ const song = (id: string, start: number, end: number, extra: Partial<SongInfo> =
   ...extra,
 });
 
+const songs = [song("A", 0, 100), song("B", 100, 190, { length: 80, hard_stop: true })];
+
+// `position` is seconds into the current song; the live state carries the timeline position.
 const link = (current: number | null, position = 0): LinkView => ({
   status: { Connected: { extension_version: "1" } },
-  state: {
+  live: {
+    sequence: 1,
+    timestamp: 0,
+    transport: "Playing",
+    position: (current === null ? 0 : songs[current].start) + position,
     phase: "Playing",
-    position,
-    auto_resume: false,
-    count_in_on_marker: true,
-    record_armed: false,
+    setlist_id: null,
     current_song: current,
+    next_song: current !== null && current + 1 < songs.length ? current + 1 : null,
+    autoplay: false,
+    count_in: true,
+    record_armed: false,
+    catalog_revision: 1,
+    setlist_revision: 0,
   },
   catalog: {
     revision: 1,
     setlist_revision: 0,
-    songs: [song("A", 0, 100), song("B", 100, 190, { length: 80, hard_stop: true })],
+    songs,
     cues: [
       { id: "cue-0", name: "Chorus", position: 130 },
       { id: "cue-1", name: "Outro", position: 50 },

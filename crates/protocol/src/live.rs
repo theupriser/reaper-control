@@ -20,12 +20,10 @@ pub struct Live {
     pub phase: Phase,
     /// The active setlist, if one is selected.
     pub setlist_id: Option<String>,
-    /// Entry that is playing now.
-    #[ts(type = "number | null")]
-    pub current_entry: Option<u64>,
-    /// Entry that follows.
-    #[ts(type = "number | null")]
-    pub next_entry: Option<u64>,
+    /// Index into `Catalog.songs` of the song the performance is on.
+    pub current_song: Option<u32>,
+    /// Index into `Catalog.songs` of the song that follows.
+    pub next_song: Option<u32>,
     /// "Auto-resume playback".
     pub autoplay: bool,
     /// "Count-in when pressing marker".
@@ -38,4 +36,24 @@ pub struct Live {
     /// Revision of the setlists this state belongs to.
     #[ts(type = "number")]
     pub setlist_revision: u64,
+}
+
+impl Default for Live {
+    fn default() -> Self {
+        Self {
+            sequence: 0,
+            timestamp: 0.0,
+            transport: Transport::Stopped,
+            position: 0.0,
+            phase: Phase::Idle,
+            setlist_id: None,
+            current_song: None,
+            next_song: None,
+            autoplay: true,
+            count_in: false,
+            record_armed: false,
+            catalog_revision: 0,
+            setlist_revision: 0,
+        }
+    }
 }

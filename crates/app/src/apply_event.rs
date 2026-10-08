@@ -11,7 +11,10 @@ pub fn apply_event(view: LinkView, event: LinkEvent) -> LinkView {
             status: LinkStatus::Connected { extension_version },
             ..view
         },
-        LinkEvent::State(state) => LinkView { state, ..view },
+        LinkEvent::Live(live) => LinkView {
+            live: Some(live),
+            ..view
+        },
         LinkEvent::Catalog(catalog) => LinkView { catalog, ..view },
         LinkEvent::Disconnected => LinkView::default(),
         LinkEvent::Ack { .. } => view,
@@ -21,34 +24,34 @@ pub fn apply_event(view: LinkView, event: LinkEvent) -> LinkView {
 #[cfg(test)]
 mod tests {
     use protocol::message::Outcome;
-    use protocol::{AppState, Catalog, Phase};
+    use protocol::{Catalog, Live, Phase};
 
     use super::*;
 
-    fn playing() -> AppState {
-        AppState {
+    fn playing() -> Live {
+        Live {
             phase: Phase::Playing,
             position: 4.0,
-            ..AppState::default()
+            ..Live::default()
         }
     }
 
     #[test]
-    fn connecting_then_a_state_shows_both() {
+    fn connecting_then_a_live_state_shows_both() {
         let view = apply_event(
             LinkView::default(),
             LinkEvent::Connected {
                 extension_version: "1".into(),
             },
         );
-        let view = apply_event(view, LinkEvent::State(playing()));
+        let view = apply_event(view, LinkEvent::Live(playing()));
         assert_eq!(
             view.status,
             LinkStatus::Connected {
                 extension_version: "1".into()
             }
         );
-        assert_eq!(view.state, playing());
+        assert_eq!(view.live, Some(playing()));
     }
 
     #[test]
@@ -58,9 +61,9 @@ mod tests {
             ..Catalog::default()
         };
         let view = apply_event(LinkView::default(), LinkEvent::Catalog(catalog.clone()));
-        let view = apply_event(view, LinkEvent::State(playing()));
+        let view = apply_event(view, LinkEvent::Live(playing()));
         assert_eq!(view.catalog, catalog);
-        assert_eq!(view.state, playing());
+        assert_eq!(view.live, Some(playing()));
     }
 
     #[test]
@@ -69,7 +72,7 @@ mod tests {
             status: LinkStatus::Connected {
                 extension_version: "1".into(),
             },
-            state: playing(),
+            live: Some(playing()),
             catalog: Catalog::default(),
         };
         assert_eq!(
@@ -81,7 +84,7 @@ mod tests {
     #[test]
     fn an_ack_changes_nothing() {
         let view = LinkView {
-            state: playing(),
+            live: Some(playing()),
             ..LinkView::default()
         };
         let acked = apply_event(

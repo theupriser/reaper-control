@@ -36,16 +36,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         if let Ok(event) = events.recv_timeout(Duration::from_millis(50)) {
             match event {
-                LinkEvent::State(state) if last_phase != Some(state.phase) => {
+                LinkEvent::Live(state) if last_phase != Some(state.phase) => {
                     last_phase = Some(state.phase);
                     println!(
-                        "{:>5.1}s state: {:?} at {:.2} s",
+                        "{:>5.1}s live: {:?} ({:?}) at {:.2} s",
                         start.elapsed().as_secs_f64(),
                         state.phase,
+                        state.transport,
                         state.position
                     );
                 }
-                LinkEvent::State(_) => {}
+                LinkEvent::Live(live) => println!(
+                    "{:>5.1}s   position {:.2} {:?}",
+                    start.elapsed().as_secs_f64(),
+                    live.position,
+                    live.transport
+                ),
                 other => println!("{:>5.1}s {other:?}", start.elapsed().as_secs_f64()),
             }
         }
