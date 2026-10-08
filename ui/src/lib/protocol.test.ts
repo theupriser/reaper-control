@@ -9,6 +9,7 @@ describe("AppState", () => {
       auto_resume: true,
       count_in_on_marker: false,
       record_armed: false,
+      current_song: null,
     };
     expect(state.phase).toBe("Idle");
   });

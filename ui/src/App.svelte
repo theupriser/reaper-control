@@ -7,34 +7,32 @@
   import { currentView, dispatch, onViewChange } from "./lib/ipc";
   import { screenLabel, type ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
-  import { keyIntent, performerPhase, seekCommand, type PerformerPhase, type SeekTarget } from "./lib/performer";
-  import type { AppState, Command, LinkStatus, LinkView } from "./lib/generated/protocol";
+  import { keyIntent, seekCommand, type PerformerPhase, type SeekTarget } from "./lib/performer";
+  import { performerView } from "./lib/performer-view";
+  import type { Command, LinkView } from "./lib/generated/protocol";
 
-  let appState = $state<AppState>({
-    phase: "Idle",
-    position: 0,
-    auto_resume: true,
-    count_in_on_marker: false,
-    record_armed: false,
+  let link = $state<LinkView>({
+    status: "NotRunning",
+    state: {
+      phase: "Idle",
+      position: 0,
+      auto_resume: true,
+      count_in_on_marker: false,
+      record_armed: false,
+      current_song: null,
+    },
+    catalog: { revision: 0, setlist_revision: 0, songs: [], cues: [], setlists: [] },
   });
-  let status = $state<LinkStatus>("NotRunning");
   let error = $state<string | null>(null);
   let screen = $state<ScreenId>("player");
   let performerMode = $state(false);
 
   const phases: PerformerPhase[] = ["Idle", "Playing", "Paused", "CountingIn", "HardStopped"];
   const forced = new URLSearchParams(location.search).get("phase") as PerformerPhase | null;
-  const shown = $derived(fixtureFor(forced && phases.includes(forced) ? forced : performerPhase(appState.phase)));
-  const view = $derived({
-    ...shown,
-    songPosition: forced ? shown.songPosition : appState.position,
-    totalElapsed: forced ? shown.totalElapsed : appState.position,
-    autoResume: appState.auto_resume,
-    countInOnMarker: appState.count_in_on_marker,
-    recordArmed: appState.record_armed,
-  });
+  const appState = $derived(link.state);
+  const view = $derived(forced && phases.includes(forced) ? fixtureFor(forced) : performerView(link));
 
-  const connection = $derived(connectionBadge(status));
+  const connection = $derived(connectionBadge(link.status));
 
   const send = async (command: Command) => {
     try {
@@ -59,10 +57,7 @@
   }
 
   onMount(() => {
-    const show = (next: LinkView) => {
-      appState = next.state;
-      status = next.status;
-    };
+    const show = (next: LinkView) => (link = next);
     const unlisten = onViewChange(show);
     currentView().then(show, (e) => (error = String(e)));
     return () => {

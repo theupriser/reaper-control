@@ -1,5 +1,5 @@
-use protocol::AppState;
 use protocol::message::{Outcome, ServerMessage};
+use protocol::{AppState, Catalog};
 
 /// What the app hears from the link.
 #[derive(Debug, Clone, PartialEq)]
@@ -11,6 +11,8 @@ pub enum LinkEvent {
     },
     /// The extension pushed a state.
     State(AppState),
+    /// The extension pushed the project contents.
+    Catalog(Catalog),
     /// A command was answered.
     Ack {
         /// Id returned by [`LinkClient::send`].
@@ -27,11 +29,11 @@ impl LinkEvent {
     pub(super) fn from_server(message: ServerMessage) -> Option<Self> {
         match message {
             ServerMessage::State { state } => Some(Self::State(state)),
+            ServerMessage::Catalog(catalog) => Some(Self::Catalog(catalog)),
             ServerMessage::Ack { id, outcome } => Some(Self::Ack { id, outcome }),
             ServerMessage::Welcome { .. }
             | ServerMessage::Pong
             | ServerMessage::Live(_)
-            | ServerMessage::Catalog(_)
             | ServerMessage::Event(_)
             | ServerMessage::EventsLost { .. } => None,
         }

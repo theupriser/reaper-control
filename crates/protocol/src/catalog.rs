@@ -4,7 +4,7 @@ use ts_rs::TS;
 use crate::{CueInfo, SetlistInfo, SongInfo};
 
 /// What the project contains. Sent when a revision changes or when asked for.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, TS)]
 pub struct Catalog {
     /// Raised whenever songs or cues change.
     #[ts(type = "number")]

@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 
 use link::{ClientConfig, CommandHandler, Endpoint, LinkClient, LinkEvent, LinkServer, SendError};
 use protocol::message::{ClientMessage, Outcome, PROTOCOL_VERSION, ServerMessage, encode_message};
-use protocol::{AppState, Command, Phase};
+use protocol::{AppState, Catalog, Command, Phase};
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
 type Started = (LinkServer, Arc<Mutex<Option<Endpoint>>>);
@@ -114,6 +114,26 @@ fn new_client_gets_welcome_then_the_current_state() -> TestResult {
         expect(&events, "State", |e| matches!(e, LinkEvent::State(_))),
         LinkEvent::State(playing(12.5))
     );
+    Ok(())
+}
+
+#[test]
+fn a_catalog_reaches_connected_clients_and_late_ones() -> TestResult {
+    let (server, endpoint) = started()?;
+    let (_early, early_events) = client_for(&endpoint);
+    connected(&early_events);
+    let catalog = Catalog {
+        revision: 2,
+        ..Catalog::default()
+    };
+    server.publish_catalog(catalog.clone());
+    expect(&early_events, "pushed catalog", |e| {
+        *e == LinkEvent::Catalog(catalog.clone())
+    });
+    let (_late, late_events) = client_for(&endpoint);
+    expect(&late_events, "catalog on connect", |e| {
+        *e == LinkEvent::Catalog(catalog.clone())
+    });
     Ok(())
 }
 

@@ -16,8 +16,8 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 
-use protocol::AppState;
 use protocol::message::{ServerMessage, encode_message};
+use protocol::{AppState, Catalog};
 
 use crate::Endpoint;
 use acceptor::Acceptor;
@@ -86,6 +86,16 @@ impl LinkServer {
             return;
         };
         self.shared.hub().broadcast(state, &Arc::new(frame));
+    }
+
+    /// Remember `catalog` for clients that connect later and push it to everyone now.
+    pub fn publish_catalog(&self, catalog: Catalog) {
+        let Ok(frame) = encode_message(&ServerMessage::Catalog(catalog.clone())) else {
+            return;
+        };
+        self.shared
+            .hub()
+            .broadcast_catalog(catalog, &Arc::new(frame));
     }
 
     /// Stop accepting and close every connection.

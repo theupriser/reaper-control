@@ -41,7 +41,11 @@ count_in_on_marker: boolean,
 /**
  * Recording is armed.
  */
-record_armed: boolean, };
+record_armed: boolean, 
+/**
+ * Index into the songs of the last [`crate::Catalog`] of the song the performance is on.
+ */
+current_song: number | null, };
 
 /**
  * What REAPER's transport is doing.
@@ -294,4 +298,8 @@ status: LinkStatus,
 /**
  * Last pushed state; the default while nothing has been pushed.
  */
-state: AppState, };
+state: AppState, 
+/**
+ * Last pushed catalog; empty while nothing has been pushed.
+ */
+catalog: Catalog, };

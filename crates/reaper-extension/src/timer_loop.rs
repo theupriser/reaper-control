@@ -1,11 +1,13 @@
+mod build_catalog;
 mod link_command;
 mod plan_songs;
 
 use performance::{Effect, Flags, HandOverPolicy, Input, Performance, Phase, PlannedSong};
 use protocol::message::Outcome;
-use protocol::{AppState, Command};
+use protocol::{AppState, Catalog, Command};
 use reaper_port::ReaperPort;
 
+use build_catalog::build_catalog;
 use link_command::to_input;
 use plan_songs::plan_songs;
 
@@ -19,6 +21,7 @@ pub struct TimerLoop<Port: ReaperPort> {
     songs: Vec<PlannedSong>,
     seen_change_count: u64,
     rebuilds: u64,
+    catalog: Catalog,
 }
 
 impl<Port: ReaperPort> TimerLoop<Port> {
@@ -27,12 +30,14 @@ impl<Port: ReaperPort> TimerLoop<Port> {
         let songs = plan_songs(&port.regions(), &port.markers());
         let seen_change_count = port.change_count();
         let performance = Self::fresh(&port, songs.clone());
+        let catalog = build_catalog(1, &songs, &port.regions(), &port.markers());
         Self {
             port,
             performance,
             songs,
             seen_change_count,
             rebuilds: 0,
+            catalog,
         }
     }
 
@@ -75,7 +80,16 @@ impl<Port: ReaperPort> TimerLoop<Port> {
             auto_resume: flags.autoplay,
             count_in_on_marker: flags.count_in,
             record_armed: false,
+            current_song: self
+                .performance
+                .current_index()
+                .and_then(|index| u32::try_from(index).ok()),
         }
+    }
+
+    /// The songs and cues of the project; the revision rises whenever they change.
+    pub fn catalog(&self) -> &Catalog {
+        &self.catalog
     }
 
     /// Where the performance is.
@@ -116,7 +130,14 @@ impl<Port: ReaperPort> TimerLoop<Port> {
             return;
         }
         self.seen_change_count = change_count;
-        let songs = plan_songs(&self.port.regions(), &self.port.markers());
+        let regions = self.port.regions();
+        let markers = self.port.markers();
+        let songs = plan_songs(&regions, &markers);
+        let mut catalog = build_catalog(self.catalog.revision, &songs, &regions, &markers);
+        if catalog != self.catalog {
+            catalog.revision += 1;
+            self.catalog = catalog;
+        }
         if songs != self.songs {
             self.performance = Self::fresh(&self.port, songs.clone());
             self.songs = songs;
