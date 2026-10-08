@@ -21,4 +21,5 @@ pub(super) const REQUIRED_FUNCTIONS: &[&str] = &[
     "GetProjExtState",
     "SetProjExtState",
     "MarkProjectDirty",
+    "GetProjectStateChangeCount",
 ];

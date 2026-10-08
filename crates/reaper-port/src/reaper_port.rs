@@ -14,6 +14,9 @@ pub trait ReaperPort {
     fn transport(&self) -> Transport;
     /// Whether REAPER's count-in is switched on.
     fn count_in(&self) -> bool;
+    /// Counts the edits made to the project; it changes whenever regions, markers, tempo or
+    /// ExtState may have changed, so readers can skip re-reading while it stays the same.
+    fn change_count(&self) -> u64;
     /// The regions of the project, in timeline order.
     fn regions(&self) -> Vec<Region>;
     /// The markers of the project, in timeline order.
