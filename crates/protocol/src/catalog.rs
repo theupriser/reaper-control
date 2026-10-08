@@ -12,6 +12,8 @@ pub struct Catalog {
     /// Raised whenever a setlist changes.
     #[ts(type = "number")]
     pub setlist_revision: u64,
+    /// The id the extension keeps in the project, empty while the project has none yet. It names the app's restore-only copy of the setlists.
+    pub project_id: String,
     /// Songs in playing order: the played setlist's, or timeline order without one. `Live::current_song` indexes this list.
     pub songs: Vec<SongInfo>,
     /// Every song of the project in timeline order, whatever the played setlist is.

@@ -19,6 +19,12 @@ impl ConfigStore {
         Self { file }
     }
 
+    /// Whether a config file exists.
+    #[must_use]
+    pub fn exists(&self) -> bool {
+        self.file.is_file()
+    }
+
     /// The saved config, migrated and validated; the defaults when there is no file yet.
     ///
     /// # Errors

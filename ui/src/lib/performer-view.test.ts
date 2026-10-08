@@ -37,6 +37,7 @@ const link = (current: number | null, position = 0): LinkView => ({
   catalog: {
     revision: 1,
     setlist_revision: 0,
+    project_id: "project-1",
     songs,
     project_songs: songs,
     cues: [

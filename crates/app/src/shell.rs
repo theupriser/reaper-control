@@ -5,11 +5,13 @@ use tauri::{Emitter, Manager, State};
 use std::sync::Arc;
 use std::time::Duration;
 
-use protocol::{Command, LinkView, Settings, SettingsView};
+use protocol::{Command, LinkView, SetlistTransferView, Settings, SettingsView};
 
 use crate::app_event::AppEvent;
 use crate::command_bus::CommandBus;
-use crate::config_location::{config_file, log_directory};
+use crate::config_location::{
+    config_file, legacy_config_file, legacy_setlists_directory, log_directory, mirror_directory,
+};
 use crate::config_store::ConfigStore;
 use crate::endpoint_location::{endpoint_file, fault_file};
 use crate::event_bus::EventBus;
@@ -17,12 +19,16 @@ use crate::event_logger::log_event;
 use crate::fault_file_check::FaultFileCheck;
 use crate::health_monitor::HealthMonitor;
 use crate::intent_dispatcher::IntentDispatcher;
+use crate::legacy_config_import::import_legacy_config;
 use crate::link_connection::LinkConnection;
 use crate::logging::Logging;
 use crate::metered_driver::MeteredDriver;
 use crate::midi_listener::{MidiListener, device_names};
 use crate::midi_router::MidiRouter;
+use crate::mirror_keeper::MirrorKeeper;
 use crate::notice_for_event::{link_problem, notice_for_event};
+use crate::setlist_mirror::SetlistMirror;
+use crate::setlist_transfer::SetlistTransfer;
 use crate::settings_service::SettingsService;
 use crate::system_clock::SystemClock;
 use crate::system_process_check::SystemProcessCheck;
@@ -55,6 +61,31 @@ fn save_settings(
 }
 
 #[tauri::command]
+fn current_transfer(
+    transfer: State<'_, Arc<SetlistTransfer>>,
+    link: State<'_, Arc<LinkConnection>>,
+) -> SetlistTransferView {
+    transfer.view(&link.view())
+}
+
+#[tauri::command]
+fn restore_setlists(
+    transfer: State<'_, Arc<SetlistTransfer>>,
+    link: State<'_, Arc<LinkConnection>>,
+) -> Result<usize, String> {
+    transfer.restore(&link.view())
+}
+
+#[tauri::command]
+fn import_setlists(
+    transfer: State<'_, Arc<SetlistTransfer>>,
+    link: State<'_, Arc<LinkConnection>>,
+    ids: Vec<String>,
+) -> Result<usize, String> {
+    transfer.import(&link.view(), &ids)
+}
+
+#[tauri::command]
 fn dispatch(bus: State<'_, Arc<CommandBus>>, command: Command) -> Result<(), String> {
     bus.dispatch(command).map_err(|error| error.to_string())
 }
@@ -77,6 +108,9 @@ pub fn run() {
                     let _ = notices.emit(LINK_PROBLEM, link_problem(health));
                 }
             });
+            if let Some((file, legacy)) = config_file().zip(legacy_config_file()) {
+                let _ = import_legacy_config(&ConfigStore::new(file), &legacy);
+            }
             let config = config_file()
                 .map(|file| ConfigStore::new(file).load())
                 .transpose()
@@ -94,11 +128,15 @@ pub fn run() {
                     fault_file().ok_or("the home folder is unknown")?,
                 )),
             ));
+            let mirror =
+                SetlistMirror::new(mirror_directory().ok_or("the home folder is unknown")?);
+            let keeper = MirrorKeeper::new(mirror.clone());
             let link = Arc::new(LinkConnection::start(
                 file,
                 events.clone(),
                 health.clone(),
                 move |view| {
+                    keeper.observe(&view);
                     let _ = handle.emit(VIEW_CHANGED, view);
                 },
             ));
@@ -113,6 +151,11 @@ pub fn run() {
             app.manage(Arc::new(SettingsService::new(
                 ConfigStore::new(settings_file),
                 config.clone(),
+                bus.clone(),
+            )));
+            app.manage(Arc::new(SetlistTransfer::new(
+                mirror,
+                legacy_setlists_directory(),
                 bus.clone(),
             )));
             if config.midi.enabled {
@@ -168,6 +211,9 @@ pub fn run() {
             current_problem,
             current_settings,
             save_settings,
+            current_transfer,
+            restore_setlists,
+            import_setlists,
             dispatch
         ])
         .run(tauri::generate_context!());

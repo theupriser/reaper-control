@@ -17,7 +17,7 @@
   let link = $state<LinkView>({
     status: "NotRunning",
     live: null,
-    catalog: { revision: 0, setlist_revision: 0, songs: [], project_songs: [], cues: [], setlists: [], active_setlist: null },
+    catalog: { revision: 0, setlist_revision: 0, project_id: "", songs: [], project_songs: [], cues: [], setlists: [], active_setlist: null },
   });
   let notices = $state<ShownNotice[]>([]);
   let problem = $state<string | null>(null);

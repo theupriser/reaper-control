@@ -1,6 +1,7 @@
 use performance::PlannedSong;
 use protocol::{EntryInfo, SetlistInfo};
 
+use super::project_identity;
 use super::setlist_edit::SetlistEdit;
 use reaper_port::ReaperPort;
 use setlists::{Entry, EntryId, Revision, Setlist, SetlistId};
@@ -19,6 +20,7 @@ const ACTIVE_KEY: &str = "active_setlist";
 pub(super) struct ProjectSetlists {
     setlists: Vec<SetlistInfo>,
     active: Option<String>,
+    project_id: Option<String>,
     stored_text: Option<String>,
 }
 
@@ -32,6 +34,7 @@ impl ProjectSetlists {
         Self {
             setlists: stored.into_iter().filter(Self::holds_together).collect(),
             active: Self::read_active(port),
+            project_id: project_identity::read(port),
             stored_text,
         }
     }
@@ -41,11 +44,17 @@ impl ProjectSetlists {
     pub(super) fn is_current(&self, port: &impl ReaperPort) -> bool {
         port.ext_state(SECTION, SETLISTS_KEY) == self.stored_text
             && Self::read_active(port) == self.active
+            && project_identity::read(port) == self.project_id
     }
 
     fn read_active(port: &impl ReaperPort) -> Option<String> {
         port.ext_state(SECTION, ACTIVE_KEY)
             .filter(|id| !id.is_empty())
+    }
+
+    /// The id of the project, once it has one.
+    pub(super) fn project_id(&self) -> Option<&str> {
+        self.project_id.as_deref()
     }
 
     pub(super) fn setlists(&self) -> &[SetlistInfo] {

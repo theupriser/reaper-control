@@ -67,3 +67,29 @@ fn bad_files_are_refused_with_a_reason() -> TestResult {
     std::fs::remove_dir_all(directory)?;
     Ok(())
 }
+
+#[test]
+fn the_first_start_takes_the_v1_midi_settings_once() -> TestResult {
+    use app::legacy_config_import::import_legacy_config;
+    let directory = std::env::temp_dir().join(format!("app-config-import-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&directory);
+    std::fs::create_dir_all(&directory)?;
+    let legacy = directory.join("v1.json");
+    std::fs::write(
+        &legacy,
+        r#"{"midi":{"enabled":true,"deviceName":"FootCtrl Mini","channel":3,"noteMapping":{"60":"playPause","61":"nonsense"}},"host":"127.0.0.1"}"#,
+    )?;
+    let store = ConfigStore::new(directory.join("config.json"));
+
+    assert!(import_legacy_config(&store, &directory.join("missing.json")).is_none());
+    assert!(!store.exists());
+
+    let imported = import_legacy_config(&store, &legacy).ok_or("nothing imported")?;
+    assert_eq!(imported.midi.device_name.as_deref(), Some("FootCtrl Mini"));
+    assert_eq!(imported.midi.channel, Some(3));
+    assert_eq!(store.load()?, imported);
+
+    assert!(import_legacy_config(&store, &legacy).is_none());
+    std::fs::remove_dir_all(directory)?;
+    Ok(())
+}

@@ -40,12 +40,18 @@ pub fn legacy_config_file() -> Option<PathBuf> {
     Some(legacy_directory()?.join("config.json"))
 }
 
-/// v1's data folder; `RC2_LEGACY_DIRECTORY` replaces it, for tests.
+/// v1's data folder; `RC2_LEGACY_DIRECTORY` replaces it, for tests. The installed v1 app keeps
+/// its data in `reaper-control`; `electron-reaper-control` is what a development run of v1 uses.
 fn legacy_directory() -> Option<PathBuf> {
-    match std::env::var_os("RC2_LEGACY_DIRECTORY") {
-        Some(directory) => Some(PathBuf::from(directory)),
-        None => Some(data_directory()?.join("electron-reaper-control")),
+    if let Some(directory) = std::env::var_os("RC2_LEGACY_DIRECTORY") {
+        return Some(PathBuf::from(directory));
     }
+    let data = data_directory()?;
+    let installed = data.join("reaper-control");
+    if installed.is_dir() {
+        return Some(installed);
+    }
+    Some(data.join("electron-reaper-control"))
 }
 
 #[cfg(target_os = "windows")]

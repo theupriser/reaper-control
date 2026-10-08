@@ -427,3 +427,40 @@ fn the_played_setlist_can_be_chosen_and_cleared_and_an_unknown_one_is_refused() 
     assert_eq!(timer_loop.catalog().active_setlist, None);
     assert_eq!(timer_loop.catalog().songs[0].id, "A");
 }
+
+#[test]
+fn a_project_gets_an_id_that_stays_and_is_in_the_catalog() {
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    let id = timer_loop.catalog().project_id.clone();
+    assert!(id.starts_with("project-"));
+    assert_eq!(
+        timer_loop.port_mut().ext_state("RC2", "project_id"),
+        Some(id.clone())
+    );
+    run(&mut timer_loop, 3);
+    assert_eq!(timer_loop.catalog().project_id, id);
+}
+
+#[test]
+fn the_id_v1_stored_is_adopted() {
+    let mut port = fake(two_songs(), Vec::new());
+    port.set_ext_state("ReaperControl", "ProjectId", "project-1754-abc");
+    let timer_loop = TimerLoop::new(port);
+    assert_eq!(timer_loop.catalog().project_id, "project-1754-abc");
+}
+
+#[test]
+fn the_id_v1_stored_is_adopted_from_a_saved_project_too() {
+    let mut port = fake(two_songs(), Vec::new());
+    port.set_ext_state("REAPERCONTROL", "PROJECTID", "project-1754-abc");
+    let timer_loop = TimerLoop::new(port);
+    assert_eq!(timer_loop.catalog().project_id, "project-1754-abc");
+}
+
+#[test]
+fn an_id_that_cannot_name_a_file_is_replaced() {
+    let mut port = fake(two_songs(), Vec::new());
+    port.set_ext_state("RC2", "project_id", "../escape");
+    let timer_loop = TimerLoop::new(port);
+    assert!(timer_loop.catalog().project_id.starts_with("project-"));
+}

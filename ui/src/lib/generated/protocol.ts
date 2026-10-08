@@ -199,6 +199,10 @@ revision: number,
  */
 setlist_revision: number, 
 /**
+ * The id the extension keeps in the project, empty while the project has none yet. It names the app's restore-only copy of the setlists.
+ */
+project_id: string, 
+/**
  * Songs in playing order: the played setlist's, or timeline order without one. `Live::current_song` indexes this list.
  */
 songs: Array<SongInfo>, 
@@ -391,3 +395,41 @@ devices: Array<string>,
  * The note table, read only until MIDI learn exists.
  */
 notes: Array<NoteMapping>, };
+
+/**
+ * One v1 setlist that can be brought into the project.
+ */
+export type ImportOffer = { 
+/**
+ * v1's id of the setlist.
+ */
+id: string, 
+/**
+ * Display name.
+ */
+name: string, 
+/**
+ * How many songs were found in the project.
+ */
+found: number, 
+/**
+ * Names of the songs the project does not have; they are left out.
+ */
+missing: Array<string>, };
+
+/**
+ * What can be moved into the project: the backup copy and the v1 setlists.
+ */
+export type SetlistTransferView = { 
+/**
+ * Names of the setlists in the backup copy that the project does not have.
+ */
+restorable: Array<string>, 
+/**
+ * The v1 setlists of this project that are not in it yet.
+ */
+imports: Array<ImportOffer>, 
+/**
+ * Why nothing is offered, when the project is unknown or a file is unusable.
+ */
+problem: string | null, };
