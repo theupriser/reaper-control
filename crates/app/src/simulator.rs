@@ -1,6 +1,7 @@
 //! The extension without REAPER: the same timer loop and performance rules over `FakeReaper`,
 //! with time that only moves when told to (SPEC §14, WP 4.11).
 
+mod incoming_commands;
 mod sample_project;
 mod simulator_state;
 
@@ -10,6 +11,7 @@ use std::time::Duration;
 use protocol::{Command, LinkView};
 use reaper_port::FakeReaper;
 
+use incoming_commands::IncomingCommands;
 pub use sample_project::sample_project;
 use simulator_state::{STEP_SECONDS, SimulatorState};
 
@@ -21,9 +23,12 @@ use crate::link_pipeline::LinkPipeline;
 use crate::link_view_source::LinkViewSource;
 
 /// Plays a project in memory and reports like the link would, so the whole app can be run and
-/// tested without REAPER. `advance` moves its time; nothing else does.
+/// tested without REAPER. `advance` moves its time and carries out the commands sent since the
+/// last call; nothing else does. `send` only queues, so a caller that holds a lock (the command
+/// bus does) is never called back while it holds it.
 pub struct Simulator {
     state: Mutex<SimulatorState>,
+    incoming: IncomingCommands,
     view: Arc<Mutex<LinkView>>,
 }
 
@@ -41,6 +46,7 @@ impl Simulator {
         let pipeline = LinkPipeline::new(Arc::clone(&view), events, health, on_change);
         Self {
             state: Mutex::new(SimulatorState::start(reaper, pipeline)),
+            incoming: IncomingCommands::default(),
             view,
         }
     }
@@ -50,10 +56,12 @@ impl Simulator {
         let Ok(mut state) = self.state.lock() else {
             return;
         };
+        state.run(self.incoming.take());
         let mut remaining = span.as_secs_f64();
         while remaining > 0.0 {
             let step = remaining.min(STEP_SECONDS);
             state.step(step);
+            state.run(self.incoming.take());
             remaining -= step;
         }
     }
@@ -61,8 +69,7 @@ impl Simulator {
 
 impl Driver for Simulator {
     fn send(&self, command: Command) -> Result<u64, DriverError> {
-        let mut state = self.state.lock().map_err(|_| DriverError::NotConnected)?;
-        Ok(state.command(command))
+        self.incoming.push(command).ok_or(DriverError::NotConnected)
     }
 }
 

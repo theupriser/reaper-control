@@ -15,7 +15,6 @@ pub(super) const STEP_SECONDS: f64 = 0.05;
 pub(super) struct SimulatorState {
     timer_loop: TimerLoop<FakeReaper>,
     pipeline: LinkPipeline,
-    next_command: u64,
     last_event: u64,
     sequence: u64,
     published: Option<Live>,
@@ -28,7 +27,6 @@ impl SimulatorState {
         let mut state = Self {
             timer_loop: TimerLoop::new(reaper),
             pipeline,
-            next_command: 1,
             last_event: 0,
             sequence: 0,
             published: None,
@@ -41,18 +39,17 @@ impl SimulatorState {
         state
     }
 
-    /// Carries out a command and answers it at once, as the extension does; a refusal shows up
-    /// as an event.
-    pub(super) fn command(&mut self, command: Command) -> u64 {
-        let id = self.next_command;
-        self.next_command += 1;
-        self.timer_loop.link_command(command);
-        self.pipeline.deliver(LinkEvent::Ack {
-            id,
-            outcome: Outcome::Done,
-        });
+    /// Carries out the commands that came in and answers each at once, as the extension does on
+    /// its tick; a refusal shows up as an event.
+    pub(super) fn run(&mut self, commands: Vec<(u64, Command)>) {
+        for (id, command) in commands {
+            self.timer_loop.link_command(command);
+            self.pipeline.deliver(LinkEvent::Ack {
+                id,
+                outcome: Outcome::Done,
+            });
+        }
         self.publish();
-        id
     }
 
     /// One timer tick after `span` seconds of simulated time.
