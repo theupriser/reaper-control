@@ -1,0 +1,140 @@
+//! MIDI notes become commands on the bus: mapping, channel filter, debounce, release, v1 import.
+
+use std::sync::Arc;
+use std::time::Duration;
+
+use app::app_config::AppConfig;
+use app::command_bus::CommandBus;
+use app::config_store::ConfigStore;
+use app::event_bus::EventBus;
+use app::fake_clock::FakeClock;
+use app::fake_driver::FakeDriver;
+use app::legacy_config_file::LegacyConfigFile;
+use app::midi_action::MidiAction;
+use app::midi_config::MidiConfig;
+use app::midi_router::MidiRouter;
+use app::queue_settings::QueueSettings;
+use protocol::Command;
+
+type TestResult = Result<(), Box<dyn std::error::Error>>;
+
+fn router(config: MidiConfig, playing: bool) -> (MidiRouter, Arc<FakeDriver>, Arc<FakeClock>) {
+    let driver = Arc::new(FakeDriver::default());
+    let clock = Arc::new(FakeClock::default());
+    let events = Arc::new(EventBus::default());
+    let bus = Arc::new(CommandBus::new(
+        driver.clone(),
+        events.clone(),
+        clock.clone(),
+        QueueSettings {
+            repeat_window: Duration::ZERO,
+            ..QueueSettings::default()
+        },
+    ));
+    (
+        MidiRouter::new(config, bus, events, clock.clone(), move || playing),
+        driver,
+        clock,
+    )
+}
+
+fn note_on(channel: u8, note: u8, velocity: u8) -> [u8; 3] {
+    [0x90 | channel, note, velocity]
+}
+
+#[test]
+fn a_mapped_note_sends_its_command_and_the_play_toggle_follows_the_state() {
+    let (stopped, driver, _) = router(MidiConfig::default(), false);
+    stopped.handle(&note_on(0, 51, 100));
+    stopped.handle(&note_on(0, 50, 100));
+    let (playing, running, _) = router(MidiConfig::default(), true);
+    playing.handle(&note_on(3, 50, 100));
+    assert_eq!(driver.sent(), vec![Command::Next, Command::Play]);
+    assert_eq!(running.sent(), vec![Command::Pause]);
+}
+
+#[test]
+fn releases_other_channels_unmapped_notes_and_other_messages_do_nothing() {
+    let config = MidiConfig {
+        channel: Some(2),
+        ..MidiConfig::default()
+    };
+    let (router, driver, _) = router(config, false);
+    router.handle(&note_on(2, 51, 0));
+    router.handle(&note_on(1, 51, 100));
+    router.handle(&note_on(2, 99, 100));
+    router.handle(&[0xB2, 51, 100]);
+    router.handle(&[0x92]);
+    assert_eq!(driver.sent(), Vec::<Command>::new());
+    router.handle(&note_on(2, 51, 100));
+    assert_eq!(driver.sent(), vec![Command::Next]);
+}
+
+#[test]
+fn the_same_note_inside_the_window_counts_once() {
+    let (router, driver, clock) = router(MidiConfig::default(), false);
+    router.handle(&note_on(0, 51, 100));
+    clock.advance(Duration::from_millis(150));
+    router.handle(&note_on(0, 51, 100));
+    router.handle(&note_on(0, 48, 100));
+    clock.advance(Duration::from_millis(100));
+    router.handle(&note_on(0, 51, 100));
+    assert_eq!(
+        driver.sent(),
+        vec![Command::Next, Command::Previous, Command::Next]
+    );
+}
+
+#[test]
+fn the_v1_config_gives_the_mapping_and_names_what_has_no_counterpart() -> TestResult {
+    let directory = std::env::temp_dir().join(format!("app-midi-legacy-{}", std::process::id()));
+    std::fs::create_dir_all(&directory)?;
+    let file = directory.join("config.json");
+    std::fs::write(
+        &file,
+        r#"{"reaper":{"host":"127.0.0.1"},"midi":{"enabled":true,"deviceName":"Pedal","channel":4,
+        "noteMapping":{"60":"nextRegion","61":"togglePlay","62":"somethingNew","200":"pause"}}}"#,
+    )?;
+    let (config, skipped) = LegacyConfigFile::read(&file)?.midi.into_config();
+    assert_eq!(config.device_name.as_deref(), Some("Pedal"));
+    assert_eq!(config.channel, Some(4));
+    assert_eq!(config.notes.get(&60), Some(&MidiAction::Next));
+    assert_eq!(config.notes.get(&61), Some(&MidiAction::TogglePlay));
+    assert_eq!(config.notes.len(), 2);
+    assert_eq!(skipped, vec!["200: pause", "62: somethingNew"]);
+
+    let store = ConfigStore::new(directory.join("saved.json"));
+    let mut saved = AppConfig {
+        midi: config,
+        ..AppConfig::default()
+    };
+    store.save(&saved)?;
+    assert_eq!(store.load()?, saved);
+    saved.midi.channel = Some(16);
+    assert!(store.save(&saved).is_err());
+    std::fs::remove_dir_all(&directory)?;
+    Ok(())
+}
+
+#[cfg(target_os = "macos")]
+#[test]
+fn a_note_from_a_real_midi_port_reaches_the_bus() -> TestResult {
+    use app::midi_listener::MidiListener;
+    use midir::MidiOutput;
+    use midir::os::unix::VirtualOutput;
+
+    let name = format!("RC2 test source {}", std::process::id());
+    let output = MidiOutput::new("Reaper Control test")?;
+    let mut source = output
+        .create_virtual(&name)
+        .map_err(|error| error.to_string())?;
+    let (router, driver, _) = router(MidiConfig::default(), false);
+    MidiListener::start(Arc::new(router), Some(name), Arc::default())?;
+    let deadline = std::time::Instant::now() + Duration::from_secs(10);
+    while driver.sent().is_empty() && std::time::Instant::now() < deadline {
+        source.send(&note_on(0, 51, 100))?;
+        std::thread::sleep(Duration::from_millis(300));
+    }
+    assert_eq!(driver.sent().first(), Some(&Command::Next));
+    Ok(())
+}

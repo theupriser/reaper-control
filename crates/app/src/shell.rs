@@ -5,7 +5,7 @@ use tauri::{Emitter, Manager, State};
 use std::sync::Arc;
 use std::time::Duration;
 
-use protocol::{Command, LinkView};
+use protocol::{Command, LinkView, Phase};
 
 use crate::app_event::AppEvent;
 use crate::command_bus::CommandBus;
@@ -15,6 +15,8 @@ use crate::endpoint_location::endpoint_file;
 use crate::event_bus::EventBus;
 use crate::health_monitor::HealthMonitor;
 use crate::link_connection::LinkConnection;
+use crate::midi_listener::MidiListener;
+use crate::midi_router::MidiRouter;
 use crate::system_clock::SystemClock;
 use crate::system_process_check::SystemProcessCheck;
 
@@ -55,6 +57,12 @@ pub fn run() {
                     eprintln!("command {command:?} refused: {refusal}");
                 }
                 AppEvent::LinkHealthChanged { health } => eprintln!("link health: {health:?}"),
+                AppEvent::MidiActivity {
+                    channel,
+                    note,
+                    velocity,
+                } => eprintln!("midi note {note} velocity {velocity} on channel {channel}"),
+                AppEvent::MidiDeviceChanged { device } => eprintln!("midi device: {device:?}"),
                 AppEvent::CommandAcknowledged { id } => eprintln!("command {id} done"),
                 AppEvent::CommandTimedOut { id, command } => {
                     eprintln!("command {id} ({command:?}) was not answered in time");
@@ -85,10 +93,32 @@ pub fn run() {
             ));
             let bus = Arc::new(CommandBus::new(
                 link.clone(),
-                events,
-                clock,
+                events.clone(),
+                clock.clone(),
                 config.queue.settings(),
             ));
+            if config.midi.enabled {
+                let running = link.clone();
+                let router = Arc::new(MidiRouter::new(
+                    config.midi.clone(),
+                    bus.clone(),
+                    events.clone(),
+                    clock,
+                    move || {
+                        running.view().live.is_some_and(|live| {
+                            matches!(
+                                live.phase,
+                                Phase::Playing | Phase::CountingIn | Phase::HandingOver
+                            )
+                        })
+                    },
+                ));
+                if let Err(error) =
+                    MidiListener::start(router, config.midi.device_name.clone(), events)
+                {
+                    eprintln!("midi thread failed to start: {error}");
+                }
+            }
             let watched = Arc::clone(&bus);
             let ticker = std::thread::Builder::new()
                 .name("command-timeouts".into())
