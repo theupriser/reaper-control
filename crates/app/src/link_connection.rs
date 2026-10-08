@@ -7,12 +7,12 @@ use std::thread;
 use link::{ClientConfig, Endpoint, LinkClient, SendError};
 use protocol::{Command, LinkView};
 
-use crate::apply_event::apply_event;
 use crate::driver::Driver;
 use crate::driver_error::DriverError;
 use crate::event_bus::EventBus;
 use crate::health_monitor::HealthMonitor;
-use crate::link_session::LinkSession;
+use crate::link_pipeline::LinkPipeline;
+use crate::link_view_source::LinkViewSource;
 
 /// The app's one connection to the extension, and what the UI shows about it.
 pub struct LinkConnection {
@@ -34,21 +34,14 @@ impl LinkConnection {
         let config = ClientConfig::new(move || Endpoint::read(&endpoint_file).ok());
         let (client, link_events) = LinkClient::start(config);
         let view = Arc::new(Mutex::new(LinkView::default()));
-        let shared = Arc::clone(&view);
+        let mut pipeline = LinkPipeline::new(Arc::clone(&view), events, health, on_change);
         let spawned = thread::Builder::new()
             .name("link-view".into())
             .spawn(move || {
-                let mut session = LinkSession::default();
                 for event in link_events {
-                    health.observe(&event);
-                    if let Some(announcement) = session.observe(&event) {
-                        events.publish(&announcement);
-                    }
-                    let Ok(mut guard) = shared.lock() else {
+                    if !pipeline.deliver(event) {
                         return;
-                    };
-                    *guard = apply_event(guard.clone(), event);
-                    on_change(guard.clone());
+                    }
                 }
             });
         if let Err(error) = spawned {
@@ -57,18 +50,18 @@ impl LinkConnection {
         Self { client, view }
     }
 
-    /// The current view.
-    #[must_use]
-    pub fn view(&self) -> LinkView {
+    /// Sends a command to the extension; refused while the link is down.
+    pub fn send(&self, command: Command) -> Result<(), SendError> {
+        self.client.send(command).map(|_| ())
+    }
+}
+
+impl LinkViewSource for LinkConnection {
+    fn view(&self) -> LinkView {
         self.view
             .lock()
             .map(|view| view.clone())
             .unwrap_or_default()
-    }
-
-    /// Sends a command to the extension; refused while the link is down.
-    pub fn send(&self, command: Command) -> Result<(), SendError> {
-        self.client.send(command).map(|_| ())
     }
 }
 

@@ -9,6 +9,7 @@ members = [
   "crates/protocol",
   "crates/link",
   "crates/reaper-port",
+  "crates/timer-loop",
   "crates/reaper-extension",
   "crates/app",
   "crates/architecture-tests",
@@ -37,6 +38,7 @@ projections = { path = "crates/projections" }
 protocol = { path = "crates/protocol" }
 link = { path = "crates/link" }
 reaper-port = { path = "crates/reaper-port" }
+timer-loop = { path = "crates/timer-loop" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

@@ -33,11 +33,14 @@ flowchart TB
   end
 
   port["reaper-port<br/>ReaperPort trait, FakeReaper,<br/>scenario runner (tests)"]
+  timerloop["timer-loop<br/>one step of REAPER's timer:<br/>performance, catalog, wire events"]
   arch["architecture-tests<br/>enforces who may depend on whom"]
 
   ext -- "reaper-rs (FFI)" --> reaper
   ext -- implements --> port
-  ext --> performance & catalogue & setlists & protocol & link
+  ext --> timerloop & protocol & link
+  timerloop --> port & performance & catalogue & setlists & protocol
+  app -- "simulator (RC2_SIMULATOR)" --> timerloop
   ext -- writes --> files
   link --> protocol
   app --> link & protocol
@@ -69,6 +72,7 @@ Simplified data flow while playing:
 | `reaper-port` | the interface to REAPER and a fake for tests | `performance` |
 | `protocol` | what goes over the link, and the generated TypeScript types | `shared-kernel` |
 | `link` | the socket: server, client, replay | `protocol` |
-| `reaper-extension` | everything that lives inside REAPER | REAPER, the logic crates, `link`, `protocol` |
-| `app` | the stage app shell | `link`, `protocol`, the webview, `endpoint.json` |
+| `timer-loop` | one step of REAPER's timer, over any `ReaperPort` (ADR-012) | `performance`, `catalogue`, `setlists`, `protocol`, `reaper-port` |
+| `reaper-extension` | everything that lives inside REAPER | REAPER, `timer-loop`, `link`, `protocol` |
+| `app` | the stage app shell, and the simulator (the timer loop over `FakeReaper`) | `link`, `protocol`, `timer-loop`, `reaper-port`, the webview, `endpoint.json` |
 | `architecture-tests` | the dependency rules | the manifests |

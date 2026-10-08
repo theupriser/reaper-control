@@ -13,7 +13,6 @@ mod log;
 mod safe_mode_marker;
 mod start_up;
 mod tick_watchdog;
-mod timer_loop;
 
 pub use fault::Fault;
 pub use fault_file::FaultFile;

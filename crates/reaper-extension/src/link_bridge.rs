@@ -15,7 +15,7 @@ use reaper_port::ReaperPort;
 
 use crate::journal::Journal;
 use crate::log::Log;
-use crate::timer_loop::TimerLoop;
+use timer_loop::TimerLoop;
 
 /// A quiet state is pushed again after this many seconds, so the app can tell a calm extension
 /// from a stuck one.

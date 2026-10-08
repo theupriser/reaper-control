@@ -84,7 +84,9 @@ version = "0.0.0"
 dependencies = [
  "link",
  "midir",
+ "performance",
  "protocol",
+ "reaper-port",
  "serde",
  "serde_json",
  "shared-kernel",
@@ -92,6 +94,7 @@ dependencies = [
  "tauri-build",
  "thiserror 2.0.21",
  "time",
+ "timer-loop",
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
@@ -2915,6 +2918,7 @@ dependencies = [
  "setlists",
  "shared-kernel",
  "thiserror 2.0.21",
+ "timer-loop",
 ]
 
 [[package]]
@@ -4008,6 +4012,19 @@ checksum = "7e689342a48d2ea927c87ea50cabf8594854bf940e9310208848d680d668ed85"
 dependencies = [
  "num-conv",
  "time-core",
+]
+
+[[package]]
+name = "timer-loop"
+version = "0.0.0"
+dependencies = [
+ "catalogue",
+ "performance",
+ "protocol",
+ "reaper-port",
+ "serde_json",
+ "setlists",
+ "shared-kernel",
 ]
 
 [[package]]

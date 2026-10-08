@@ -184,8 +184,7 @@ impl<Port: ReaperPort> TimerLoop<Port> {
         self.rebuilds
     }
 
-    /// The port, for the test probe.
-    #[cfg(any(test, feature = "probe"))]
+    /// The port, for the test probe and the simulator.
     pub fn port_mut(&mut self) -> &mut Port {
         &mut self.port
     }
