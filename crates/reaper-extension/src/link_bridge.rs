@@ -23,6 +23,7 @@ pub struct LinkBridge {
     commands: Receiver<Command>,
     endpoint_file: PathBuf,
     published: Option<AppState>,
+    published_revision: Option<u64>,
 }
 
 impl LinkBridge {
@@ -41,6 +42,7 @@ impl LinkBridge {
             commands,
             endpoint_file,
             published: None,
+            published_revision: None,
         })
     }
 
@@ -50,6 +52,11 @@ impl LinkBridge {
             if let Outcome::Rejected { reason } = timer_loop.link_command(command) {
                 log.line(&format!("link command {command:?} refused: {reason}"));
             }
+        }
+        let catalog = timer_loop.catalog();
+        if self.published_revision != Some(catalog.revision) {
+            self.server.publish_catalog(catalog.clone());
+            self.published_revision = Some(catalog.revision);
         }
         let state = timer_loop.app_state();
         if self.published != Some(state) {

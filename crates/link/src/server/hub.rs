@@ -2,8 +2,8 @@ use std::net::{Shutdown, TcpStream};
 use std::sync::Arc;
 use std::sync::mpsc::SyncSender;
 
-use protocol::AppState;
 use protocol::message::{PROTOCOL_VERSION, ServerMessage, encode_message};
+use protocol::{AppState, Catalog};
 
 use crate::wire::ReadError;
 
@@ -16,6 +16,7 @@ pub(super) use connected_client::Frame;
 #[derive(Default)]
 pub(super) struct Hub {
     state: AppState,
+    catalog: Option<Catalog>,
     clients: Vec<ConnectedClient>,
     next_id: u64,
 }
@@ -39,7 +40,9 @@ impl Hub {
             setlist_revision: 0,
             last_event_id: 0,
         };
-        for message in [welcome, ServerMessage::State { state: self.state }] {
+        let mut messages = vec![welcome, ServerMessage::State { state: self.state }];
+        messages.extend(self.catalog.clone().map(ServerMessage::Catalog));
+        for message in messages {
             outbox
                 .try_send(Arc::new(encode_message(&message)?))
                 .map_err(|_| ReadError::Closed)?;
@@ -60,6 +63,10 @@ impl Hub {
     /// Remember `state` and push it to everyone; a client that cannot take it at once is dropped.
     pub(super) fn broadcast(&mut self, state: AppState, frame: &Frame) {
         self.state = state;
+        self.send_to_all(frame);
+    }
+
+    fn send_to_all(&mut self, frame: &Frame) {
         self.clients.retain(|c| {
             let sent = c.outbox.try_send(Arc::clone(frame)).is_ok();
             if !sent {
@@ -67,6 +74,12 @@ impl Hub {
             }
             sent
         });
+    }
+
+    /// Remember `catalog` for clients that connect later and push it to everyone.
+    pub(super) fn broadcast_catalog(&mut self, catalog: Catalog, frame: &Frame) {
+        self.catalog = Some(catalog);
+        self.send_to_all(frame);
     }
 
     pub(super) fn close_all(&mut self) {

@@ -150,3 +150,43 @@ fn a_link_toggle_flips_the_setting_and_a_count_in_seek_is_refused() {
         protocol::message::Outcome::Rejected { .. }
     ));
 }
+
+#[test]
+fn the_catalog_lists_the_songs_and_only_the_cues_with_a_label() {
+    let markers = vec![
+        marker("Chorus", 4.0),
+        marker("!1008", 9.0),
+        marker("Bridge !length:8", 6.0),
+    ];
+    let timer_loop = TimerLoop::new(fake(two_songs(), markers));
+    let catalog = timer_loop.catalog();
+    let names: Vec<&str> = catalog.songs.iter().map(|s| s.name.as_str()).collect();
+    assert_eq!(names, ["A", "B"]);
+    let first = &catalog.songs[0];
+    assert!(first.hard_stop);
+    assert_eq!(first.length, Some(8.0));
+    let cues: Vec<&str> = catalog.cues.iter().map(|c| c.name.as_str()).collect();
+    assert_eq!(cues, ["Chorus", "Bridge !length:8"]);
+}
+
+#[test]
+fn the_current_song_is_an_index_into_the_catalog() {
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    assert_eq!(timer_loop.app_state().current_song, Some(0));
+    timer_loop.command(Input::Next);
+    assert_eq!(timer_loop.app_state().current_song, Some(1));
+}
+
+#[test]
+fn the_catalog_revision_rises_only_when_the_project_content_changes() {
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    let first = timer_loop.catalog().revision;
+    run(&mut timer_loop, 3);
+    assert_eq!(timer_loop.catalog().revision, first);
+    timer_loop
+        .port_mut()
+        .replace_regions(vec![region("A", 0.0, 10.0)]);
+    run(&mut timer_loop, 1);
+    assert_eq!(timer_loop.catalog().revision, first + 1);
+    assert_eq!(timer_loop.catalog().songs.len(), 1);
+}

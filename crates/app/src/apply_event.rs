@@ -12,6 +12,7 @@ pub fn apply_event(view: LinkView, event: LinkEvent) -> LinkView {
             ..view
         },
         LinkEvent::State(state) => LinkView { state, ..view },
+        LinkEvent::Catalog(catalog) => LinkView { catalog, ..view },
         LinkEvent::Disconnected => LinkView::default(),
         LinkEvent::Ack { .. } => view,
     }
@@ -20,7 +21,7 @@ pub fn apply_event(view: LinkView, event: LinkEvent) -> LinkView {
 #[cfg(test)]
 mod tests {
     use protocol::message::Outcome;
-    use protocol::{AppState, Phase};
+    use protocol::{AppState, Catalog, Phase};
 
     use super::*;
 
@@ -51,12 +52,25 @@ mod tests {
     }
 
     #[test]
+    fn a_catalog_is_kept_with_the_state() {
+        let catalog = Catalog {
+            revision: 3,
+            ..Catalog::default()
+        };
+        let view = apply_event(LinkView::default(), LinkEvent::Catalog(catalog.clone()));
+        let view = apply_event(view, LinkEvent::State(playing()));
+        assert_eq!(view.catalog, catalog);
+        assert_eq!(view.state, playing());
+    }
+
+    #[test]
     fn losing_the_link_forgets_the_old_state() {
         let view = LinkView {
             status: LinkStatus::Connected {
                 extension_version: "1".into(),
             },
             state: playing(),
+            catalog: Catalog::default(),
         };
         assert_eq!(
             apply_event(view, LinkEvent::Disconnected),

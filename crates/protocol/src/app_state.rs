@@ -16,6 +16,8 @@ pub struct AppState {
     pub count_in_on_marker: bool,
     /// Recording is armed.
     pub record_armed: bool,
+    /// Index into the songs of the last [`crate::Catalog`] of the song the performance is on.
+    pub current_song: Option<u32>,
 }
 
 impl Default for AppState {
@@ -26,6 +28,7 @@ impl Default for AppState {
             auto_resume: true,
             count_in_on_marker: false,
             record_armed: false,
+            current_song: None,
         }
     }
 }
