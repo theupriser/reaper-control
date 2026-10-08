@@ -98,7 +98,7 @@ reaper-control-app-v2/
 | 🟡 4.16 | Reaper Link ACL: `MessageTranslator`/`CommandTranslator`, LinkSession aggregate + health events (with cause classification) **Missing: cause classification (ReaperNotRunning, ExtensionFaulted, ... with 4.6), a `CommandTranslator` (the command is already the wire type, so none until a second form exists).** | 2.5 |
 | ⬜ 4.17 | Control context: `ControlBinding`, `IntentTranslator` (one validation path for UI/MIDI/keyboard/remote) | 2 |
 | 🟡 4.2 | Link client over `protocol`: connect via endpoint file, handshake, reconnect with back-off, resume from last event id; decorators Timeout/Metrics/Logging **Missing: Timeout/Metrics/Logging decorators, tests for replay after reconnect and the 1 s heartbeat, Windows.** | 3.5 |
-| ⬜ 4.3 | `ExtensionDriver`: state decode, version check, command send/ack | 2.5 |
+| 🟡 4.3 | `ExtensionDriver`: state decode, version check, command send/ack **Missing: a protocol mismatch looks like "REAPER not running" to the app (it needs the `ExtensionOutdated` cause of 4.6). The rest is done: `LinkConnection` is the driver (decode in `link`, ack in 4.16).** | 2.5 |
 | ⬜ 4.4 | Command queue: ordered, id'd, de-duplication of rapid repeats, per-command timeout, back-pressure | 2.5 |
 | ⬜ 4.5 | Command bus + handlers (one per Command), single dispatch entry | 2 |
 | ⬜ 4.6 | Link health model: Connected/Degraded/Lost/Dead + causes ReaperNotRunning/ExtensionNotLoaded/ExtensionOutdated/ExtensionFaulted; events | 1.5 |
