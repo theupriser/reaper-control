@@ -11,6 +11,15 @@ pub fn apply_event(view: LinkView, event: LinkEvent) -> LinkView {
             status: LinkStatus::Connected { extension_version },
             ..view
         },
+        // A state that arrives after a newer one (frames can be reordered) is stale.
+        LinkEvent::Live(live)
+            if view
+                .live
+                .as_ref()
+                .is_some_and(|shown| shown.sequence >= live.sequence) =>
+        {
+            view
+        }
         LinkEvent::Live(live) => LinkView {
             live: Some(live),
             ..view
@@ -58,6 +67,21 @@ mod tests {
             }
         );
         assert_eq!(view.live, Some(playing()));
+    }
+
+    #[test]
+    fn an_older_state_after_a_newer_one_is_ignored() {
+        let newer = Live {
+            sequence: 5,
+            ..playing()
+        };
+        let older = Live {
+            sequence: 4,
+            position: 1.0,
+            ..playing()
+        };
+        let view = apply_event(LinkView::default(), LinkEvent::Live(newer.clone()));
+        assert_eq!(apply_event(view, LinkEvent::Live(older)).live, Some(newer));
     }
 
     #[test]

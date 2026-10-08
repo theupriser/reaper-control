@@ -8,6 +8,9 @@ Status: **Proposed**. Date: 2026-10-08. Related: ADR-011, SPEC §14.5, WP 4.11, 
 ## Decision
 Move `TimerLoop` and its helpers unchanged into a new crate `timer-loop`. It may use `shared-kernel`, `performance`, `catalogue`, `setlists`, `protocol` and `reaper-port`. `reaper-extension` uses it; `app` may use it, plus `reaper-port` (for `FakeReaper`) and `performance` (for `TempoMap`).
 
+## Amendment (WP 4.12)
+`timer-loop` also holds `StatePublisher` and `QueuedCommands`, the extension's push and command-intake logic, so the extension and the app's fake extension server run one copy. For that it may use `link` (the server type only; `reaper-extension` already did).
+
 ## Cost
 - The app now sees `reaper-port` and `performance`. It uses them only to build a simulated project; the real app path still goes through `link`.
 - `TimerLoop::port_mut` is no longer limited to tests and the probe (the simulator moves its clock through it).
