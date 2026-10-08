@@ -2,12 +2,13 @@
 
 use tauri::{Emitter, Manager, State};
 
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use protocol::{Command, LinkView, SetlistTransferView, Settings, SettingsView};
 
 use crate::app_event::AppEvent;
+use crate::app_fault::AppFault;
 use crate::command_bus::CommandBus;
 use crate::config_location::{
     config_file, diagnostics_directory, legacy_config_file, legacy_setlists_directory,
@@ -31,10 +32,13 @@ use crate::midi_listener::{MidiListener, device_names};
 use crate::midi_router::MidiRouter;
 use crate::mirror_keeper::MirrorKeeper;
 use crate::notice_for_event::{link_problem, notice_for_event};
+use crate::panic_hook::install_panic_hook;
+use crate::periodic_thread::PeriodicThread;
 use crate::process_check::ProcessCheck;
 use crate::setlist_mirror::SetlistMirror;
 use crate::setlist_transfer::SetlistTransfer;
 use crate::settings_service::SettingsService;
+use crate::shutdown_sequence::ShutdownSequence;
 use crate::start_link::start_link;
 use crate::system_clock::SystemClock;
 use crate::system_process_check::SystemProcessCheck;
@@ -49,8 +53,11 @@ fn current_view(link: State<'_, Arc<dyn LinkViewSource>>) -> LinkView {
 }
 
 #[tauri::command]
-fn current_problem(health: State<'_, Arc<HealthMonitor>>) -> Option<String> {
-    link_problem(&health.health())
+fn current_problem(
+    health: State<'_, Arc<HealthMonitor>>,
+    fault: State<'_, Arc<AppFault>>,
+) -> Option<String> {
+    fault.message().or_else(|| link_problem(&health.health()))
 }
 
 #[tauri::command]
@@ -120,6 +127,13 @@ pub fn run() {
     let result = tauri::Builder::default()
         .setup(|app| {
             let handle = app.handle().clone();
+            let fault = Arc::new(AppFault::default());
+            let reporter = handle.clone();
+            let recorder = fault.clone();
+            install_panic_hook(move |panic| {
+                let _ = reporter.emit(LINK_PROBLEM, Some(recorder.record(panic)));
+            });
+            app.manage(fault);
             let file = endpoint_file().ok_or("the home folder is unknown")?;
             let events = Arc::new(EventBus::default());
             events.subscribe(log_event);
@@ -129,18 +143,15 @@ pub fn run() {
                     .join("journal.log"),
             ));
             journal.import();
+            let mut threads = Vec::new();
             let importing = journal.clone();
-            let importer = std::thread::Builder::new()
-                .name("journal-import".into())
-                .spawn(move || {
-                    loop {
-                        std::thread::sleep(Duration::from_secs(2));
-                        importing.import();
-                    }
-                });
-            if let Err(error) = importer {
-                tracing::error!(%error, "journal import thread failed to start");
-            }
+            threads.extend(PeriodicThread::start(
+                "journal-import",
+                Duration::from_secs(2),
+                move || {
+                    importing.import();
+                },
+            ));
             app.manage(journal);
             app.manage(Arc::new(DiagnosticsBundle::new(
                 log_directory(),
@@ -235,29 +246,18 @@ pub fn run() {
                 }
             }
             let watched = Arc::clone(&bus);
-            let ticker = std::thread::Builder::new()
-                .name("command-timeouts".into())
-                .spawn(move || {
-                    loop {
-                        std::thread::sleep(Duration::from_millis(500));
-                        watched.expire();
-                    }
-                });
-            if let Err(error) = ticker {
-                tracing::error!(%error, "command timeout thread failed to start");
-            }
+            threads.extend(PeriodicThread::start(
+                "command-timeouts",
+                Duration::from_millis(500),
+                move || watched.expire(),
+            ));
             let ticking = health.clone();
-            let health_ticker = std::thread::Builder::new()
-                .name("link-health".into())
-                .spawn(move || {
-                    loop {
-                        std::thread::sleep(Duration::from_secs(1));
-                        ticking.tick();
-                    }
-                });
-            if let Err(error) = health_ticker {
-                tracing::error!(%error, "link health thread failed to start");
-            }
+            threads.extend(PeriodicThread::start(
+                "link-health",
+                Duration::from_secs(1),
+                move || ticking.tick(),
+            ));
+            app.manage(Mutex::new(threads));
             app.manage(health);
             app.manage(bus);
             app.manage(link);
@@ -274,10 +274,33 @@ pub fn run() {
             export_diagnostics,
             dispatch
         ])
-        .run(tauri::generate_context!());
-    if let Err(error) = result {
-        tracing::error!(%error, "reaper control failed to start");
-        drop(logging);
-        std::process::exit(1);
-    }
+        .build(tauri::generate_context!());
+    let app = match result {
+        Ok(app) => app,
+        Err(error) => {
+            tracing::error!(%error, "reaper control failed to start");
+            drop(logging);
+            std::process::exit(1);
+        }
+    };
+    let mut logging = Some(logging);
+    app.run(move |handle, event| {
+        if let tauri::RunEvent::Exit = event {
+            let mut sequence = ShutdownSequence::default();
+            if let Some(threads) = handle.try_state::<Mutex<Vec<PeriodicThread>>>() {
+                let threads = threads
+                    .lock()
+                    .map(|mut held| std::mem::take(&mut *held))
+                    .unwrap_or_default();
+                sequence.add("background threads", move || {
+                    for thread in threads {
+                        thread.stop();
+                    }
+                });
+            }
+            let closing = logging.take();
+            sequence.add("log", move || drop(closing));
+            let _ = sequence.run();
+        }
+    });
 }
