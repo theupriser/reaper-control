@@ -4019,6 +4019,7 @@ name = "timer-loop"
 version = "0.0.0"
 dependencies = [
  "catalogue",
+ "link",
  "performance",
  "protocol",
  "reaper-port",

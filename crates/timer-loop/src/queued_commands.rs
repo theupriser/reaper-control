@@ -8,12 +8,13 @@ use protocol::message::Outcome;
 /// Runs on the link's connection threads: puts the command on the queue and answers at once. REAPER's
 /// main thread takes the commands off the queue on its next tick.
 #[derive(Debug)]
-pub(super) struct QueuedCommands {
+pub struct QueuedCommands {
     sender: Mutex<Sender<Command>>,
 }
 
 impl QueuedCommands {
-    pub(super) fn new(sender: Sender<Command>) -> Self {
+    /// A handler that puts commands on `sender`.
+    pub fn new(sender: Sender<Command>) -> Self {
         Self {
             sender: Mutex::new(sender),
         }

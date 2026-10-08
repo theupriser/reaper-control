@@ -72,7 +72,7 @@ Simplified data flow while playing:
 | `reaper-port` | the interface to REAPER and a fake for tests | `performance` |
 | `protocol` | what goes over the link, and the generated TypeScript types | `shared-kernel` |
 | `link` | the socket: server, client, replay | `protocol` |
-| `timer-loop` | one step of REAPER's timer, over any `ReaperPort` (ADR-012) | `performance`, `catalogue`, `setlists`, `protocol`, `reaper-port` |
+| `timer-loop` | one step of REAPER's timer and what is pushed to the link, over any `ReaperPort` (ADR-012) | `performance`, `catalogue`, `setlists`, `protocol`, `link`, `reaper-port` |
 | `reaper-extension` | everything that lives inside REAPER | REAPER, `timer-loop`, `link`, `protocol` |
 | `app` | the stage app shell, and the simulator (the timer loop over `FakeReaper`) | `link`, `protocol`, `timer-loop`, `reaper-port`, the webview, `endpoint.json` |
 | `architecture-tests` | the dependency rules | the manifests |

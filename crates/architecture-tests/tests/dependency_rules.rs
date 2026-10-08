@@ -67,6 +67,7 @@ const RULES: &[Rule] = &[
             "catalogue",
             "setlists",
             "protocol",
+            "link",
             "reaper-port",
         ],
         must_not_use_external: HEAVY,

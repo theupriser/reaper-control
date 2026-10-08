@@ -3,6 +3,8 @@
 pub mod app_config;
 pub mod app_event;
 pub mod apply_event;
+pub mod chaos_proxy;
+pub mod chaos_settings;
 pub mod clock;
 pub mod command_bus;
 pub mod command_check;
@@ -22,6 +24,7 @@ pub mod event_bus;
 pub mod event_logger;
 pub mod fake_clock;
 pub mod fake_driver;
+pub mod fake_extension;
 pub mod fake_fault_check;
 pub mod fake_process_check;
 pub mod fault_check;
