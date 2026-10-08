@@ -2,7 +2,7 @@
 
 use crate::link_cause::LinkCause;
 
-/// The health of the link. It only gets better through a new connection.
+/// The health of the link.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum LinkHealth {
     /// The extension answers.

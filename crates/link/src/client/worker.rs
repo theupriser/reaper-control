@@ -48,6 +48,7 @@ impl Worker {
     /// One connection from attempt to loss. True when it got past the handshake.
     fn connect_and_serve(&self) -> bool {
         let Some(endpoint) = (self.config.endpoint)() else {
+            self.reported_outdated.set(None);
             return false;
         };
         if endpoint.protocol != PROTOCOL_VERSION {

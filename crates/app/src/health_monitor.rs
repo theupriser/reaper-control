@@ -12,13 +12,14 @@ use crate::link_cause::LinkCause;
 use crate::link_health::LinkHealth;
 use crate::process_check::ProcessCheck;
 
+mod state;
+use state::State;
+
 /// How long a lost link is only "lost" before the app names a cause.
 const GRACE: Duration = Duration::from_secs(5);
 
-struct State {
-    health: LinkHealth,
-    lost_since: Duration,
-}
+/// How often the operating system is asked whether REAPER runs.
+const PROCESS_CHECK_EVERY: Duration = Duration::from_secs(5);
 
 /// Turns link events and the passing of time into `LinkHealth`.
 pub struct HealthMonitor {
@@ -29,7 +30,8 @@ pub struct HealthMonitor {
 }
 
 impl HealthMonitor {
-    /// A monitor that starts out lost, as the app has not connected yet.
+    /// A monitor that starts out lost, as the app has not connected yet. The start is not
+    /// announced: read `health()` for the first value.
     pub fn new(
         events: Arc<EventBus>,
         clock: Arc<dyn Clock>,
@@ -40,6 +42,7 @@ impl HealthMonitor {
             state: Mutex::new(State {
                 health: LinkHealth::Lost,
                 lost_since,
+                last_process_check: None,
             }),
             events,
             clock,
@@ -81,30 +84,46 @@ impl HealthMonitor {
     }
 
     /// Lets time pass: a link that stays lost gets a cause, and a cause is looked at again.
+    /// The operating system is asked outside the lock and at most every few seconds.
     pub fn tick(&self) {
         let now = self.clock.now();
+        let Some(before) = self.due_for_process_check(now) else {
+            return;
+        };
+        let running = self.processes.reaper_is_running();
         let changed = {
             let Ok(mut state) = self.state.lock() else {
                 return;
             };
-            let waiting = match state.health {
-                LinkHealth::Lost => now.saturating_sub(state.lost_since) >= GRACE,
-                LinkHealth::Dead(LinkCause::ReaperNotRunning | LinkCause::ExtensionNotLoaded) => {
-                    true
-                }
-                _ => false,
-            };
-            if !waiting {
+            if state.health != before {
                 return;
             }
-            let cause = if self.processes.reaper_is_running() {
-                LinkCause::ExtensionNotLoaded
-            } else {
-                LinkCause::ReaperNotRunning
+            let next = match (&before, running) {
+                (LinkHealth::Dead(LinkCause::ExtensionOutdated { .. }), true) => return,
+                (_, true) => LinkHealth::Dead(LinkCause::ExtensionNotLoaded),
+                (_, false) => LinkHealth::Dead(LinkCause::ReaperNotRunning),
             };
-            Self::change(&mut state, LinkHealth::Dead(cause))
+            Self::change(&mut state, next)
         };
         self.announce(changed);
+    }
+
+    /// The health to re-check against, when a cause has to be found or looked at again.
+    fn due_for_process_check(&self, now: Duration) -> Option<LinkHealth> {
+        let mut state = self.state.lock().ok()?;
+        let wanted = match state.health {
+            LinkHealth::Lost => now.saturating_sub(state.lost_since) >= GRACE,
+            LinkHealth::Dead(_) => true,
+            LinkHealth::Connected | LinkHealth::Degraded => false,
+        };
+        let recent = state
+            .last_process_check
+            .is_some_and(|last| now.saturating_sub(last) < PROCESS_CHECK_EVERY);
+        if !wanted || recent {
+            return None;
+        }
+        state.last_process_check = Some(now);
+        Some(state.health.clone())
     }
 
     fn change(state: &mut State, next: LinkHealth) -> Option<LinkHealth> {

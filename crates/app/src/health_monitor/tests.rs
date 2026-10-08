@@ -108,6 +108,13 @@ fn the_cause_follows_whether_reaper_runs() {
     setup.monitor.tick();
     assert_eq!(
         setup.monitor.health(),
+        LinkHealth::Dead(LinkCause::ReaperNotRunning),
+        "asked again too soon"
+    );
+    setup.clock.advance(Duration::from_secs(5));
+    setup.monitor.tick();
+    assert_eq!(
+        setup.monitor.health(),
         LinkHealth::Dead(LinkCause::ExtensionNotLoaded)
     );
     setup.monitor.tick();
@@ -122,6 +129,7 @@ fn another_protocol_is_dead_at_once_and_a_connection_ends_it() {
         setup.monitor.health(),
         LinkHealth::Dead(LinkCause::ExtensionOutdated { found: 0 })
     );
+    setup.processes.set_running(true);
     setup.clock.advance(Duration::from_secs(60));
     setup.monitor.tick();
     assert_eq!(
@@ -130,4 +138,16 @@ fn another_protocol_is_dead_at_once_and_a_connection_ends_it() {
     );
     setup.monitor.observe(&connected());
     assert_eq!(setup.monitor.health(), LinkHealth::Connected);
+}
+
+#[test]
+fn an_outdated_extension_is_replaced_by_reaper_not_running_when_reaper_quits() {
+    let setup = setup();
+    setup.monitor.observe(&LinkEvent::Outdated { found: 0 });
+    setup.clock.advance(Duration::from_secs(60));
+    setup.monitor.tick();
+    assert_eq!(
+        setup.monitor.health(),
+        LinkHealth::Dead(LinkCause::ReaperNotRunning)
+    );
 }

@@ -87,11 +87,21 @@ pub fn run() {
                     loop {
                         std::thread::sleep(Duration::from_millis(500));
                         watched.expire();
-                        health.tick();
                     }
                 });
             if let Err(error) = ticker {
                 eprintln!("command timeout thread failed to start: {error}");
+            }
+            let health_ticker = std::thread::Builder::new()
+                .name("link-health".into())
+                .spawn(move || {
+                    loop {
+                        std::thread::sleep(Duration::from_secs(1));
+                        health.tick();
+                    }
+                });
+            if let Err(error) = health_ticker {
+                eprintln!("link health thread failed to start: {error}");
             }
             app.manage(bus);
             app.manage(link);
