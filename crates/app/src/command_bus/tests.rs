@@ -4,6 +4,7 @@ use std::time::Duration;
 use protocol::Command;
 
 use super::*;
+use crate::command_refusal::CommandRefusal;
 use crate::fake_clock::FakeClock;
 use crate::fake_driver::FakeDriver;
 
@@ -191,4 +192,29 @@ fn a_command_in_flight_when_the_link_is_lost_is_still_reported_when_it_times_out
             .iter()
             .any(|e| matches!(e, AppEvent::CommandTimedOut { .. }))
     );
+}
+
+#[test]
+fn a_command_that_can_never_be_right_is_refused_before_the_driver() {
+    let driver = Arc::new(FakeDriver::default());
+    let events = Arc::new(EventBus::default());
+    let seen = recorded(&events);
+    let (_clock, bus) = bus_with(&driver, events);
+    let command = Command::Seek {
+        position: f64::NAN,
+        count_in: false,
+    };
+
+    assert_eq!(
+        bus.dispatch(command),
+        Err(DispatchError::Invalid(CommandRefusal::InvalidPosition))
+    );
+    assert!(driver.sent().is_empty());
+    assert!(matches!(
+        seen.lock()
+            .map(|seen| seen.clone())
+            .unwrap_or_default()
+            .as_slice(),
+        [AppEvent::CommandInvalid { .. }]
+    ));
 }

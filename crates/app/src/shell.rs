@@ -48,6 +48,9 @@ pub fn run() {
                 AppEvent::CommandQueueFull(command) => {
                     eprintln!("command {command:?} refused: too many commands are waiting");
                 }
+                AppEvent::CommandInvalid { command, refusal } => {
+                    eprintln!("command {command:?} refused: {refusal}");
+                }
                 AppEvent::CommandAcknowledged { id } => eprintln!("command {id} done"),
                 AppEvent::CommandTimedOut { id, command } => {
                     eprintln!("command {id} ({command:?}) was not answered in time");
