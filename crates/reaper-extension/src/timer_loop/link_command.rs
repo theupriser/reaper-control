@@ -30,6 +30,8 @@ pub(super) fn to_input(
             enabled: !flags.count_in,
         }),
         Command::ToggleRecordArm => Err("recording is not wired yet"),
-        Command::SaveSetlist { .. } => Err("not a performance command"),
+        Command::SaveSetlist { .. } | Command::SetActiveSetlist { .. } => {
+            Err("not a performance command")
+        }
     }
 }

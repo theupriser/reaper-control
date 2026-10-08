@@ -97,6 +97,13 @@ impl<Port: ReaperPort> TimerLoop<Port> {
             self.refresh_if_changed();
             return self.outcome(saved);
         }
+        if let Command::SetActiveSetlist { id } = &command {
+            let chosen = self
+                .project_setlists
+                .set_active(&mut self.port, id.as_deref());
+            self.refresh_if_changed();
+            return self.outcome(chosen);
+        }
         let start = self.song_start();
         match to_input(command, start, self.performance.flags()) {
             Ok(input) => {

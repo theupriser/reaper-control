@@ -1,5 +1,6 @@
 //! Connects to a running extension and prints what it pushes. Each extra argument is a command
 //! (`play`, `pause`, `next`, `previous`, `restart`), sent one second apart.
+//! `active:<id>` (or `active:` for none) chooses the played setlist.
 //! `save:<id>:<name>:<expected revision>:<song id>,<song id>` stores a setlist.
 //! `cargo run -p link --example send_command -- <resource directory>/RC2/endpoint.json play next`
 
@@ -21,9 +22,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "next" => Command::Next,
             "previous" => Command::Previous,
             "restart" => Command::RestartSong,
-            other => match other.strip_prefix("save:") {
-                Some(specification) => save_command(specification)?,
-                None => return Err(format!("unknown command {other}").into()),
+            other => match other.strip_prefix("active:") {
+                Some(id) => Command::SetActiveSetlist {
+                    id: (!id.is_empty()).then(|| id.to_owned()),
+                },
+                None => match other.strip_prefix("save:") {
+                    Some(specification) => save_command(specification)?,
+                    None => return Err(format!("unknown command {other}").into()),
+                },
             },
         };
         commands.push(command);

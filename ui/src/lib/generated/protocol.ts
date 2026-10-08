@@ -32,7 +32,11 @@ entries: Array<EntryInfo>,
 /**
  * The revision of the setlist the edit was made on.
  */
-expected_revision: number, } };
+expected_revision: number, } } | { "SetActiveSetlist": { 
+/**
+ * Identity of the setlist, if any.
+ */
+id: string | null, } };
 
 /**
  * What REAPER's transport is doing.
