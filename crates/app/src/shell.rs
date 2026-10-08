@@ -19,10 +19,12 @@ use crate::link_connection::LinkConnection;
 use crate::logging::Logging;
 use crate::midi_listener::MidiListener;
 use crate::midi_router::MidiRouter;
+use crate::notice_for_event::notice_for_event;
 use crate::system_clock::SystemClock;
 use crate::system_process_check::SystemProcessCheck;
 
 const VIEW_CHANGED: &str = "link-view";
+const NOTICE: &str = "notice";
 
 #[tauri::command]
 fn current_view(link: State<'_, Arc<LinkConnection>>) -> LinkView {
@@ -43,6 +45,12 @@ pub fn run() {
             let file = endpoint_file().ok_or("the home folder is unknown")?;
             let events = Arc::new(EventBus::default());
             events.subscribe(log_event);
+            let notices = handle.clone();
+            events.subscribe(move |event| {
+                if let Some(notice) = notice_for_event(event) {
+                    let _ = notices.emit(NOTICE, notice);
+                }
+            });
             let config = config_file()
                 .map(|file| ConfigStore::new(file).load())
                 .transpose()

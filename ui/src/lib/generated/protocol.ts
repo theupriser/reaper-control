@@ -302,3 +302,29 @@ live: Live | null,
  * Last pushed catalog; empty while nothing has been pushed.
  */
 catalog: Catalog, };
+
+/**
+ * How much a notice matters to the person looking at the screen.
+ */
+export type NoticeLevel = "Info" | "Warning" | "Error";
+
+/**
+ * A short message for the screen. A newer notice with the same `key` replaces the older one.
+ */
+export type Notice = { 
+/**
+ * What the notice is about, for example `link` or `command`.
+ */
+key: string, 
+/**
+ * How much it matters.
+ */
+level: NoticeLevel, 
+/**
+ * What happened, in a few words.
+ */
+title: string, 
+/**
+ * What it means or what to do.
+ */
+text: string, };
