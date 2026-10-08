@@ -7,6 +7,9 @@ use crate::InvalidValue;
 pub struct Bpm(f64);
 
 impl Bpm {
+    /// The tempo to fall back on when nothing better is known.
+    pub const FALLBACK: Self = Self(120.0);
+
     /// Creates a value; rejects NaN, infinities, zero and negatives.
     pub fn new(value: f64) -> Result<Self, InvalidValue> {
         if !value.is_finite() {
