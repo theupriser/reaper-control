@@ -15,6 +15,10 @@ use reaper_port::ReaperPort;
 
 use crate::log::Log;
 use crate::timer_loop::TimerLoop;
+
+/// A quiet state is pushed again after this many seconds, so the app can tell a calm extension
+/// from a stuck one.
+const HEARTBEAT_SECONDS: f64 = 1.0;
 use queued_commands::QueuedCommands;
 
 /// The running link and the endpoint file that tells the app where to find it.
@@ -24,6 +28,7 @@ pub struct LinkBridge {
     endpoint_file: PathBuf,
     published: Option<Live>,
     sequence: u64,
+    published_at: f64,
     published_revisions: Option<(u64, u64)>,
 }
 
@@ -44,6 +49,7 @@ impl LinkBridge {
             endpoint_file,
             published: None,
             sequence: 0,
+            published_at: 0.0,
             published_revisions: None,
         })
     }
@@ -55,6 +61,9 @@ impl LinkBridge {
                 log.line(&format!("link command {command:?} refused: {reason}"));
             }
         }
+        for event in timer_loop.take_events() {
+            self.server.publish_event(event);
+        }
         let catalog = timer_loop.catalog();
         let revisions = (catalog.revision, catalog.setlist_revision);
         if self.published_revisions != Some(revisions) {
@@ -62,12 +71,14 @@ impl LinkBridge {
             self.published_revisions = Some(revisions);
         }
         let live = timer_loop.live();
-        if self.published.as_ref() != Some(&live) {
+        let now = timer_loop.now();
+        if self.published.as_ref() != Some(&live) || now - self.published_at >= HEARTBEAT_SECONDS {
             self.sequence += 1;
             self.published = Some(live.clone());
+            self.published_at = now;
             self.server.publish(Live {
                 sequence: self.sequence,
-                timestamp: timer_loop.now(),
+                timestamp: now,
                 ..live
             });
         }

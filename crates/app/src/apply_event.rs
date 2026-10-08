@@ -17,7 +17,8 @@ pub fn apply_event(view: LinkView, event: LinkEvent) -> LinkView {
         },
         LinkEvent::Catalog(catalog) => LinkView { catalog, ..view },
         LinkEvent::Disconnected => LinkView::default(),
-        LinkEvent::Ack { .. } => view,
+        // The UI shows the state, not the event log.
+        LinkEvent::Ack { .. } | LinkEvent::Event(_) | LinkEvent::EventsLost { .. } => view,
     }
 }
 

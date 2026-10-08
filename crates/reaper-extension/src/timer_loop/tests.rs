@@ -275,3 +275,42 @@ fn editing_the_setlist_raises_its_revision_and_leaves_the_content_revision_alone
     // The songs listed changed with the order, so the content revision moved too.
     assert_eq!(timer_loop.catalog().revision, content + 1);
 }
+
+#[test]
+fn what_the_performance_does_is_handed_out_once_in_order() {
+    use protocol::WireEvent;
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    timer_loop.command(Input::Play);
+    assert_eq!(
+        timer_loop.take_events(),
+        vec![WireEvent::PerformanceStarted]
+    );
+    assert_eq!(timer_loop.take_events(), Vec::new());
+}
+
+#[test]
+fn a_refused_link_command_becomes_an_event() {
+    use protocol::{Command, WireEvent};
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    timer_loop.link_command(Command::ToggleRecordArm);
+    assert!(matches!(
+        timer_loop.take_events().as_slice(),
+        [WireEvent::CommandRejected { .. }]
+    ));
+}
+
+#[test]
+fn a_hand_over_is_reported_when_a_song_ends() {
+    use protocol::WireEvent;
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    timer_loop.command(Input::Play);
+    timer_loop.take_events();
+    run(&mut timer_loop, 220);
+    let events = timer_loop.take_events();
+    assert!(
+        events
+            .iter()
+            .any(|event| matches!(event, WireEvent::HandOverStarted { .. })),
+        "{events:?}"
+    );
+}

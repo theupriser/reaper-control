@@ -1,3 +1,4 @@
+use std::cell::Cell;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::Sender;
@@ -16,6 +17,7 @@ pub(super) struct Worker {
     pub(super) commands: CommandQueue,
     pub(super) connected: Arc<AtomicBool>,
     pub(super) stop: Arc<AtomicBool>,
+    pub(super) last_event_id: Cell<Option<u64>>,
 }
 
 impl Worker {
@@ -48,9 +50,18 @@ impl Worker {
             return false;
         };
         let handshake = Handshake { stop: &self.stop };
-        let Some(version) = handshake.perform(&mut link, endpoint.token) else {
+        let Some((version, welcomed_last)) =
+            handshake.perform(&mut link, endpoint.token, self.last_event_id.get())
+        else {
             return false;
         };
+        if self
+            .last_event_id
+            .get()
+            .is_some_and(|seen| seen > welcomed_last)
+        {
+            self.last_event_id.set(Some(welcomed_last));
+        }
         self.commands.discard();
         self.connected.store(true, Ordering::SeqCst);
         let _ = self.events.send(LinkEvent::Connected {
@@ -62,6 +73,8 @@ impl Worker {
             queue: &self.commands,
             events: &self.events,
             stop: &self.stop,
+            last_event_id: &self.last_event_id,
+            welcomed_last,
         }
         .run();
         true

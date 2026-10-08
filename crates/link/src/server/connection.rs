@@ -6,6 +6,7 @@ use super::hub::Frame;
 use super::shared::Shared;
 use crate::wire::{MessageReader, ReadError};
 
+mod admitted;
 mod client_writer;
 mod command_session;
 mod handshake;
@@ -37,16 +38,18 @@ impl Connection<'_> {
             token: &self.shared.token,
             stop: &self.shared.stop,
         };
-        if !handshake.accepts(&mut reader)? {
+        let Some(admitted) = handshake.admit(&mut reader)? else {
             return Ok(());
-        }
+        };
 
         let (outbox, inbox) = sync_channel::<Frame>(OUTBOX);
         let writer = ClientWriter::spawn(stream.try_clone()?, inbox)?;
-        let id = self
-            .shared
-            .hub()
-            .register(&self.shared.extension_version, stream, &outbox)?;
+        let id = self.shared.hub().register(
+            &self.shared.extension_version,
+            admitted.resume_from,
+            stream,
+            &outbox,
+        )?;
         let result = CommandSession {
             shared: self.shared,
             outbox: &outbox,

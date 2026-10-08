@@ -2,16 +2,21 @@ mod build_catalog;
 mod link_command;
 mod plan_songs;
 mod project_setlists;
+mod wire_event;
 
 use performance::{Effect, Flags, HandOverPolicy, Input, Performance, Phase, PlannedSong};
 use protocol::message::Outcome;
-use protocol::{Catalog, Command, Live, Transport};
+use protocol::{Catalog, Command, Live, Transport, WireEvent};
 use reaper_port::{Marker, ReaperPort, Region};
 
 use build_catalog::build_catalog;
 use link_command::to_input;
 use plan_songs::plan_songs;
 use project_setlists::ProjectSetlists;
+use wire_event::to_wire_event;
+
+/// Events nobody has collected yet; the oldest go first when a link never collects them.
+const PENDING_EVENTS: usize = 1024;
 
 /// One step of REAPER's timer: read the clock and the play position, step the performance, carry
 /// out what it asks for. Generic over the port, so the same code runs against REAPER and against
@@ -25,6 +30,7 @@ pub struct TimerLoop<Port: ReaperPort> {
     seen_change_count: u64,
     rebuilds: u64,
     catalog: Catalog,
+    pending_events: Vec<WireEvent>,
 }
 
 impl<Port: ReaperPort> TimerLoop<Port> {
@@ -50,6 +56,7 @@ impl<Port: ReaperPort> TimerLoop<Port> {
             seen_change_count,
             rebuilds: 0,
             catalog,
+            pending_events: Vec::new(),
         }
     }
 
@@ -77,9 +84,14 @@ impl<Port: ReaperPort> TimerLoop<Port> {
                 self.command(input);
                 Outcome::Done
             }
-            Err(reason) => Outcome::Rejected {
-                reason: reason.into(),
-            },
+            Err(reason) => {
+                self.record(WireEvent::CommandRejected {
+                    reason: reason.into(),
+                });
+                Outcome::Rejected {
+                    reason: reason.into(),
+                }
+            }
         }
     }
 
@@ -109,6 +121,11 @@ impl<Port: ReaperPort> TimerLoop<Port> {
             setlist_revision: self.catalog.setlist_revision,
             ..Live::default()
         }
+    }
+
+    /// What happened since the last call, oldest first.
+    pub fn take_events(&mut self) -> Vec<WireEvent> {
+        std::mem::take(&mut self.pending_events)
     }
 
     /// REAPER's clock in seconds.
@@ -200,8 +217,18 @@ impl<Port: ReaperPort> TimerLoop<Port> {
         self.catalog = catalog;
     }
 
+    fn record(&mut self, event: WireEvent) {
+        if self.pending_events.len() >= PENDING_EVENTS {
+            self.pending_events.remove(0);
+        }
+        self.pending_events.push(event);
+    }
+
     fn apply(&mut self, input: Input) {
         let output = self.performance.step(input);
+        for event in output.events {
+            self.record(to_wire_event(event));
+        }
         for effect in output.effects {
             match effect {
                 Effect::Play => self.port.play(),

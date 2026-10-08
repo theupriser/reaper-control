@@ -15,6 +15,12 @@ pub struct EventLog {
     ring: VecDeque<EventRecord>,
 }
 
+impl Default for EventLog {
+    fn default() -> Self {
+        Self::new(1024)
+    }
+}
+
 impl EventLog {
     /// A log that keeps the newest `capacity` events (at least one).
     pub fn new(capacity: usize) -> Self {

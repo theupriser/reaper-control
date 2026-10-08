@@ -1,3 +1,4 @@
+use std::cell::Cell;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::Sender;
 
@@ -21,6 +22,8 @@ pub(super) struct Session<'a> {
     pub(super) queue: &'a CommandQueue,
     pub(super) events: &'a Sender<LinkEvent>,
     pub(super) stop: &'a AtomicBool,
+    pub(super) last_event_id: &'a Cell<Option<u64>>,
+    pub(super) welcomed_last: u64,
 }
 
 impl Session<'_> {
@@ -34,6 +37,7 @@ impl Session<'_> {
                 Some(message) => {
                     self.heartbeat.heard();
                     if let Some(event) = LinkEvent::from_server(message) {
+                        self.note(&event)?;
                         let _ = self.events.send(event);
                     }
                 }
@@ -50,6 +54,21 @@ impl Session<'_> {
                     .send(&ClientMessage::Command { id, command })
                     .ok_or(ReadError::Closed)?;
             }
+        }
+        Ok(())
+    }
+
+    /// Remember how far the events go, and ask for the catalog again when some were lost.
+    fn note(&mut self, event: &LinkEvent) -> Result<(), ReadError> {
+        match event {
+            LinkEvent::Event(record) => self.last_event_id.set(Some(record.id)),
+            LinkEvent::EventsLost { .. } => {
+                self.last_event_id.set(Some(self.welcomed_last));
+                self.link
+                    .send(&ClientMessage::GetCatalog)
+                    .ok_or(ReadError::Closed)?;
+            }
+            _ => {}
         }
         Ok(())
     }
