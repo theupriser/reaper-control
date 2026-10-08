@@ -3,11 +3,12 @@
   import ComingSoon from "./components/ComingSoon.svelte";
   import PerformerScreen from "./components/PerformerScreen.svelte";
   import Sidebar from "./components/Sidebar.svelte";
-  import { currentState, dispatch } from "./lib/ipc";
+  import { connectionBadge } from "./lib/connection";
+  import { currentView, dispatch, onViewChange } from "./lib/ipc";
   import { screenLabel, type ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
   import { keyIntent, performerPhase, seekCommand, type PerformerPhase, type SeekTarget } from "./lib/performer";
-  import type { AppState, Command } from "./lib/generated/protocol";
+  import type { AppState, Command, LinkStatus, LinkView } from "./lib/generated/protocol";
 
   let appState = $state<AppState>({
     phase: "Idle",
@@ -16,6 +17,7 @@
     count_in_on_marker: false,
     record_armed: false,
   });
+  let status = $state<LinkStatus>("NotRunning");
   let error = $state<string | null>(null);
   let screen = $state<ScreenId>("player");
   let performerMode = $state(false);
@@ -32,11 +34,11 @@
     recordArmed: appState.record_armed,
   });
 
-  const connection = { label: "Fake performance", detail: "no REAPER link yet", tone: "warn" } as const;
+  const connection = $derived(connectionBadge(status));
 
   const send = async (command: Command) => {
     try {
-      appState = await dispatch(command);
+      await dispatch(command);
       error = null;
     } catch (e) {
       error = String(e);
@@ -56,12 +58,16 @@
     else toggleAutoResume();
   }
 
-  onMount(async () => {
-    try {
-      appState = await currentState();
-    } catch (e) {
-      error = String(e);
-    }
+  onMount(() => {
+    const show = (next: LinkView) => {
+      appState = next.state;
+      status = next.status;
+    };
+    const unlisten = onViewChange(show);
+    currentView().then(show, (e) => (error = String(e)));
+    return () => {
+      unlisten.then((stop) => stop());
+    };
   });
 </script>
 
