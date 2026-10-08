@@ -6,8 +6,13 @@ export const dispatch = (command: Command): Promise<void> => invoke<void>("dispa
 
 export const currentView = (): Promise<LinkView> => invoke<LinkView>("current_view");
 
+export const currentProblem = (): Promise<string | null> => invoke<string | null>("current_problem");
+
 export const onViewChange = (handler: (view: LinkView) => void): Promise<UnlistenFn> =>
   listen<LinkView>("link-view", (event) => handler(event.payload));
 
 export const onNotice = (handler: (notice: Notice) => void): Promise<UnlistenFn> =>
   listen<Notice>("notice", (event) => handler(event.payload));
+
+export const onLinkProblem = (handler: (problem: string | null) => void): Promise<UnlistenFn> =>
+  listen<string | null>("link-problem", (event) => handler(event.payload));

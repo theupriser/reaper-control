@@ -5,7 +5,7 @@
   import PerformerScreen from "./components/PerformerScreen.svelte";
   import Sidebar from "./components/Sidebar.svelte";
   import { connectionBadge } from "./lib/connection";
-  import { currentView, dispatch, onNotice, onViewChange } from "./lib/ipc";
+  import { currentProblem, currentView, dispatch, onLinkProblem, onNotice, onViewChange } from "./lib/ipc";
   import { addNotice, dismissNotice, expireNotices, type ShownNotice } from "./lib/notices";
   import { screenLabel, type ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
@@ -19,6 +19,7 @@
     catalog: { revision: 0, setlist_revision: 0, songs: [], project_songs: [], cues: [], setlists: [], active_setlist: null },
   });
   let notices = $state<ShownNotice[]>([]);
+  let problem = $state<string | null>(null);
   let error = $state<string | null>(null);
   let screen = $state<ScreenId>("player");
   let performerMode = $state(false);
@@ -26,9 +27,9 @@
   const phases: PerformerPhase[] = ["Idle", "Playing", "Paused", "CountingIn", "HardStopped"];
   const forced = new URLSearchParams(location.search).get("phase") as PerformerPhase | null;
   const live = $derived(link.live);
-  const view = $derived(forced && phases.includes(forced) ? fixtureFor(forced) : performerView(link));
+  const view = $derived(forced && phases.includes(forced) ? fixtureFor(forced) : performerView(link, problem));
 
-  const connection = $derived(connectionBadge(link.status));
+  const connection = $derived(connectionBadge(link.status, problem));
 
   const send = async (command: Command) => {
     try {
@@ -62,10 +63,13 @@
     const unlisten = onViewChange(show);
     currentView().then(show, (e) => (error = String(e)));
     const unlistenNotice = onNotice((notice) => (notices = addNotice(notices, notice, Date.now())));
+    currentProblem().then((now) => (problem = now), (e) => (error = String(e)));
+    const unlistenProblem = onLinkProblem((next) => (problem = next));
     const sweep = setInterval(() => (notices = expireNotices(notices, Date.now())), 500);
     return () => {
       unlisten.then((stop) => stop());
       unlistenNotice.then((stop) => stop());
+      unlistenProblem.then((stop) => stop());
       clearInterval(sweep);
     };
   });

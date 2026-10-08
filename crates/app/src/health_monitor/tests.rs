@@ -190,3 +190,21 @@ fn a_fault_left_behind_is_ignored_while_reaper_is_not_running() {
         LinkHealth::Dead(LinkCause::ReaperNotRunning)
     );
 }
+
+#[test]
+fn an_extension_that_reports_a_fault_while_still_answering_is_dead() {
+    let setup = setup();
+    setup.monitor.observe(&connected());
+    setup.clock.advance(Duration::from_secs(5));
+    setup.monitor.tick();
+    assert_eq!(setup.monitor.health(), LinkHealth::Connected);
+    setup.faults.set_reason(Some("crashed"));
+    setup.clock.advance(Duration::from_secs(5));
+    setup.monitor.tick();
+    assert_eq!(
+        setup.monitor.health(),
+        LinkHealth::Dead(LinkCause::ExtensionFaulted {
+            reason: "crashed".into()
+        })
+    );
+}

@@ -56,6 +56,15 @@ pub fn notice_for_event(event: &AppEvent) -> Option<Notice> {
     }
 }
 
+/// What is wrong with the link, in a few words for the sidebar; `None` while the link works.
+#[must_use]
+pub fn link_problem(health: &LinkHealth) -> Option<String> {
+    match health {
+        LinkHealth::Connected | LinkHealth::Degraded => None,
+        _ => Some(health_notice(health).title),
+    }
+}
+
 fn health_notice(health: &LinkHealth) -> Notice {
     let (level, title, text) = match health {
         LinkHealth::Connected => (NoticeLevel::Info, "Connected to REAPER", "The link works."),

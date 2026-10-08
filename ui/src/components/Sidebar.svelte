@@ -10,7 +10,7 @@
     active: ScreenId;
     onSelect: (id: ScreenId) => void;
     onPerformer: () => void;
-    connection: { label: string; detail: string; tone: "ok" | "warn" };
+    connection: { label: string; detail: string; tone: "ok" | "error" };
   } = $props();
 </script>
 
@@ -139,8 +139,8 @@
   .dot.ok {
     background: var(--green);
   }
-  .dot.warn {
-    background: var(--amber);
+  .dot.error {
+    background: var(--red);
   }
   .detail {
     font-size: 13px;

@@ -1,6 +1,7 @@
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::sync::atomic::{AtomicBool, Ordering};
 
+use crate::fault_file::FaultFile;
 use crate::log::Log;
 
 /// Set once when anything inside the extension panics. From then on the extension does nothing
@@ -44,11 +45,12 @@ impl Fault {
     }
 
     /// Makes every panic anywhere in the process, also on our own threads, trip this fault and
-    /// log where it happened (ADR-009).
-    pub fn install_panic_hook(&'static self, log: &'static Log) {
+    /// log where it happened (ADR-009). The reason is also left in `faults` for the app.
+    pub fn install_panic_hook(&'static self, log: &'static Log, faults: &'static FaultFile) {
         std::panic::set_hook(Box::new(move |info| {
             self.trip();
             log.line(&format!("PANIC, extension faulted: {info}"));
+            let _ = faults.report("the extension crashed and switched itself off");
         }));
     }
 }

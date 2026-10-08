@@ -1,6 +1,6 @@
 use protocol::{Command, NoticeLevel};
 
-use super::notice_for_event;
+use super::{link_problem, notice_for_event};
 use crate::app_event::AppEvent;
 use crate::intent::Intent;
 use crate::intent_refusal::IntentRefusal;
@@ -69,5 +69,17 @@ fn a_faulted_extension_says_why_it_turned_itself_off() {
             "The extension turned itself off".to_owned(),
             "Safe mode".to_owned()
         ))
+    );
+}
+
+#[test]
+fn the_sidebar_names_the_problem_only_while_the_link_is_down() {
+    assert_eq!(link_problem(&LinkHealth::Connected), None);
+    assert_eq!(link_problem(&LinkHealth::Degraded), None);
+    assert_eq!(
+        link_problem(&LinkHealth::Dead(LinkCause::ExtensionFaulted {
+            reason: "safe mode".into()
+        })),
+        Some("The extension turned itself off".to_owned())
     );
 }

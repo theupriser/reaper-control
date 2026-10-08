@@ -5,6 +5,7 @@ use reaper_medium::ControlSurface;
 
 use super::reaper_rs_adapter::ReaperRsAdapter;
 use crate::fault::Fault;
+use crate::fault_file::FaultFile;
 use crate::link_bridge::LinkBridge;
 use crate::log::Log;
 use crate::tick_watchdog::{TickWatchdog, Verdict};
@@ -16,6 +17,7 @@ const HEARTBEAT_EVERY: u64 = 300;
 #[derive(Debug)]
 pub(super) struct Surface {
     fault: &'static Fault,
+    faults: &'static FaultFile,
     log: &'static Log,
     #[cfg_attr(not(feature = "fault-injection"), allow(dead_code))]
     directory: PathBuf,
@@ -31,6 +33,7 @@ impl Surface {
     pub(super) fn new(
         fault: &'static Fault,
         log: &'static Log,
+        faults: &'static FaultFile,
         directory: PathBuf,
         adapter: ReaperRsAdapter,
     ) -> Self {
@@ -43,6 +46,7 @@ impl Surface {
         };
         Self {
             fault,
+            faults,
             log,
             #[cfg(feature = "probe")]
             probe: super::probe::Probe::new(directory.clone()),
@@ -66,6 +70,9 @@ impl Surface {
                     "WATCHDOG: ticks keep stalling ({elapsed:?}); extension disabled"
                 ));
                 self.fault.trip();
+                let _ = self
+                    .faults
+                    .report("REAPER kept stalling, so the extension switched itself off");
             }
         }
     }

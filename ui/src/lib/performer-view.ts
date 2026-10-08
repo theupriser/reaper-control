@@ -17,7 +17,7 @@ function songView(song: SongInfo, catalog: Catalog): SongView {
   };
 }
 
-export function performerView(link: LinkView): PerformerView {
+export function performerView(link: LinkView, problem: string | null = null): PerformerView {
   const { catalog, live, status } = link;
   const index = live?.current_song ?? null;
   const song = index === null ? undefined : catalog.songs[index];
@@ -38,6 +38,6 @@ export function performerView(link: LinkView): PerformerView {
     autoResume: live?.autoplay ?? true,
     countInOnMarker: live?.count_in ?? false,
     recordArmed: live?.record_armed ?? false,
-    stats: { connected: status !== "NotRunning", midiActive: false, cpu: 0 },
+    stats: { connected: status !== "NotRunning" && !problem, midiActive: false, cpu: 0 },
   };
 }

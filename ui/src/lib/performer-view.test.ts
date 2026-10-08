@@ -76,6 +76,7 @@ describe("performerView", () => {
     expect(performerView(link(null)).song).toBeNull();
     const down: LinkView = { ...link(0), status: "NotRunning" };
     expect(performerView(down).stats.connected).toBe(false);
+    expect(performerView(link(null), "The extension turned itself off").stats.connected).toBe(false);
   });
 
   it("names the played setlist and shows nothing for an unknown one", () => {

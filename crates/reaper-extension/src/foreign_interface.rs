@@ -26,6 +26,7 @@ use surface::Surface;
 
 static FAULT: Fault = Fault::new();
 static LOG: OnceLock<Log> = OnceLock::new();
+static FAULTS: OnceLock<FaultFile> = OnceLock::new();
 static MARKER: OnceLock<SafeModeMarker> = OnceLock::new();
 
 unsafe extern "C" {
@@ -57,9 +58,9 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
     std::fs::create_dir_all(&directory)?;
 
     let log = LOG.get_or_init(|| Log::new(directory.join("extension.log")));
-    FAULT.install_panic_hook(log);
+    let faults = FAULTS.get_or_init(|| FaultFile::new(directory.join("faulted")));
+    FAULT.install_panic_hook(log, faults);
 
-    let faults = FaultFile::new(directory.join("faulted"));
     if let Err(missing) = MissingFunctions::check(context) {
         log.line(&format!("REFUSING TO START: {missing}"));
         let _ = faults.report(&format!("this REAPER is too old: {missing}"));
@@ -90,6 +91,7 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
     session.plugin_register_add_csurf_inst(Box::new(Surface::new(
         &FAULT,
         log,
+        faults,
         directory,
         ReaperRsAdapter::new(session.reaper().clone()),
     )))?;
