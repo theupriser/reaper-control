@@ -7,8 +7,8 @@ use std::path::PathBuf;
 use ts_rs::{Config, TS};
 
 use crate::{
-    Catalog, Command, CueInfo, EntryInfo, EventRecord, LinkStatus, LinkView, Live, Phase,
-    SetlistInfo, Setting, SongInfo, Transport, WireEvent,
+    Catalog, Command, CueInfo, EntryInfo, EventRecord, LinkStatus, LinkView, Live, Notice,
+    NoticeLevel, Phase, SetlistInfo, Setting, SongInfo, Transport, WireEvent,
 };
 
 const HEADER: &str =
@@ -32,6 +32,8 @@ fn render() -> Result<String, ts_rs::ExportError> {
         Live::export_to_string(&config)?,
         LinkStatus::export_to_string(&config)?,
         LinkView::export_to_string(&config)?,
+        NoticeLevel::export_to_string(&config)?,
+        Notice::export_to_string(&config)?,
     ] {
         out.push('\n');
         out.push_str(&strip_imports(&declaration));

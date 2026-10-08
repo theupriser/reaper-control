@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import ComingSoon from "./components/ComingSoon.svelte";
+  import Notices from "./components/Notices.svelte";
   import PerformerScreen from "./components/PerformerScreen.svelte";
   import Sidebar from "./components/Sidebar.svelte";
   import { connectionBadge } from "./lib/connection";
-  import { currentView, dispatch, onViewChange } from "./lib/ipc";
+  import { currentView, dispatch, onNotice, onViewChange } from "./lib/ipc";
+  import { addNotice, expireNotices, type ShownNotice } from "./lib/notices";
   import { screenLabel, type ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
   import { keyIntent, seekCommand, type PerformerPhase, type SeekTarget } from "./lib/performer";
@@ -16,6 +18,7 @@
     live: null,
     catalog: { revision: 0, setlist_revision: 0, songs: [], project_songs: [], cues: [], setlists: [], active_setlist: null },
   });
+  let notices = $state<ShownNotice[]>([]);
   let error = $state<string | null>(null);
   let screen = $state<ScreenId>("player");
   let performerMode = $state(false);
@@ -58,13 +61,19 @@
     const show = (next: LinkView) => (link = next);
     const unlisten = onViewChange(show);
     currentView().then(show, (e) => (error = String(e)));
+    const unlistenNotice = onNotice((notice) => (notices = addNotice(notices, notice, Date.now())));
+    const sweep = setInterval(() => (notices = expireNotices(notices, Date.now())), 500);
     return () => {
       unlisten.then((stop) => stop());
+      unlistenNotice.then((stop) => stop());
+      clearInterval(sweep);
     };
   });
 </script>
 
 <svelte:window onkeydown={onKeydown} />
+
+<Notices {notices} />
 
 {#if performerMode}
   <PerformerScreen

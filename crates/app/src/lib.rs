@@ -47,6 +47,7 @@ pub mod midi_message;
 pub mod midi_router;
 pub mod mirror_error;
 pub mod mirror_file;
+pub mod notice_for_event;
 pub mod pending_command;
 pub mod performance_runs;
 pub mod process_check;
