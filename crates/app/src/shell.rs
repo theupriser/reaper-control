@@ -17,6 +17,7 @@ use crate::health_monitor::HealthMonitor;
 use crate::intent_dispatcher::IntentDispatcher;
 use crate::link_connection::LinkConnection;
 use crate::logging::Logging;
+use crate::metered_driver::MeteredDriver;
 use crate::midi_listener::MidiListener;
 use crate::midi_router::MidiRouter;
 use crate::notice_for_event::notice_for_event;
@@ -73,8 +74,9 @@ pub fn run() {
                     let _ = handle.emit(VIEW_CHANGED, view);
                 },
             ));
+            let driver = Arc::new(MeteredDriver::new(link.clone(), clock.clone(), &events));
             let bus = Arc::new(CommandBus::new(
-                link.clone(),
+                driver,
                 events.clone(),
                 clock.clone(),
                 config.queue.settings(),
