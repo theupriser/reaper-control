@@ -92,6 +92,13 @@ cd crates/app && ../../ui/node_modules/.bin/tauri dev   # run the app window
 - `/next`: after finishing something: sync `main`, list open PRs, update docs/STATUS.md, propose the next work package.
 - Remind the owner to `/compact` whenever a feature, spike or bug is complete.
 
+## Project agents (`.claude/agents/`)
+- `coder`: builds one work package on a branch, with tests, and opens the PR. Does not merge or touch STATUS/PLAN.
+- `reviewer`: reads a PR with `gh` against the diff, docs and these rules; reports findings, changes nothing.
+- `tester`: runs the checks and the app with the isolated REAPER, reports what it saw, changes nothing.
+- `docs-keeper`: the `/next` routine: syncs `main`, updates STATUS and the PLAN marks, names the next package.
+- Agents report to the main session, not to each other; the main session passes findings on. Use them when asked, they start without context.
+
 ## Pointers
 - v1 key files for parity: `src/main/services/{reaperConnector,regionService,projectService,midiService}.ts`, `src/main/utils/{bpmUtils,config}.ts`, `src/renderer/src/lib/utils/markerUtils.ts`, `src/renderer/src/components/{PerformerMode,TransportControls,RegionList,SetlistEditor,Settings,Help}.svelte` (all under `~/Projects/Reaper-Control-App`).
 - v1 REAPER commands used: transport via web interface (`_/TRANSPORT`, `_/BEATPOS`, `_/REGION`, `_/MARKER`, actions 1007 play, 1008 pause, 40046, 40317 play from edit cursor, 40363 count-in toggle, 40667). v2 calls the REAPER API directly instead.
