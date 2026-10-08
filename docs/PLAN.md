@@ -95,7 +95,7 @@ reaper-control-app-v2/
 | WP | Task | d |
 |----|------|---|
 | 🟡 4.1 | Application layer per context: use-case services, ports (`Driver`, `Clock`, repositories, `MidiSource`), in-process domain event bus, command bus **Missing: Clock, MidiSource and repository ports, use-case services.** | 3 |
-| ⬜ 4.16 | Reaper Link ACL: `MessageTranslator`/`CommandTranslator`, LinkSession aggregate + health events (with cause classification) | 2.5 |
+| 🟡 4.16 | Reaper Link ACL: `MessageTranslator`/`CommandTranslator`, LinkSession aggregate + health events (with cause classification) **Missing: cause classification (ReaperNotRunning, ExtensionFaulted, ... with 4.6), a `CommandTranslator` (the command is already the wire type, so none until a second form exists).** | 2.5 |
 | ⬜ 4.17 | Control context: `ControlBinding`, `IntentTranslator` (one validation path for UI/MIDI/keyboard/remote) | 2 |
 | 🟡 4.2 | Link client over `protocol`: connect via endpoint file, handshake, reconnect with back-off, resume from last event id; decorators Timeout/Metrics/Logging **Missing: Timeout/Metrics/Logging decorators, tests for replay after reconnect and the 1 s heartbeat, Windows.** | 3.5 |
 | ⬜ 4.3 | `ExtensionDriver`: state decode, version check, command send/ack | 2.5 |

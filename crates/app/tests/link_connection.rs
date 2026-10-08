@@ -4,6 +4,8 @@ use std::sync::mpsc::{Sender, channel};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
+use app::app_event::AppEvent;
+use app::event_bus::EventBus;
 use app::link_connection::LinkConnection;
 use link::{CommandHandler, LinkServer, SendError};
 use protocol::message::Outcome;
@@ -43,7 +45,7 @@ fn temporary_directory(name: &str) -> Result<std::path::PathBuf, std::io::Error>
 #[test]
 fn a_missing_endpoint_file_shows_not_running_and_refuses_commands() -> TestResult {
     let directory = temporary_directory("app-link-missing")?;
-    let connection = LinkConnection::start(directory.join("endpoint.json"), |_| {});
+    let connection = LinkConnection::start(directory.join("endpoint.json"), Arc::default(), |_| {});
     assert_eq!(connection.view(), LinkView::default());
     assert_eq!(connection.send(Command::Play), Err(SendError::NotConnected));
     std::fs::remove_dir_all(&directory)?;
@@ -65,7 +67,7 @@ fn it_follows_the_extension_and_sends_commands_to_it() -> TestResult {
 
     let changes = Arc::new(Mutex::new(0u32));
     let counted = Arc::clone(&changes);
-    let connection = LinkConnection::start(file, move |_| {
+    let connection = LinkConnection::start(file, Arc::default(), move |_| {
         if let Ok(mut count) = counted.lock() {
             *count += 1;
         }
@@ -97,6 +99,55 @@ fn it_follows_the_extension_and_sends_commands_to_it() -> TestResult {
         *view == LinkView::default()
     });
     assert_eq!(connection.send(Command::Play), Err(SendError::NotConnected));
+    std::fs::remove_dir_all(&directory)?;
+    Ok(())
+}
+
+struct Refuser;
+
+impl CommandHandler for Refuser {
+    fn handle(&self, _command: Command) -> Outcome {
+        Outcome::Rejected {
+            reason: "this is the last song".into(),
+        }
+    }
+}
+
+#[test]
+fn connecting_and_a_refused_command_are_announced_on_the_event_bus() -> TestResult {
+    let directory = temporary_directory("app-link-announce")?;
+    let file = directory.join("endpoint.json");
+    let mut server = LinkServer::start("9.9.9", Refuser)?;
+    server.endpoint().write(&file)?;
+
+    let events = Arc::new(EventBus::default());
+    let (sender, announced) = channel();
+    let sender = Mutex::new(sender);
+    events.subscribe(move |event| {
+        if let Ok(sender) = sender.lock() {
+            let _ = sender.send(event.clone());
+        }
+    });
+    let connection = LinkConnection::start(file, events, |_| {});
+    assert_eq!(
+        announced.recv_timeout(Duration::from_secs(5))?,
+        AppEvent::LinkConnected {
+            extension_version: "9.9.9".into()
+        }
+    );
+
+    connection.send(Command::Next)?;
+    let refused = announced.recv_timeout(Duration::from_secs(5))?;
+    assert!(
+        matches!(&refused, AppEvent::ExtensionRefused { reason, .. } if reason == "this is the last song"),
+        "got {refused:?}"
+    );
+
+    server.stop();
+    assert_eq!(
+        announced.recv_timeout(Duration::from_secs(5))?,
+        AppEvent::LinkLost
+    );
     std::fs::remove_dir_all(&directory)?;
     Ok(())
 }
