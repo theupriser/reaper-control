@@ -8,6 +8,8 @@ use link::{ClientConfig, Endpoint, LinkClient, SendError};
 use protocol::{Command, LinkView};
 
 use crate::apply_event::apply_event;
+use crate::driver::Driver;
+use crate::driver_error::DriverError;
 
 /// The app's one connection to the extension, and what the UI shows about it.
 pub struct LinkConnection {
@@ -53,5 +55,11 @@ impl LinkConnection {
     /// Sends a command to the extension; refused while the link is down.
     pub fn send(&self, command: Command) -> Result<(), SendError> {
         self.client.send(command).map(|_| ())
+    }
+}
+
+impl Driver for LinkConnection {
+    fn send(&self, command: Command) -> Result<(), DriverError> {
+        Self::send(self, command).map_err(|_| DriverError::NotConnected)
     }
 }
