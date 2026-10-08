@@ -113,6 +113,21 @@ impl ProjectSetlists {
         Ok(())
     }
 
+    /// Chooses the played setlist (none: timeline order) and stores the choice in the project; the next refresh reads it back.
+    pub(super) fn set_active(
+        &mut self,
+        port: &mut impl ReaperPort,
+        id: Option<&str>,
+    ) -> Result<(), &'static str> {
+        if let Some(id) = id
+            && !self.setlists.iter().any(|setlist| setlist.id == id)
+        {
+            return Err("that setlist does not exist");
+        }
+        port.set_ext_state(SECTION, ACTIVE_KEY, id.unwrap_or(""));
+        Ok(())
+    }
+
     fn active_setlist(&self) -> Option<&SetlistInfo> {
         let active = self.active.as_deref()?;
         self.setlists.iter().find(|setlist| setlist.id == active)

@@ -398,3 +398,32 @@ fn the_catalog_lists_every_song_in_timeline_order_whatever_is_played() {
     assert_eq!(names, ["A", "B"]);
     assert_eq!(timer_loop.catalog().songs.len(), 3);
 }
+
+#[test]
+fn the_played_setlist_can_be_chosen_and_cleared_and_an_unknown_one_is_refused() {
+    use protocol::Command::SetActiveSetlist;
+    use protocol::message::Outcome;
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    timer_loop.link_command(save("sat", &["B", "A"], 0));
+    let choose = |id: Option<&str>| SetActiveSetlist {
+        id: id.map(str::to_owned),
+    };
+    assert!(matches!(
+        timer_loop.link_command(choose(Some("gone"))),
+        Outcome::Rejected { .. }
+    ));
+    assert_eq!(timer_loop.catalog().active_setlist, None);
+    assert_eq!(timer_loop.link_command(choose(Some("sat"))), Outcome::Done);
+    assert_eq!(timer_loop.catalog().active_setlist.as_deref(), Some("sat"));
+    assert_eq!(timer_loop.catalog().songs[0].id, "B");
+    assert_eq!(
+        timer_loop
+            .port_mut()
+            .ext_state("RC2", "active_setlist")
+            .as_deref(),
+        Some("sat")
+    );
+    assert_eq!(timer_loop.link_command(choose(None)), Outcome::Done);
+    assert_eq!(timer_loop.catalog().active_setlist, None);
+    assert_eq!(timer_loop.catalog().songs[0].id, "A");
+}

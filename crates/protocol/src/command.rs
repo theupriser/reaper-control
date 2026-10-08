@@ -44,4 +44,10 @@ pub enum Command {
         #[ts(type = "number")]
         expected_revision: u64,
     },
+    /// Choose the setlist that is played; `None` plays the songs in timeline order. Refused for an
+    /// id the project does not have.
+    SetActiveSetlist {
+        /// Identity of the setlist, if any.
+        id: Option<String>,
+    },
 }
