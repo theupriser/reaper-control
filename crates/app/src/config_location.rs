@@ -16,6 +16,12 @@ pub fn config_file() -> Option<PathBuf> {
     Some(app_directory()?.join("config.json"))
 }
 
+/// The folder of the log files, `logs` next to the config file.
+#[must_use]
+pub fn log_directory() -> Option<PathBuf> {
+    Some(app_directory()?.join("logs"))
+}
+
 /// The folder of the restore-only setlist copies, `setlist-mirror` next to the config file.
 #[must_use]
 pub fn mirror_directory() -> Option<PathBuf> {
