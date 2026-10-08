@@ -27,7 +27,7 @@
     <svg viewBox="0 0 24 24" width="36" height="36"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" fill="currentColor" /></svg>
   </button>
   <button aria-label="Rewind to start of song" disabled={!canRewind} onclick={onRewind}>
-    <svg viewBox="0 0 24 24" width="36" height="36"><path d="M12 12l9 6V6l-9 6zm-1 0l-9 6V6l9 6z" fill="currentColor" /></svg>
+    <svg viewBox="0 0 24 24" width="36" height="36"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" fill="currentColor" /></svg>
   </button>
   <button class="play" aria-label={playing ? "Pause" : "Play"} disabled={!canPlay} onclick={onPlayPause}>
     {#if playing}
