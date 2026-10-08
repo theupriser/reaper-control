@@ -23,6 +23,10 @@ pub(super) fn build_catalog(
     Catalog {
         revision,
         setlist_revision,
+        project_id: project_setlists
+            .project_id()
+            .unwrap_or_default()
+            .to_string(),
         songs: planned
             .iter()
             .filter_map(|song| regions.iter().find(|r| r.id.as_str() == song.song_id))

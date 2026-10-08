@@ -156,6 +156,7 @@ fn catalog() -> Catalog {
     Catalog {
         revision: 3,
         setlist_revision: 5,
+        project_id: "project-1".into(),
         songs: vec![opener()],
         project_songs: vec![opener()],
         cues: vec![CueInfo {

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import SetlistTransferCard from "./SetlistTransferCard.svelte";
   import { currentSettings, saveSettings } from "../lib/ipc";
   import type { SettingsView } from "../lib/generated/protocol";
   import { ALL_CHANNELS, isChanged, toDraft, toSettings, type SettingsDraft } from "../lib/settings-form";
@@ -88,6 +89,8 @@
         <label class="grow">Queue size<input inputmode="numeric" bind:value={draft.capacity} /></label>
       </div>
     </div>
+
+    <SetlistTransferCard />
 
     <div class="actions">
       <button class="primary" disabled={!changed} onclick={save}>Save</button>

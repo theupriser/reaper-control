@@ -1,6 +1,7 @@
 mod build_catalog;
 mod link_command;
 mod plan_songs;
+mod project_identity;
 mod project_setlists;
 mod setlist_edit;
 mod wire_event;
@@ -37,7 +38,8 @@ pub struct TimerLoop<Port: ReaperPort> {
 
 impl<Port: ReaperPort> TimerLoop<Port> {
     /// Reads the project once and starts idle at the first song.
-    pub fn new(port: Port) -> Self {
+    pub fn new(mut port: Port) -> Self {
+        project_identity::ensure(&mut port);
         let project_setlists = ProjectSetlists::read(&port);
         let songs = plan_songs(&port.regions(), &port.markers(), &project_setlists);
         let seen_change_count = port.change_count();
@@ -210,6 +212,7 @@ impl<Port: ReaperPort> TimerLoop<Port> {
             return;
         }
         self.seen_change_count = change_count;
+        project_identity::ensure(&mut self.port);
         let regions = self.port.regions();
         let markers = self.port.markers();
         let project_setlists = ProjectSetlists::read(&self.port);
