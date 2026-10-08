@@ -11,7 +11,7 @@ fn events_reach_the_log_file_and_a_bad_folder_only_costs_the_file() -> TestResul
     let directory = std::env::temp_dir().join(format!("app-logging-{}", std::process::id()));
     std::fs::create_dir_all(&directory)?;
 
-    let logging = Logging::start(Some(directory.clone()));
+    let logging = Logging::start(Some(directory.clone()), "info");
     log_event(&AppEvent::LinkConnected {
         extension_version: "9.9.9".into(),
     });
@@ -30,7 +30,7 @@ fn events_reach_the_log_file_and_a_bad_folder_only_costs_the_file() -> TestResul
     let file_in_the_way =
         std::env::temp_dir().join(format!("app-logging-file-{}", std::process::id()));
     std::fs::write(&file_in_the_way, "not a folder")?;
-    let _unusable = Logging::start(Some(file_in_the_way.join("logs")));
+    let _unusable = Logging::start(Some(file_in_the_way.join("logs")), "info");
     std::fs::remove_file(&file_in_the_way)?;
     Ok(())
 }

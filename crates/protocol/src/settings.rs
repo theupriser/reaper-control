@@ -18,4 +18,6 @@ pub struct Settings {
     pub midi_channel: Option<u8>,
     /// Milliseconds inside which the same note counts as one press (0 to 5000).
     pub midi_debounce_milliseconds: u32,
+    /// How much the app logs: error, warn, info, debug or trace. Applies after a restart.
+    pub log_level: String,
 }

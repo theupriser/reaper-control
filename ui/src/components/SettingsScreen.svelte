@@ -1,9 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import DiagnosticsCard from "./DiagnosticsCard.svelte";
   import SetlistTransferCard from "./SetlistTransferCard.svelte";
   import { currentSettings, saveSettings } from "../lib/ipc";
   import type { SettingsView } from "../lib/generated/protocol";
-  import { ALL_CHANNELS, isChanged, toDraft, toSettings, type SettingsDraft } from "../lib/settings-form";
+  import { ALL_CHANNELS, LOG_LEVELS, isChanged, toDraft, toSettings, type SettingsDraft } from "../lib/settings-form";
 
   let view = $state<SettingsView | null>(null);
   let draft = $state<SettingsDraft | null>(null);
@@ -34,7 +35,7 @@
     }
     try {
       await saveSettings(settings);
-      message = { tone: "ok", text: "Saved. Queue limits apply now; MIDI changes apply after a restart." };
+      message = { tone: "ok", text: "Saved. Queue limits apply now; MIDI and log level changes apply after a restart." };
       await load();
     } catch (e) {
       message = { tone: "error", text: String(e) };
@@ -91,6 +92,8 @@
     </div>
 
     <SetlistTransferCard />
+
+    <DiagnosticsCard bind:level={draft.logLevel} levels={LOG_LEVELS} />
 
     <div class="actions">
       <button class="primary" disabled={!changed} onclick={save}>Save</button>

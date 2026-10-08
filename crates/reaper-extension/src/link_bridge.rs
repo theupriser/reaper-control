@@ -13,6 +13,7 @@ use protocol::message::Outcome;
 use protocol::{Command, Live};
 use reaper_port::ReaperPort;
 
+use crate::journal::Journal;
 use crate::log::Log;
 use crate::timer_loop::TimerLoop;
 
@@ -26,6 +27,7 @@ pub struct LinkBridge {
     server: LinkServer,
     commands: Receiver<Command>,
     endpoint_file: PathBuf,
+    journal: Journal,
     published: Option<Live>,
     sequence: u64,
     published_at: f64,
@@ -47,6 +49,7 @@ impl LinkBridge {
             server,
             commands,
             endpoint_file,
+            journal: Journal::new(directory.join("journal.log")),
             published: None,
             sequence: 0,
             published_at: 0.0,
@@ -63,6 +66,7 @@ impl LinkBridge {
             }
         }
         for event in timer_loop.take_events() {
+            self.journal.record(&event);
             self.server.publish_event(event);
         }
         let catalog = timer_loop.catalog();
