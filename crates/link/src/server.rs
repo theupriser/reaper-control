@@ -17,7 +17,7 @@ use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 
 use protocol::message::{ServerMessage, encode_message};
-use protocol::{Catalog, Live};
+use protocol::{Catalog, Live, WireEvent};
 
 use crate::Endpoint;
 use acceptor::Acceptor;
@@ -96,6 +96,12 @@ impl LinkServer {
         self.shared
             .hub()
             .broadcast_catalog(catalog, &Arc::new(frame));
+    }
+
+    /// Number the event and push it to everyone. It is kept, so a client that reconnects
+    /// can ask for what it missed.
+    pub fn publish_event(&self, event: WireEvent) {
+        self.shared.hub().broadcast_event(event);
     }
 
     /// Stop accepting and close every connection.

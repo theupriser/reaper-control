@@ -25,7 +25,12 @@ impl CommandSession<'_> {
                     outcome: self.handle(command),
                 },
                 Some(ClientMessage::Ping) => ServerMessage::Pong,
-                Some(ClientMessage::GetCatalog) => continue,
+                Some(ClientMessage::GetCatalog) => {
+                    if let Some(frame) = self.shared.hub().catalog_frame() {
+                        self.outbox.try_send(frame).map_err(|_| ReadError::Closed)?;
+                    }
+                    continue;
+                }
                 Some(ClientMessage::Hello { .. }) => return Ok(()),
             };
             self.outbox

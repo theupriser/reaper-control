@@ -47,6 +47,7 @@ impl LinkClient {
             commands: CommandQueue::new(command_rx),
             connected: Arc::clone(&connected),
             stop: Arc::clone(&stop),
+            last_event_id: Default::default(),
         };
         let thread = thread::Builder::new()
             .name("link-client".into())

@@ -3,8 +3,9 @@ use std::sync::Arc;
 use std::sync::mpsc::SyncSender;
 
 use protocol::message::{PROTOCOL_VERSION, ServerMessage, encode_message};
-use protocol::{Catalog, Live};
+use protocol::{Catalog, Live, WireEvent};
 
+use crate::event_log::{EventLog, Replay};
 use crate::wire::ReadError;
 
 mod connected_client;
@@ -17,6 +18,7 @@ pub(super) use connected_client::Frame;
 pub(super) struct Hub {
     live: Option<Live>,
     catalog: Option<Catalog>,
+    events: EventLog,
     clients: Vec<ConnectedClient>,
     next_id: u64,
 }
@@ -26,21 +28,36 @@ impl Hub {
         self.clients.len()
     }
 
-    /// Welcome and the current state go out first, then the client joins the broadcasts.
+    /// Welcome, what the client missed and the current state go out first, then the client joins
+    /// the broadcasts. `resume_from` is the last event the client saw.
     pub(super) fn register(
         &mut self,
         extension_version: &str,
+        resume_from: Option<u64>,
         stream: &TcpStream,
         outbox: &SyncSender<Frame>,
     ) -> Result<u64, ReadError> {
+        let (catalog_revision, setlist_revision) =
+            self.catalog.as_ref().map_or((0, 0), |catalog| {
+                (catalog.revision, catalog.setlist_revision)
+            });
         let welcome = ServerMessage::Welcome {
             protocol: PROTOCOL_VERSION,
             extension_version: extension_version.to_owned(),
-            catalog_revision: 0,
-            setlist_revision: 0,
-            last_event_id: 0,
+            catalog_revision,
+            setlist_revision,
+            last_event_id: self.events.last_id(),
         };
         let mut messages = vec![welcome];
+        match resume_from.map(|after| self.events.since(after)) {
+            None => {}
+            Some(Replay::Events(records)) => {
+                messages.extend(records.into_iter().map(ServerMessage::Event));
+            }
+            Some(Replay::Lost { oldest_available }) => {
+                messages.push(ServerMessage::EventsLost { oldest_available });
+            }
+        }
         messages.extend(self.live.clone().map(ServerMessage::Live));
         messages.extend(self.catalog.clone().map(ServerMessage::Catalog));
         for message in messages {
@@ -81,6 +98,22 @@ impl Hub {
     pub(super) fn broadcast_catalog(&mut self, catalog: Catalog, frame: &Frame) {
         self.catalog = Some(catalog);
         self.send_to_all(frame);
+    }
+
+    /// Number the event, keep it for clients that were away and push it to everyone.
+    pub(super) fn broadcast_event(&mut self, event: WireEvent) {
+        let record = self.events.push(event);
+        if let Ok(frame) = encode_message(&ServerMessage::Event(record)) {
+            self.send_to_all(&Arc::new(frame));
+        }
+    }
+
+    /// The current catalog as a frame, for a client that asked for it.
+    pub(super) fn catalog_frame(&self) -> Option<Frame> {
+        let catalog = self.catalog.clone()?;
+        encode_message(&ServerMessage::Catalog(catalog))
+            .ok()
+            .map(Arc::new)
     }
 
     pub(super) fn close_all(&mut self) {
