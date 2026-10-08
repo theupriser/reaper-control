@@ -6,6 +6,7 @@ use protocol::Command;
 
 use crate::app_event::AppEvent;
 use crate::clock::Clock;
+use crate::command_check::check;
 use crate::command_queue::CommandQueue;
 use crate::dispatch_error::DispatchError;
 use crate::driver::Driver;
@@ -54,8 +55,14 @@ impl CommandBus {
     }
 
     /// Sends `command` and publishes whether it went out, was dropped as a repeat or was refused.
+    /// A command that can never be right is refused first.
     pub fn dispatch(&self, command: Command) -> Result<(), DispatchError> {
         self.expire();
+        if let Err(refusal) = check(&command) {
+            self.events
+                .publish(&AppEvent::CommandInvalid { command, refusal });
+            return Err(refusal.into());
+        }
         let sent = {
             let mut queue = self.queue.lock().map_err(|_| DriverError::NotConnected)?;
             match queue.admit(&command) {

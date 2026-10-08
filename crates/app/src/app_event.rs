@@ -2,6 +2,7 @@
 
 use protocol::{Command, EventRecord};
 
+use crate::command_refusal::CommandRefusal;
 use crate::driver_error::DriverError;
 
 /// Something that happened inside the app, for anyone who listens (log, UI, tests).
@@ -20,6 +21,13 @@ pub enum AppEvent {
     CommandDropped(Command),
     /// Too many commands were waiting for REAPER, so this one was not sent.
     CommandQueueFull(Command),
+    /// The command can never be right, so it was not sent.
+    CommandInvalid {
+        /// The command.
+        command: Command,
+        /// What is wrong with it.
+        refusal: CommandRefusal,
+    },
     /// The extension answered a command and it was done.
     CommandAcknowledged {
         /// Id the link gave the command when it was sent.
