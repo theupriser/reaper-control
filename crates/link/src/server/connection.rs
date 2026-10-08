@@ -10,6 +10,7 @@ mod admitted;
 mod client_writer;
 mod command_session;
 mod handshake;
+mod recent_answers;
 
 use client_writer::ClientWriter;
 use command_session::CommandSession;

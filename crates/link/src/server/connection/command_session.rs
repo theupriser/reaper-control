@@ -5,6 +5,8 @@ use std::sync::mpsc::SyncSender;
 
 use protocol::message::{ClientMessage, Outcome, ServerMessage, encode_message};
 
+use super::recent_answers::RecentAnswers;
+
 use crate::server::hub::Frame;
 use crate::server::shared::Shared;
 use crate::wire::{MessageReader, ReadError};
@@ -17,21 +19,40 @@ pub(super) struct CommandSession<'a> {
 
 impl CommandSession<'_> {
     pub(super) fn run(&self, reader: &mut MessageReader) -> Result<(), ReadError> {
+        let mut answers = RecentAnswers::default();
         while !self.shared.stop.load(Ordering::SeqCst) {
-            let reply = match reader.poll::<ClientMessage>()? {
-                None => continue,
-                Some(ClientMessage::Command { id, command }) => ServerMessage::Ack {
-                    id,
-                    outcome: self.handle(command),
+            let Some(value) = reader.poll::<serde_json::Value>()? else {
+                continue;
+            };
+            let reply = match serde_json::from_value::<ClientMessage>(value.clone()) {
+                Err(error) => match unknown_command_id(&value) {
+                    Some(id) => ServerMessage::Ack {
+                        id,
+                        outcome: Outcome::Rejected {
+                            reason: format!("unknown command: {error}"),
+                        },
+                    },
+                    None => return Err(protocol::message::CodecError::from(error).into()),
                 },
-                Some(ClientMessage::Ping) => ServerMessage::Pong,
-                Some(ClientMessage::GetCatalog) => {
+                Ok(ClientMessage::Command { id, command }) => {
+                    let outcome = match answers.find(id) {
+                        Some(known) => known.clone(),
+                        None => {
+                            let outcome = self.handle(command);
+                            answers.remember(id, outcome.clone());
+                            outcome
+                        }
+                    };
+                    ServerMessage::Ack { id, outcome }
+                }
+                Ok(ClientMessage::Ping) => ServerMessage::Pong,
+                Ok(ClientMessage::GetCatalog) => {
                     if let Some(frame) = self.shared.hub().catalog_frame() {
                         self.outbox.try_send(frame).map_err(|_| ReadError::Closed)?;
                     }
                     continue;
                 }
-                Some(ClientMessage::Hello { .. }) => return Ok(()),
+                Ok(ClientMessage::Hello { .. }) => return Ok(()),
             };
             self.outbox
                 .try_send(Arc::new(encode_message(&reply)?))
@@ -48,4 +69,12 @@ impl CommandSession<'_> {
             },
         )
     }
+}
+
+/// The id of a well-formed Command message whose command this version does not know.
+fn unknown_command_id(value: &serde_json::Value) -> Option<u64> {
+    if value.get("type")?.as_str()? != "Command" {
+        return None;
+    }
+    value.get("id")?.as_u64()
 }

@@ -83,7 +83,7 @@ reaper-control-app-v2/
 | ✅ 3.3 | Main-thread timer loop driving the performance core (snapshot → step → execute effects), tick budget, watchdog | 2.5 |
 | ✅ 3.4 | Local server: listener, endpoint file, token, framing, handshake, back-pressure, multi-client, resume-from-event-id | 3.5 |
 | ✅ 3.5 | Publishing: Live/Catalog/Event streams, event ring, on-disk journal | 2.5 |
-| 🟡 3.6 | Command intake/ack (ids, idempotency, unknown commands, version mismatch) **Missing: a refused command is acked Done first; ids and idempotency not checked.** | 2 |
+| ✅ 3.6 | Command intake/ack (ids, idempotency, unknown commands, version mismatch) | 2 |
 | ✅ 3.7 | Setlist persistence in project ExtState (versioned schema, `expectedRev`, corruption recovery, re-validation on load) | 2.5 |
 | 🟡 3.8 | Hand-over execution per ADR-005, hard stops, count-in (audio-hook trigger only if S2 shows it is needed and safe) **Missing: count-in effect in REAPER (R4), Windows runs.** | 3.5 |
 | 🟡 3.9 | Project change/tab handling, cheap change detection, stable ids per ADR-008 **Missing: project switch and tab handling, stable ids not verified live.** | 2 |
