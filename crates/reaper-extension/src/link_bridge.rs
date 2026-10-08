@@ -23,7 +23,7 @@ pub struct LinkBridge {
     commands: Receiver<Command>,
     endpoint_file: PathBuf,
     published: Option<AppState>,
-    published_revision: Option<u64>,
+    published_revisions: Option<(u64, u64)>,
 }
 
 impl LinkBridge {
@@ -42,7 +42,7 @@ impl LinkBridge {
             commands,
             endpoint_file,
             published: None,
-            published_revision: None,
+            published_revisions: None,
         })
     }
 
@@ -54,9 +54,10 @@ impl LinkBridge {
             }
         }
         let catalog = timer_loop.catalog();
-        if self.published_revision != Some(catalog.revision) {
+        let revisions = (catalog.revision, catalog.setlist_revision);
+        if self.published_revisions != Some(revisions) {
             self.server.publish_catalog(catalog.clone());
-            self.published_revision = Some(catalog.revision);
+            self.published_revisions = Some(revisions);
         }
         let state = timer_loop.app_state();
         if self.published != Some(state) {

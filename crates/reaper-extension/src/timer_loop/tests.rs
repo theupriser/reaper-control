@@ -190,3 +190,79 @@ fn the_catalog_revision_rises_only_when_the_project_content_changes() {
     assert_eq!(timer_loop.catalog().revision, first + 1);
     assert_eq!(timer_loop.catalog().songs.len(), 1);
 }
+
+const FRIDAY: &str = r#"[{"id":"friday","name":"Friday","revision":2,"entries":[
+    {"id":0,"song_id":"B"},{"id":1,"song_id":"gone"},{"id":2,"song_id":"A"},{"id":3,"song_id":"B"}]}]"#;
+
+fn with_setlist(text: &str, active: &str) -> TimerLoop<FakeReaper> {
+    let mut port = fake(two_songs(), Vec::new());
+    port.set_ext_state("RC2", "setlists", text);
+    port.set_ext_state("RC2", "active_setlist", active);
+    TimerLoop::new(port)
+}
+
+fn song_names(timer_loop: &TimerLoop<FakeReaper>) -> Vec<&str> {
+    let songs = &timer_loop.catalog().songs;
+    songs.iter().map(|song| song.name.as_str()).collect()
+}
+
+#[test]
+fn the_played_setlist_sets_the_order_and_skips_songs_the_project_lost() {
+    let timer_loop = with_setlist(FRIDAY, "friday");
+    assert_eq!(song_names(&timer_loop), ["B", "A", "B"]);
+    assert_eq!(
+        timer_loop.catalog().active_setlist.as_deref(),
+        Some("friday")
+    );
+    assert_eq!(timer_loop.catalog().setlists.len(), 1);
+    assert_eq!(timer_loop.catalog().setlists[0].entries.len(), 4);
+}
+
+#[test]
+fn the_performance_plays_the_setlist_order() {
+    let mut timer_loop = with_setlist(FRIDAY, "friday");
+    assert_eq!(timer_loop.app_state().current_song, Some(0));
+    timer_loop.link_command(protocol::Command::Next);
+    assert_eq!(timer_loop.app_state().current_song, Some(1));
+    // The second entry is song A, which starts at the top of the timeline.
+    assert_eq!(timer_loop.port_mut().position().get(), 0.0);
+}
+
+#[test]
+fn without_a_played_setlist_the_songs_keep_timeline_order() {
+    for active in ["", "unknown"] {
+        let timer_loop = with_setlist(FRIDAY, active);
+        assert_eq!(song_names(&timer_loop), ["A", "B"]);
+        assert_eq!(timer_loop.catalog().active_setlist, None);
+        assert_eq!(timer_loop.catalog().setlists.len(), 1);
+    }
+}
+
+#[test]
+fn a_setlist_that_does_not_hold_together_or_is_not_json_is_left_out() {
+    let repeated = r#"[{"id":"x","name":"X","revision":0,"entries":[
+        {"id":1,"song_id":"A"},{"id":1,"song_id":"B"}]},
+        {"id":"y","name":" ","revision":0,"entries":[]}]"#;
+    for text in [repeated, "not json", "{}"] {
+        let timer_loop = with_setlist(text, "x");
+        assert!(timer_loop.catalog().setlists.is_empty(), "{text}");
+        assert_eq!(song_names(&timer_loop), ["A", "B"]);
+    }
+}
+
+#[test]
+fn editing_the_setlist_raises_its_revision_and_leaves_the_content_revision_alone() {
+    let mut timer_loop = with_setlist(FRIDAY, "friday");
+    let content = timer_loop.catalog().revision;
+    let setlists = timer_loop.catalog().setlist_revision;
+    run(&mut timer_loop, 3);
+    assert_eq!(timer_loop.catalog().setlist_revision, setlists);
+    timer_loop
+        .port_mut()
+        .set_ext_state("RC2", "active_setlist", "");
+    run(&mut timer_loop, 1);
+    assert_eq!(timer_loop.catalog().setlist_revision, setlists + 1);
+    assert_eq!(song_names(&timer_loop), ["A", "B"]);
+    // The songs listed changed with the order, so the content revision moved too.
+    assert_eq!(timer_loop.catalog().revision, content + 1);
+}

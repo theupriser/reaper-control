@@ -12,10 +12,12 @@ pub struct Catalog {
     /// Raised whenever a setlist changes.
     #[ts(type = "number")]
     pub setlist_revision: u64,
-    /// Songs in timeline order.
+    /// Songs in playing order: the played setlist's, or timeline order without one. `AppState::current_song` indexes this list.
     pub songs: Vec<SongInfo>,
     /// Cues in timeline order.
     pub cues: Vec<CueInfo>,
     /// The setlists of the project.
     pub setlists: Vec<SetlistInfo>,
+    /// The id of the setlist being played, if any.
+    pub active_setlist: Option<String>,
 }

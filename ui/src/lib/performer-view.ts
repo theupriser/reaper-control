@@ -1,8 +1,8 @@
 import type { Catalog, LinkView, SongInfo } from "./generated/protocol";
 import { performerPhase, type PerformerView, type SongView } from "./performer";
 
-// Without a setlist the songs play in timeline order (the setlist arrives with its own work package).
-const SETLIST_NAME = null;
+const setlistName = (catalog: Catalog): string | null =>
+  catalog.setlists.find((setlist) => setlist.id === catalog.active_setlist)?.name ?? null;
 
 export const songLength = (song: SongInfo): number => song.length ?? song.end - song.start;
 
@@ -26,7 +26,7 @@ export function performerView(link: LinkView): PerformerView {
   const elapsedBefore = before.reduce((sum, earlier) => sum + songLength(earlier), 0);
   return {
     phase: performerPhase(state.phase),
-    setlistName: SETLIST_NAME,
+    setlistName: setlistName(catalog),
     song: song ? songView(song, catalog) : null,
     hasPrevious: index !== null && index > 0,
     nextSong: next ? { name: next.name, duration: songLength(next) } : null,

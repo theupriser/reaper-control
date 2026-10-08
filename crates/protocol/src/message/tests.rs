@@ -174,6 +174,7 @@ fn catalog() -> Catalog {
                 song_id: "{A}".into(),
             }],
         }],
+        active_setlist: Some("set-1".into()),
     }
 }
 
