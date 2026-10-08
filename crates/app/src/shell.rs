@@ -5,7 +5,7 @@ use tauri::{Emitter, Manager, State};
 use std::sync::Arc;
 use std::time::Duration;
 
-use protocol::{Command, LinkView};
+use protocol::{Command, LinkView, Settings, SettingsView};
 
 use crate::app_event::AppEvent;
 use crate::command_bus::CommandBus;
@@ -20,9 +20,10 @@ use crate::intent_dispatcher::IntentDispatcher;
 use crate::link_connection::LinkConnection;
 use crate::logging::Logging;
 use crate::metered_driver::MeteredDriver;
-use crate::midi_listener::MidiListener;
+use crate::midi_listener::{MidiListener, device_names};
 use crate::midi_router::MidiRouter;
 use crate::notice_for_event::{link_problem, notice_for_event};
+use crate::settings_service::SettingsService;
 use crate::system_clock::SystemClock;
 use crate::system_process_check::SystemProcessCheck;
 
@@ -38,6 +39,19 @@ fn current_view(link: State<'_, Arc<LinkConnection>>) -> LinkView {
 #[tauri::command]
 fn current_problem(health: State<'_, Arc<HealthMonitor>>) -> Option<String> {
     link_problem(&health.health())
+}
+
+#[tauri::command]
+fn current_settings(settings: State<'_, Arc<SettingsService>>) -> SettingsView {
+    settings.view(device_names().unwrap_or_default())
+}
+
+#[tauri::command]
+fn save_settings(
+    service: State<'_, Arc<SettingsService>>,
+    settings: Settings,
+) -> Result<(), String> {
+    service.save(&settings).map_err(|error| error.to_string())
 }
 
 #[tauri::command]
@@ -95,6 +109,12 @@ pub fn run() {
                 clock.clone(),
                 config.queue.settings(),
             ));
+            let settings_file = config_file().ok_or("the home folder is unknown")?;
+            app.manage(Arc::new(SettingsService::new(
+                ConfigStore::new(settings_file),
+                config.clone(),
+                bus.clone(),
+            )));
             if config.midi.enabled {
                 let watched = link.clone();
                 let intents = Arc::new(IntentDispatcher::new(
@@ -146,6 +166,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             current_view,
             current_problem,
+            current_settings,
+            save_settings,
             dispatch
         ])
         .run(tauri::generate_context!());

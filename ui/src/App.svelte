@@ -3,6 +3,7 @@
   import ComingSoon from "./components/ComingSoon.svelte";
   import Notices from "./components/Notices.svelte";
   import PerformerScreen from "./components/PerformerScreen.svelte";
+  import SettingsScreen from "./components/SettingsScreen.svelte";
   import Sidebar from "./components/Sidebar.svelte";
   import { connectionBadge } from "./lib/connection";
   import { currentProblem, currentView, dispatch, onLinkProblem, onNotice, onViewChange } from "./lib/ipc";
@@ -109,6 +110,8 @@
           onToggleRecord={() => send("ToggleRecordArm")}
         />
         {#if error}<p class="error">{error}</p>{/if}
+      {:else if screen === "settings"}
+        <SettingsScreen />
       {:else}
         <ComingSoon title={screenLabel(screen)} />
       {/if}

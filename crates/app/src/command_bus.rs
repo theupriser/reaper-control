@@ -54,6 +54,13 @@ impl CommandBus {
         }
     }
 
+    /// Uses these queue limits from now on.
+    pub fn apply(&self, settings: QueueSettings) {
+        if let Ok(mut queue) = self.queue.lock() {
+            queue.apply(settings);
+        }
+    }
+
     /// Sends `command` and publishes whether it went out, was dropped as a repeat or was refused.
     /// A command that can never be right is refused first.
     pub fn dispatch(&self, command: Command) -> Result<(), DispatchError> {
