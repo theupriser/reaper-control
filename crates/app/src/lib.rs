@@ -1,5 +1,6 @@
 //! Reaper Control app: the Tauri shell around the app core.
 
+pub mod app_config;
 pub mod app_event;
 pub mod apply_event;
 pub mod clock;
@@ -7,6 +8,10 @@ pub mod command_bus;
 pub mod command_check;
 pub mod command_queue;
 pub mod command_refusal;
+pub mod config_error;
+pub mod config_location;
+pub mod config_migration;
+pub mod config_store;
 pub mod dispatch_error;
 pub mod driver;
 pub mod driver_error;
@@ -23,6 +28,7 @@ pub mod link_session;
 pub mod message_translator;
 pub mod pending_command;
 pub mod process_check;
+pub mod queue_config;
 pub mod queue_rejection;
 pub mod queue_settings;
 pub mod shell;

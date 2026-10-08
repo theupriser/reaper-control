@@ -54,6 +54,7 @@ dependencies = [
  "link",
  "protocol",
  "serde",
+ "serde_json",
  "shared-kernel",
  "tauri",
  "tauri-build",
