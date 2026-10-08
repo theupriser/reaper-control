@@ -103,7 +103,7 @@ reaper-control-app-v2/
 | 🟡 4.5 | Command bus + handlers (one per Command), single dispatch entry **Missing: no handler per command (the extension judges state; the app only checks what can never be right), checks for MIDI and keyboard input come with 4.17.** | 2 |
 | 🟡 4.6 | Link health model: Connected/Degraded/Lost/Dead + causes ReaperNotRunning/ExtensionNotLoaded/ExtensionOutdated/ExtensionFaulted; events **Missing: `ExtensionFaulted` (the extension must report that it disabled itself), not shown in the UI.** | 1.5 |
 | 🟡 4.7 | Config: typed struct, defaults, validation, atomic write, schema version + migrations **Missing: only the queue limits are in it so far, no settings screen.** | 2 |
-| ⬜ 4.8 | Setlist backup mirror + v1 import (config.json, setlists/*.json) | 2.5 |
+| 🟡 4.8 | Setlist backup mirror + v1 import (config.json, setlists/*.json) **Missing: not wired into the shell, no import screen, v1 config.json (MIDI part with 4.9), region number not matched.** | 2.5 |
 | ⬜ 4.9 | MIDI (midir): device list/hotplug, channel filter, note→Command registry (user-editable mapping), global debounce | 2.5 |
 | ⬜ 4.10 | Logging (tracing): levels, rolling file, journal import from the extension, "export diagnostics" bundle | 2 |
 | 🟡 4.11 | FakeDriver + simulator (the same `performance` crate over `FakeReaper`, deterministic clock) **Missing: simulator not built, only FakeDriver.** | 1.5 |
