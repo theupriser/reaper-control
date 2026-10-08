@@ -60,6 +60,20 @@ pub enum AppEvent {
         /// Why, as the extension says.
         reason: String,
     },
+    /// A note arrived from a MIDI device (mapped or not), for the activity light.
+    MidiActivity {
+        /// Channel 0 to 15.
+        channel: u8,
+        /// Note 0 to 127.
+        note: u8,
+        /// Velocity 0 to 127.
+        velocity: u8,
+    },
+    /// The MIDI devices being listened to changed.
+    MidiDevicesChanged {
+        /// The names of the devices now in use; empty when there are none.
+        devices: Vec<String>,
+    },
     /// Something happened in the performance.
     PerformanceEvent(EventRecord),
     /// The app was away too long to be caught up on the performance events.

@@ -22,14 +22,24 @@ pub fn mirror_directory() -> Option<PathBuf> {
     Some(app_directory()?.join("setlist-mirror"))
 }
 
-/// The `setlists` folder of v1 (`RC2_LEGACY_DIRECTORY` replaces v1's data folder, for tests).
+/// The `setlists` folder of v1.
 #[must_use]
 pub fn legacy_setlists_directory() -> Option<PathBuf> {
-    let directory = match std::env::var_os("RC2_LEGACY_DIRECTORY") {
-        Some(directory) => PathBuf::from(directory),
-        None => data_directory()?.join("electron-reaper-control"),
-    };
-    Some(directory.join("setlists"))
+    Some(legacy_directory()?.join("setlists"))
+}
+
+/// The `config.json` of v1.
+#[must_use]
+pub fn legacy_config_file() -> Option<PathBuf> {
+    Some(legacy_directory()?.join("config.json"))
+}
+
+/// v1's data folder; `RC2_LEGACY_DIRECTORY` replaces it, for tests.
+fn legacy_directory() -> Option<PathBuf> {
+    match std::env::var_os("RC2_LEGACY_DIRECTORY") {
+        Some(directory) => Some(PathBuf::from(directory)),
+        None => Some(data_directory()?.join("electron-reaper-control")),
+    }
 }
 
 #[cfg(target_os = "windows")]
