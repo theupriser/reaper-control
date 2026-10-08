@@ -28,6 +28,10 @@ pub(super) fn build_catalog(
             .filter_map(|song| regions.iter().find(|r| r.id.as_str() == song.song_id))
             .filter_map(|region| song_info(region, &cues))
             .collect(),
+        project_songs: regions
+            .iter()
+            .filter_map(|region| song_info(region, &cues))
+            .collect(),
         cues: markers
             .iter()
             .enumerate()

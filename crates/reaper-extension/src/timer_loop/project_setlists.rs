@@ -1,5 +1,7 @@
 use performance::PlannedSong;
 use protocol::{EntryInfo, SetlistInfo};
+
+use super::setlist_edit::SetlistEdit;
 use reaper_port::ReaperPort;
 use setlists::{Entry, EntryId, Revision, Setlist, SetlistId};
 use shared_kernel::SongId;
@@ -67,6 +69,48 @@ impl ProjectSetlists {
             .filter_map(|entry| timeline.iter().find(|song| song.song_id == entry.song_id))
             .cloned()
             .collect()
+    }
+
+    /// Creates or replaces a setlist in the project. The edit must have been made on the stored
+    /// revision (0 for a new setlist); the stored one then rises by one.
+    pub(super) fn save(
+        &mut self,
+        port: &mut impl ReaperPort,
+        edit: SetlistEdit<'_>,
+    ) -> Result<(), &'static str> {
+        let position = self.setlists.iter().position(|s| s.id == edit.id);
+        let stored = position.map_or(0, |index| {
+            self.setlists.get(index).map_or(0, |s| s.revision)
+        });
+        if stored != edit.expected_revision {
+            return Err("the setlist changed since it was opened");
+        }
+        let entries = edit
+            .entries
+            .iter()
+            .map(|EntryInfo { id, song_id }| Entry::new(EntryId::new(*id), SongId::new(song_id)))
+            .collect();
+        let setlist = Setlist::restore(
+            SetlistId::new(edit.id),
+            edit.name,
+            entries,
+            Revision::new(stored).next(),
+        )
+        .map_err(|_| "that setlist cannot be saved")?;
+        let info = SetlistInfo {
+            id: edit.id.to_owned(),
+            name: setlist.name().to_owned(),
+            revision: setlist.revision().get(),
+            entries: edit.entries.to_vec(),
+        };
+        match position.and_then(|index| self.setlists.get_mut(index)) {
+            Some(existing) => *existing = info,
+            None => self.setlists.push(info),
+        }
+        let text =
+            serde_json::to_string(&self.setlists).map_err(|_| "that setlist cannot be saved")?;
+        port.set_ext_state(SECTION, SETLISTS_KEY, &text);
+        Ok(())
     }
 
     fn active_setlist(&self) -> Option<&SetlistInfo> {

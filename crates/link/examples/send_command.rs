@@ -1,11 +1,12 @@
 //! Connects to a running extension and prints what it pushes. Each extra argument is a command
 //! (`play`, `pause`, `next`, `previous`, `restart`), sent one second apart.
+//! `save:<id>:<name>:<expected revision>:<song id>,<song id>` stores a setlist.
 //! `cargo run -p link --example send_command -- <resource directory>/RC2/endpoint.json play next`
 
 use std::time::{Duration, Instant};
 
 use link::{ClientConfig, Endpoint, LinkClient, LinkEvent};
-use protocol::Command;
+use protocol::{Command, EntryInfo};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut arguments = std::env::args().skip(1);
@@ -14,14 +15,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .ok_or("usage: send_command <endpoint.json> [commands]")?;
     let mut commands: Vec<Command> = Vec::new();
     for word in arguments {
-        commands.push(match word.as_str() {
+        let command = match word.as_str() {
             "play" => Command::Play,
             "pause" => Command::Pause,
             "next" => Command::Next,
             "previous" => Command::Previous,
             "restart" => Command::RestartSong,
-            other => return Err(format!("unknown command {other}").into()),
-        });
+            other => match other.strip_prefix("save:") {
+                Some(specification) => save_command(specification)?,
+                None => return Err(format!("unknown command {other}").into()),
+            },
+        };
+        commands.push(command);
     }
     let (client, events) = LinkClient::start(ClientConfig::new(move || {
         Endpoint::read(std::path::Path::new(&path)).ok()
@@ -57,8 +62,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         if client.is_connected() && !commands.is_empty() && start.elapsed() >= next_at {
             let command = commands.remove(0);
+            let shown = format!("{command:?}");
             println!(
-                "{:>5.1}s send {command:?}: {:?}",
+                "{:>5.1}s send {shown}: {:?}",
                 start.elapsed().as_secs_f64(),
                 client.send(command)
             );
@@ -66,4 +72,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
     Ok(())
+}
+
+fn save_command(specification: &str) -> Result<Command, String> {
+    let parts: Vec<&str> = specification.splitn(4, ':').collect();
+    let [id, name, expected, songs] = parts.as_slice() else {
+        return Err("save:<id>:<name>:<expected revision>:<song ids>".into());
+    };
+    let expected_revision = expected
+        .parse()
+        .map_err(|_| "expected revision is not a number")?;
+    let entries = songs
+        .split(',')
+        .filter(|song| !song.is_empty())
+        .zip(1..)
+        .map(|(song_id, id)| EntryInfo {
+            id,
+            song_id: song_id.to_owned(),
+        })
+        .collect();
+    Ok(Command::SaveSetlist {
+        id: (*id).to_owned(),
+        name: (*name).to_owned(),
+        entries,
+        expected_revision,
+    })
 }

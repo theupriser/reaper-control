@@ -57,8 +57,9 @@ impl LinkBridge {
     /// Carries out the queued commands, then pushes the state when it changed.
     pub fn pump<Port: ReaperPort>(&mut self, timer_loop: &mut TimerLoop<Port>, log: &Log) {
         while let Ok(command) = self.commands.try_recv() {
+            let description = format!("{command:?}");
             if let Outcome::Rejected { reason } = timer_loop.link_command(command) {
-                log.line(&format!("link command {command:?} refused: {reason}"));
+                log.line(&format!("link command {description} refused: {reason}"));
             }
         }
         for event in timer_loop.take_events() {

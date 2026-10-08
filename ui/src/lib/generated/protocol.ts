@@ -16,7 +16,23 @@ position: number,
 /**
  * Start with a count-in (a click on a Cue while "Count-in when pressing marker" is on).
  */
-count_in: boolean, } } | "ToggleAutoResume" | "ToggleCountInOnMarker" | "ToggleRecordArm";
+count_in: boolean, } } | "ToggleAutoResume" | "ToggleCountInOnMarker" | "ToggleRecordArm" | { "SaveSetlist": { 
+/**
+ * Identity of the setlist.
+ */
+id: string, 
+/**
+ * Display name.
+ */
+name: string, 
+/**
+ * The entries in playing order.
+ */
+entries: Array<EntryInfo>, 
+/**
+ * The revision of the setlist the edit was made on.
+ */
+expected_revision: number, } };
 
 /**
  * What REAPER's transport is doing.
@@ -182,6 +198,10 @@ setlist_revision: number,
  * Songs in playing order: the played setlist's, or timeline order without one. `Live::current_song` indexes this list.
  */
 songs: Array<SongInfo>, 
+/**
+ * Every song of the project in timeline order, whatever the played setlist is.
+ */
+project_songs: Array<SongInfo>, 
 /**
  * Cues in timeline order.
  */

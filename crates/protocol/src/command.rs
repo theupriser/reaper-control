@@ -1,8 +1,10 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+use crate::EntryInfo;
+
 /// Everything the UI can ask for.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
 pub enum Command {
     /// Start or resume playback.
     Play,
@@ -29,4 +31,17 @@ pub enum Command {
     ToggleCountInOnMarker,
     /// Arm or disarm recording.
     ToggleRecordArm,
+    /// Create or replace a setlist in the project. Refused when the stored revision is not
+    /// `expected_revision` (use 0 for a new setlist), so an edit never overwrites a newer one.
+    SaveSetlist {
+        /// Identity of the setlist.
+        id: String,
+        /// Display name.
+        name: String,
+        /// The entries in playing order.
+        entries: Vec<EntryInfo>,
+        /// The revision of the setlist the edit was made on.
+        #[ts(type = "number")]
+        expected_revision: u64,
+    },
 }

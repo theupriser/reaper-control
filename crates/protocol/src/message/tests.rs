@@ -139,20 +139,25 @@ fn live() -> Live {
     }
 }
 
+fn opener() -> SongInfo {
+    SongInfo {
+        id: "{A}".into(),
+        name: "Opener".into(),
+        start: 0.0,
+        end: 200.5,
+        colour: Some("#ff8800".into()),
+        hard_stop: true,
+        length: Some(180.0),
+        bpm: None,
+    }
+}
+
 fn catalog() -> Catalog {
     Catalog {
         revision: 3,
         setlist_revision: 5,
-        songs: vec![SongInfo {
-            id: "{A}".into(),
-            name: "Opener".into(),
-            start: 0.0,
-            end: 200.5,
-            colour: Some("#ff8800".into()),
-            hard_stop: true,
-            length: Some(180.0),
-            bpm: None,
-        }],
+        songs: vec![opener()],
+        project_songs: vec![opener()],
         cues: vec![CueInfo {
             id: "m1".into(),
             name: "Bridge".into(),
