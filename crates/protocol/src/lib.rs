@@ -22,6 +22,7 @@ mod setting;
 mod settings;
 mod settings_view;
 mod song_info;
+mod system_stats;
 mod transport;
 mod wire_event;
 
@@ -47,5 +48,6 @@ pub use setting::Setting;
 pub use settings::Settings;
 pub use settings_view::SettingsView;
 pub use song_info::SongInfo;
+pub use system_stats::SystemStats;
 pub use transport::Transport;
 pub use wire_event::WireEvent;
