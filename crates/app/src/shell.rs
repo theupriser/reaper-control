@@ -127,11 +127,17 @@ pub fn run() {
             ));
             journal.import();
             let importing = journal.clone();
-            events.subscribe(move |event| {
-                if matches!(event, AppEvent::LinkConnected { .. } | AppEvent::LinkLost) {
-                    importing.import();
-                }
-            });
+            let importer = std::thread::Builder::new()
+                .name("journal-import".into())
+                .spawn(move || {
+                    loop {
+                        std::thread::sleep(Duration::from_secs(2));
+                        importing.import();
+                    }
+                });
+            if let Err(error) = importer {
+                tracing::error!(%error, "journal import thread failed to start");
+            }
             app.manage(journal);
             app.manage(Arc::new(DiagnosticsBundle::new(
                 log_directory(),

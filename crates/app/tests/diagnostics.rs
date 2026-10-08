@@ -42,6 +42,11 @@ fn the_bundle_has_the_files_that_exist_and_leaves_the_token_out() -> TestResult 
             "logs/reaper-control.2026-10-08.log"
         ]
     );
+    let year = archive
+        .by_name("about.txt")?
+        .last_modified()
+        .map_or(0, |stamp| stamp.year());
+    assert!(year >= 2026, "entries carry the real date, got {year}");
     let mut about = String::new();
     archive.by_name("about.txt")?.read_to_string(&mut about)?;
     assert!(about.contains("link: NotRunning"), "got {about:?}");

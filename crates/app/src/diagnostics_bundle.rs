@@ -49,7 +49,10 @@ impl DiagnosticsBundle {
             .map_or(0, |elapsed| elapsed.as_secs());
         let target = directory.join(format!("reaper-control-diagnostics-{seconds}.zip"));
         let mut zip = ZipWriter::new(std::fs::File::create(&target)?);
-        let options = SimpleFileOptions::default();
+        let options = match zip::DateTime::try_from(plain_now()) {
+            Ok(stamp) => SimpleFileOptions::default().last_modified_time(stamp),
+            Err(_) => SimpleFileOptions::default(),
+        };
         let about = format!(
             "Reaper Control {}\nsystem: {} {}\nlink: {link_status}\n",
             env!("CARGO_PKG_VERSION"),
@@ -102,4 +105,9 @@ fn add(
     zip.start_file(name, options)?;
     zip.write_all(bytes)?;
     Ok(())
+}
+
+fn plain_now() -> time::PrimitiveDateTime {
+    let now = time::OffsetDateTime::now_utc();
+    time::PrimitiveDateTime::new(now.date(), now.time())
 }
