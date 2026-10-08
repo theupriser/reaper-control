@@ -111,7 +111,7 @@ reaper-control-app-v2/
 | ⬜ 4.18 | System stats (`sysinfo`: CPU/memory) for F14 | 1 |
 | ⬜ 4.14 | **Installer module** (`ExtensionInstaller` port + OS adapters): locate REAPER, detect its architecture, `InstallReport`, copy to `UserPlugins`, signature/quarantine handling, rollback copy, staged update, verify-by-handshake, repair, uninstall, dry-run | 5 |
 | ⬜ 4.15 | Installer test suite: temp fake REAPER resource dirs (clean / existing extension / read-only / wrong architecture / portable / running-REAPER lock), golden-file tests | 2.5 |
-| ⬜ 4.13 | Composition root, graceful shutdown, panic hook → log + safe UI state | 1.5 |
+| 🟡 4.13 | Composition root, graceful shutdown, panic hook → log + safe UI state. Missing: the panic message in the window was not seen live (tested up to the hook and the stored fault) | 1.5 |
 
 **Gate 4:** installer suite green on all temp-dir scenarios; conformance + chaos suite green incl. link loss, replay and restart-reattach; CLI harness can run a whole set against `FakeReaper` and the real extension.
 

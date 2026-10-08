@@ -2,6 +2,7 @@
 
 pub mod app_config;
 pub mod app_event;
+pub mod app_fault;
 pub mod apply_event;
 pub mod chaos_proxy;
 pub mod chaos_settings;
@@ -64,8 +65,10 @@ pub mod mirror_error;
 pub mod mirror_file;
 pub mod mirror_keeper;
 pub mod notice_for_event;
+pub mod panic_hook;
 pub mod pending_command;
 pub mod performance_runs;
+pub mod periodic_thread;
 pub mod process_check;
 pub mod queue_config;
 pub mod queue_rejection;
@@ -75,6 +78,7 @@ pub mod setlist_mirror;
 pub mod setlist_transfer;
 pub mod settings_service;
 pub mod shell;
+pub mod shutdown_sequence;
 pub mod simulator;
 pub mod start_link;
 pub mod system_clock;
