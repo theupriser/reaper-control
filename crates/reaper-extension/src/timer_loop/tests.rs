@@ -114,3 +114,39 @@ fn a_region_without_length_is_not_a_song() {
     timer_loop.command(Input::Play);
     assert_eq!(timer_loop.phase(), Phase::Idle);
 }
+
+#[test]
+fn a_link_play_starts_the_transport_and_shows_in_the_app_state() {
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), vec![]));
+    let outcome = timer_loop.link_command(protocol::Command::Play);
+    timer_loop.tick();
+    assert_eq!(outcome, protocol::message::Outcome::Done);
+    assert_eq!(timer_loop.app_state().phase, protocol::Phase::Playing);
+}
+
+#[test]
+fn a_link_seek_is_counted_from_the_start_of_the_current_song() {
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), vec![]));
+    timer_loop.command(Input::Next);
+    timer_loop.link_command(protocol::Command::Seek {
+        position: 3.0,
+        count_in: false,
+    });
+    assert!((timer_loop.app_state().position - 3.0).abs() < 1e-9);
+}
+
+#[test]
+fn a_link_toggle_flips_the_setting_and_a_count_in_seek_is_refused() {
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), vec![]));
+    let before = timer_loop.app_state().auto_resume;
+    timer_loop.link_command(protocol::Command::ToggleAutoResume);
+    assert_ne!(timer_loop.app_state().auto_resume, before);
+    let refused = timer_loop.link_command(protocol::Command::Seek {
+        position: 1.0,
+        count_in: true,
+    });
+    assert!(matches!(
+        refused,
+        protocol::message::Outcome::Rejected { .. }
+    ));
+}

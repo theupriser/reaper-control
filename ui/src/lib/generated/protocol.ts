@@ -8,7 +8,7 @@ export type Phase = "Idle" | "Playing" | "Paused" | "CountingIn" | "HardStopped"
 /**
  * Everything the UI can ask for.
  */
-export type Command = "Play" | "Pause" | "Stop" | { "Seek": { 
+export type Command = "Play" | "Pause" | "Stop" | "Next" | "Previous" | "RestartSong" | { "Seek": { 
 /**
  * Seconds from the start of the song.
  */

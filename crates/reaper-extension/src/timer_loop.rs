@@ -1,8 +1,12 @@
+mod link_command;
 mod plan_songs;
 
 use performance::{Effect, Flags, HandOverPolicy, Input, Performance, Phase, PlannedSong};
+use protocol::message::Outcome;
+use protocol::{AppState, Command};
 use reaper_port::ReaperPort;
 
+use link_command::to_input;
 use plan_songs::plan_songs;
 
 /// One step of REAPER's timer: read the clock and the play position, step the performance, carry
@@ -48,6 +52,32 @@ impl<Port: ReaperPort> TimerLoop<Port> {
         self.apply(input);
     }
 
+    /// Carries out a command from the link, or says why it cannot.
+    pub fn link_command(&mut self, command: Command) -> Outcome {
+        let start = self.song_start();
+        match to_input(command, start, self.performance.flags()) {
+            Ok(input) => {
+                self.command(input);
+                Outcome::Done
+            }
+            Err(reason) => Outcome::Rejected {
+                reason: reason.into(),
+            },
+        }
+    }
+
+    /// What the app shows: the phase, the position in the current song and the settings.
+    pub fn app_state(&self) -> AppState {
+        let flags = self.performance.flags();
+        AppState {
+            phase: map_phase(self.performance.phase()),
+            position: (self.port.position().get() - self.song_start().get()).max(0.0),
+            auto_resume: flags.autoplay,
+            count_in_on_marker: flags.count_in,
+            record_armed: false,
+        }
+    }
+
     /// Where the performance is.
     pub fn phase(&self) -> Phase {
         self.performance.phase()
@@ -62,6 +92,12 @@ impl<Port: ReaperPort> TimerLoop<Port> {
     #[cfg(any(test, feature = "probe"))]
     pub fn port_mut(&mut self) -> &mut Port {
         &mut self.port
+    }
+
+    fn song_start(&self) -> shared_kernel::Seconds {
+        self.performance
+            .current()
+            .map_or(shared_kernel::Seconds::ZERO, |song| song.window.start())
     }
 
     fn fresh(port: &Port, songs: Vec<PlannedSong>) -> Performance {
@@ -98,6 +134,18 @@ impl<Port: ReaperPort> TimerLoop<Port> {
                 Effect::SetCountIn(enabled) => self.port.set_count_in(enabled),
             }
         }
+    }
+}
+
+fn map_phase(phase: Phase) -> protocol::Phase {
+    match phase {
+        Phase::Idle => protocol::Phase::Idle,
+        Phase::Playing => protocol::Phase::Playing,
+        Phase::Paused => protocol::Phase::Paused,
+        Phase::CountingIn => protocol::Phase::CountingIn,
+        Phase::HardStopped => protocol::Phase::HardStopped,
+        Phase::HandingOver => protocol::Phase::HandingOver,
+        Phase::Finished => protocol::Phase::Finished,
     }
 }
 

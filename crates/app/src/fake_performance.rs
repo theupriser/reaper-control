@@ -16,6 +16,7 @@ pub fn dispatch(state: AppState, command: Command) -> AppState {
             ..state
         },
         Command::Pause => state,
+        Command::Next | Command::Previous | Command::RestartSong => state,
         Command::Stop => AppState {
             phase: Phase::Idle,
             position: 0.0,

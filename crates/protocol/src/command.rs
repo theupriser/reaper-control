@@ -10,6 +10,12 @@ pub enum Command {
     Pause,
     /// Stop playback.
     Stop,
+    /// Go to the next song.
+    Next,
+    /// Go to the previous song.
+    Previous,
+    /// Go back to the start of the current song.
+    RestartSong,
     /// Jump to a position in the current song, in seconds from its start.
     Seek {
         /// Seconds from the start of the song.

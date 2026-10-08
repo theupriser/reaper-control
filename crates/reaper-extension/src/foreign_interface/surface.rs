@@ -5,6 +5,7 @@ use reaper_medium::ControlSurface;
 
 use super::reaper_rs_adapter::ReaperRsAdapter;
 use crate::fault::Fault;
+use crate::link_bridge::LinkBridge;
 use crate::log::Log;
 use crate::tick_watchdog::{TickWatchdog, Verdict};
 use crate::timer_loop::TimerLoop;
@@ -20,6 +21,7 @@ pub(super) struct Surface {
     directory: PathBuf,
     timer_loop: TimerLoop<ReaperRsAdapter>,
     watchdog: TickWatchdog,
+    link: Option<LinkBridge>,
     #[cfg(feature = "probe")]
     probe: super::probe::Probe,
     ticks: u64,
@@ -32,6 +34,13 @@ impl Surface {
         directory: PathBuf,
         adapter: ReaperRsAdapter,
     ) -> Self {
+        let link = match LinkBridge::start(&directory, log) {
+            Ok(link) => Some(link),
+            Err(error) => {
+                log.line(&format!("link not started: {error}"));
+                None
+            }
+        };
         Self {
             fault,
             log,
@@ -40,6 +49,7 @@ impl Surface {
             directory,
             timer_loop: TimerLoop::new(adapter),
             watchdog: TickWatchdog::new(),
+            link,
             ticks: 0,
         }
     }
@@ -74,6 +84,9 @@ impl Surface {
         self.probe.run(&mut self.timer_loop, self.log);
         let started = Instant::now();
         self.timer_loop.tick();
+        if let Some(link) = &mut self.link {
+            link.pump(&mut self.timer_loop, self.log);
+        }
         #[cfg(feature = "fault-injection")]
         if self.directory.join("slow-main").exists() {
             // every tick stays slow while the trigger file exists
