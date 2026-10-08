@@ -12,7 +12,7 @@ pub struct Setlist {
     name: String,
     entries: Vec<Entry>,
     next_entry: u64,
-    rev: Revision,
+    revision: Revision,
 }
 
 fn clean_name(name: &str) -> Option<String> {
@@ -31,7 +31,7 @@ impl Setlist {
         id: SetlistId,
         name: &str,
         entries: Vec<Entry>,
-        rev: Revision,
+        revision: Revision,
     ) -> Result<Self, InvalidSetlist> {
         let name = clean_name(name).ok_or(InvalidSetlist::EmptyName)?;
         let mut seen = HashSet::new();
@@ -47,7 +47,7 @@ impl Setlist {
             name,
             entries,
             next_entry,
-            rev,
+            revision,
         })
     }
 
@@ -67,8 +67,8 @@ impl Setlist {
     }
 
     /// The current revision.
-    pub fn rev(&self) -> Revision {
-        self.rev
+    pub fn revision(&self) -> Revision {
+        self.revision
     }
 
     /// The songs, in order.
@@ -84,10 +84,10 @@ impl Setlist {
 
     /// Applies an edit made against `expected`. On success the revision rises by one.
     pub fn edit(&mut self, expected: Revision, edit: Edit) -> Result<SetlistEvent, Rejection> {
-        if expected != self.rev {
+        if expected != self.revision {
             return Err(Rejection::Stale {
                 expected,
-                actual: self.rev,
+                actual: self.revision,
             });
         }
         let event = match edit {
@@ -96,7 +96,7 @@ impl Setlist {
             Edit::Remove(entry) => self.remove(entry)?,
             Edit::Move { entry, to } => self.move_entry(entry, to)?,
         };
-        self.rev = self.rev.next();
+        self.revision = self.revision.next();
         Ok(event)
     }
 

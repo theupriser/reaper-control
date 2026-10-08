@@ -33,9 +33,9 @@ impl Endpoint {
 
     /// Write the endpoint file in one step, so a reader never sees half of it.
     pub fn write(&self, path: &Path) -> Result<(), EndpointError> {
-        let tmp = path.with_extension("tmp");
-        fs::write(&tmp, serde_json::to_vec(self)?)?;
-        fs::rename(&tmp, path)?;
+        let temporary = path.with_extension("temporary");
+        fs::write(&temporary, serde_json::to_vec(self)?)?;
+        fs::rename(&temporary, path)?;
         Ok(())
     }
 }

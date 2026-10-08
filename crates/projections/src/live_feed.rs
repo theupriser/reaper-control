@@ -18,12 +18,12 @@ impl LiveFeed {
         Self::default()
     }
 
-    /// Offers update number `seq`, received at `now`.
-    pub fn accept(&mut self, seq: u64, now: Seconds) -> Applied {
+    /// Offers update number `sequence`, received at `now`.
+    pub fn accept(&mut self, sequence: u64, now: Seconds) -> Applied {
         match self.last {
-            Some((last, _)) if seq <= last => Applied::Ignored,
+            Some((last, _)) if sequence <= last => Applied::Ignored,
             _ => {
-                self.last = Some((seq, now));
+                self.last = Some((sequence, now));
                 Applied::Accepted
             }
         }
@@ -35,8 +35,8 @@ impl LiveFeed {
     }
 
     /// The sequence number of the update on screen.
-    pub fn seq(&self) -> Option<u64> {
-        self.last.map(|(seq, _)| seq)
+    pub fn sequence(&self) -> Option<u64> {
+        self.last.map(|(sequence, _)| sequence)
     }
 
     /// Fresh while the last update is at most a second old.

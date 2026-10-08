@@ -7,7 +7,7 @@ use crate::{Freshness, LiveFeed, PerformanceView};
 #[derive(Debug, Clone, PartialEq)]
 pub struct PlayerView {
     /// Sequence number of the update this is built from.
-    pub seq: Option<u64>,
+    pub sequence: Option<u64>,
     /// Whether the numbers may be shown as live.
     pub freshness: Freshness,
     /// Where the playhead is.
@@ -25,7 +25,7 @@ impl PlayerView {
         now: Seconds,
     ) -> Self {
         Self {
-            seq: feed.seq(),
+            sequence: feed.sequence(),
             freshness: feed.freshness(now),
             position,
             performance,

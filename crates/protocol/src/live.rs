@@ -9,9 +9,9 @@ use crate::{Phase, Transport};
 pub struct Live {
     /// Counts up per sender run; the receiver drops anything not newer than the last one.
     #[ts(type = "number")]
-    pub seq: u64,
+    pub sequence: u64,
     /// Sender clock in seconds, for latency figures only.
-    pub ts: f64,
+    pub timestamp: f64,
     /// What REAPER's transport does.
     pub transport: Transport,
     /// Seconds on the project timeline.
@@ -34,8 +34,8 @@ pub struct Live {
     pub record_armed: bool,
     /// Revision of the catalog this state belongs to.
     #[ts(type = "number")]
-    pub catalog_rev: u64,
+    pub catalog_revision: u64,
     /// Revision of the setlists this state belongs to.
     #[ts(type = "number")]
-    pub setlist_rev: u64,
+    pub setlist_revision: u64,
 }

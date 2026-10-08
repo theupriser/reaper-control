@@ -47,9 +47,9 @@ fn vectors_decode_the_same_whole_and_byte_by_byte() -> Result<(), Box<dyn std::e
 
         let mut whole = FrameDecoder::new();
         whole.push(&bytes);
-        let (frames, err) = drain(&mut whole);
+        let (frames, error) = drain(&mut whole);
         assert_eq!(frames, v.frames, "{}: frames", v.name);
-        assert_eq!(error_name(err), v.error.as_deref(), "{}: error", v.name);
+        assert_eq!(error_name(error), v.error.as_deref(), "{}: error", v.name);
 
         let mut trickle = FrameDecoder::new();
         let mut got = Vec::new();
@@ -83,14 +83,14 @@ fn encode_then_decode_returns_the_payload() -> Result<(), FrameError> {
 #[test]
 fn encode_refuses_empty_and_oversized_payloads() {
     assert_eq!(encode(b""), Err(FrameError::Empty));
-    let big = vec![0u8; MAX_FRAME_LEN + 1];
+    let big = vec![0u8; MAX_FRAME_LENGTH + 1];
     assert_eq!(
         encode(&big),
         Err(FrameError::TooLarge {
-            len: MAX_FRAME_LEN + 1
+            length: MAX_FRAME_LENGTH + 1
         })
     );
-    assert!(encode(&big[..MAX_FRAME_LEN]).is_ok());
+    assert!(encode(&big[..MAX_FRAME_LENGTH]).is_ok());
 }
 
 #[test]
@@ -107,7 +107,7 @@ fn a_failed_decoder_stays_failed() {
 fn an_oversized_length_is_refused_before_any_payload_arrives() {
     let mut decoder = FrameDecoder::new();
     decoder.push(
-        &u32::try_from(MAX_FRAME_LEN + 1)
+        &u32::try_from(MAX_FRAME_LENGTH + 1)
             .unwrap_or(u32::MAX)
             .to_be_bytes(),
     );

@@ -14,9 +14,9 @@ pub enum ServerMessage {
         /// Version of the extension build.
         extension_version: String,
         /// Revision of the catalog the extension holds.
-        catalog_rev: u64,
+        catalog_revision: u64,
         /// Revision of the setlists the extension holds.
-        setlist_rev: u64,
+        setlist_revision: u64,
         /// Id of the newest event, 0 when there is none yet.
         last_event_id: u64,
     },

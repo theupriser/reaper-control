@@ -8,10 +8,10 @@ use crate::{CueInfo, SetlistInfo, SongInfo};
 pub struct Catalog {
     /// Raised whenever songs or cues change.
     #[ts(type = "number")]
-    pub rev: u64,
+    pub revision: u64,
     /// Raised whenever a setlist changes.
     #[ts(type = "number")]
-    pub setlist_rev: u64,
+    pub setlist_revision: u64,
     /// Songs in timeline order.
     pub songs: Vec<SongInfo>,
     /// Cues in timeline order.

@@ -40,8 +40,8 @@ fn every_message_survives_a_round_trip() -> Result<(), Box<dyn std::error::Error
         ServerMessage::Welcome {
             protocol: PROTOCOL_VERSION,
             extension_version: "0.0.0".into(),
-            catalog_rev: 3,
-            setlist_rev: 5,
+            catalog_revision: 3,
+            setlist_revision: 5,
             last_event_id: 99,
         },
         ServerMessage::State {
@@ -130,8 +130,8 @@ fn the_handshake_checks_kind_token_and_version() {
 
 fn live() -> Live {
     Live {
-        seq: 41,
-        ts: 1234.5,
+        sequence: 41,
+        timestamp: 1234.5,
         transport: Transport::Playing,
         position: 72.25,
         phase: Phase::HandingOver,
@@ -141,15 +141,15 @@ fn live() -> Live {
         autoplay: true,
         count_in: false,
         record_armed: true,
-        catalog_rev: 3,
-        setlist_rev: 5,
+        catalog_revision: 3,
+        setlist_revision: 5,
     }
 }
 
 fn catalog() -> Catalog {
     Catalog {
-        rev: 3,
-        setlist_rev: 5,
+        revision: 3,
+        setlist_revision: 5,
         songs: vec![SongInfo {
             id: "{A}".into(),
             name: "Opener".into(),
@@ -168,7 +168,7 @@ fn catalog() -> Catalog {
         setlists: vec![SetlistInfo {
             id: "set-1".into(),
             name: "Friday".into(),
-            rev: 5,
+            revision: 5,
             entries: vec![EntryInfo {
                 id: 1,
                 song_id: "{A}".into(),
@@ -250,10 +250,10 @@ fn an_event_is_tagged_by_kind_next_to_its_id() -> Result<(), serde_json::Error> 
 fn damaged_new_messages_are_errors_not_panics() {
     for bad in [
         &br#"{"type":"Live"}"#[..],
-        br#"{"type":"Live","seq":-1}"#,
+        br#"{"type":"Live","sequence":-1}"#,
         br#"{"type":"Event","id":1,"event":{"kind":"Explode"}}"#,
         br#"{"type":"Event","id":1}"#,
-        br#"{"type":"Catalog","rev":1,"setlist_rev":1,"songs":[{"id":1}],"cues":[],"setlists":[]}"#,
+        br#"{"type":"Catalog","revision":1,"setlist_revision":1,"songs":[{"id":1}],"cues":[],"setlists":[]}"#,
         br#"{"type":"EventsLost"}"#,
         br#"{"type":"Welcome","protocol":2,"extension_version":"x"}"#,
     ] {

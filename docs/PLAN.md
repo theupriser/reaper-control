@@ -68,7 +68,7 @@ reaper-control-app-v2/
 | 2.5 | Property tests (proptest): never skips an entry, never double-fires, never leaves song bounds without hand-over, never panics | 1.5 |
 | 2.6 | Setlists aggregate (validation, events, `expectedRev`) + in-memory repository | 2 |
 | 2.7 | `reaper-port` crate: `ReaperPort` trait + `FakeReaper` (deterministic playhead and clock) + scenario-file format and runner | 3.5 |
-| 2.8 | Projections/read models (PerformanceView, PlayerView, SetlistView) + stale/seq handling | 2 |
+| 2.8 | Projections/read models (PerformanceView, PlayerView, SetlistView) + stale/sequence handling | 2 |
 | 2.9 | `protocol` crate: messages, framing, versioning, serde, type generation to TS | 2.5 |
 
 **Gate 2:** `performance`, `catalogue`, `setlists` ≥ 95% line coverage; all v1 behaviours expressed as scenario files that pass on `FakeReaper`.

@@ -70,7 +70,7 @@ impl LinkServer {
     }
 
     /// Address the server listens on.
-    pub fn addr(&self) -> SocketAddr {
+    pub fn address(&self) -> SocketAddr {
         SocketAddr::from((Ipv4Addr::LOCALHOST, self.endpoint.port))
     }
 
