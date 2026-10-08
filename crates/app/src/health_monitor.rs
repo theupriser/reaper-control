@@ -8,6 +8,7 @@ use link::LinkEvent;
 use crate::app_event::AppEvent;
 use crate::clock::Clock;
 use crate::event_bus::EventBus;
+use crate::fault_check::FaultCheck;
 use crate::link_cause::LinkCause;
 use crate::link_health::LinkHealth;
 use crate::process_check::ProcessCheck;
@@ -27,6 +28,7 @@ pub struct HealthMonitor {
     events: Arc<EventBus>,
     clock: Arc<dyn Clock>,
     processes: Arc<dyn ProcessCheck>,
+    faults: Arc<dyn FaultCheck>,
 }
 
 impl HealthMonitor {
@@ -36,6 +38,7 @@ impl HealthMonitor {
         events: Arc<EventBus>,
         clock: Arc<dyn Clock>,
         processes: Arc<dyn ProcessCheck>,
+        faults: Arc<dyn FaultCheck>,
     ) -> Self {
         let lost_since = clock.now();
         Self {
@@ -47,6 +50,7 @@ impl HealthMonitor {
             events,
             clock,
             processes,
+            faults,
         }
     }
 
@@ -91,6 +95,7 @@ impl HealthMonitor {
             return;
         };
         let running = self.processes.reaper_is_running();
+        let fault = if running { self.faults.reason() } else { None };
         let changed = {
             let Ok(mut state) = self.state.lock() else {
                 return;
@@ -100,7 +105,10 @@ impl HealthMonitor {
             }
             let next = match (&before, running) {
                 (LinkHealth::Dead(LinkCause::ExtensionOutdated { .. }), true) => return,
-                (_, true) => LinkHealth::Dead(LinkCause::ExtensionNotLoaded),
+                (_, true) => match fault {
+                    Some(reason) => LinkHealth::Dead(LinkCause::ExtensionFaulted { reason }),
+                    None => LinkHealth::Dead(LinkCause::ExtensionNotLoaded),
+                },
                 (_, false) => LinkHealth::Dead(LinkCause::ReaperNotRunning),
             };
             Self::change(&mut state, next)

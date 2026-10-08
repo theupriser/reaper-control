@@ -13,4 +13,9 @@ pub enum LinkCause {
         /// The protocol version the extension announced; 0 when it announced none.
         found: u32,
     },
+    /// The extension is loaded but turned itself off, for instance in safe mode.
+    ExtensionFaulted {
+        /// Why, as the extension wrote it down.
+        reason: String,
+    },
 }

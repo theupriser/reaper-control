@@ -10,9 +10,10 @@ use protocol::{Command, LinkView};
 use crate::command_bus::CommandBus;
 use crate::config_location::{config_file, log_directory};
 use crate::config_store::ConfigStore;
-use crate::endpoint_location::endpoint_file;
+use crate::endpoint_location::{endpoint_file, fault_file};
 use crate::event_bus::EventBus;
 use crate::event_logger::log_event;
+use crate::fault_file_check::FaultFileCheck;
 use crate::health_monitor::HealthMonitor;
 use crate::intent_dispatcher::IntentDispatcher;
 use crate::link_connection::LinkConnection;
@@ -65,6 +66,9 @@ pub fn run() {
                 events.clone(),
                 clock.clone(),
                 Arc::new(SystemProcessCheck),
+                Arc::new(FaultFileCheck::new(
+                    fault_file().ok_or("the home folder is unknown")?,
+                )),
             ));
             let link = Arc::new(LinkConnection::start(
                 file,

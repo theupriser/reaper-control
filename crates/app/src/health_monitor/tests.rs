@@ -1,6 +1,7 @@
 use std::sync::Mutex;
 
 use crate::fake_clock::FakeClock;
+use crate::fake_fault_check::FakeFaultCheck;
 use crate::fake_process_check::FakeProcessCheck;
 
 use super::*;
@@ -9,6 +10,7 @@ struct Setup {
     monitor: HealthMonitor,
     clock: Arc<FakeClock>,
     processes: Arc<FakeProcessCheck>,
+    faults: Arc<FakeFaultCheck>,
     heard: Arc<Mutex<Vec<LinkHealth>>>,
 }
 
@@ -23,10 +25,12 @@ fn setup() -> Setup {
     });
     let clock = Arc::new(FakeClock::default());
     let processes = Arc::new(FakeProcessCheck::default());
+    let faults = Arc::new(FakeFaultCheck::default());
     Setup {
-        monitor: HealthMonitor::new(events, clock.clone(), processes.clone()),
+        monitor: HealthMonitor::new(events, clock.clone(), processes.clone(), faults.clone()),
         clock,
         processes,
+        faults,
         heard,
     }
 }
@@ -145,6 +149,41 @@ fn an_outdated_extension_is_replaced_by_reaper_not_running_when_reaper_quits() {
     let setup = setup();
     setup.monitor.observe(&LinkEvent::Outdated { found: 0 });
     setup.clock.advance(Duration::from_secs(60));
+    setup.monitor.tick();
+    assert_eq!(
+        setup.monitor.health(),
+        LinkHealth::Dead(LinkCause::ReaperNotRunning)
+    );
+}
+
+#[test]
+fn a_running_reaper_with_a_faulted_extension_names_the_fault() {
+    let setup = setup();
+    setup.processes.set_running(true);
+    setup.faults.set_reason(Some("safe mode"));
+    setup.clock.advance(Duration::from_secs(5));
+    setup.monitor.tick();
+    assert_eq!(
+        setup.monitor.health(),
+        LinkHealth::Dead(LinkCause::ExtensionFaulted {
+            reason: "safe mode".into()
+        })
+    );
+    setup.faults.set_reason(None);
+    setup.clock.advance(Duration::from_secs(5));
+    setup.monitor.tick();
+    assert_eq!(
+        setup.monitor.health(),
+        LinkHealth::Dead(LinkCause::ExtensionNotLoaded),
+        "the fault was cleared"
+    );
+}
+
+#[test]
+fn a_fault_left_behind_is_ignored_while_reaper_is_not_running() {
+    let setup = setup();
+    setup.faults.set_reason(Some("safe mode"));
+    setup.clock.advance(Duration::from_secs(5));
     setup.monitor.tick();
     assert_eq!(
         setup.monitor.health(),

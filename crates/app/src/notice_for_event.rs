@@ -84,6 +84,14 @@ fn health_notice(health: &LinkHealth) -> Notice {
             "The extension is another version",
             "Update the extension in REAPER to match this app.",
         ),
+        LinkHealth::Dead(LinkCause::ExtensionFaulted { reason }) => {
+            return notice(
+                "link",
+                NoticeLevel::Error,
+                "The extension turned itself off",
+                &capitalised(reason),
+            );
+        }
     };
     notice("link", level, title, text)
 }

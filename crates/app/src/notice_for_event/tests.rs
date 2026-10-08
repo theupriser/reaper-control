@@ -55,3 +55,19 @@ fn routine_events_stay_in_the_log() {
         None
     );
 }
+
+#[test]
+fn a_faulted_extension_says_why_it_turned_itself_off() {
+    let notice = notice_for_event(&AppEvent::LinkHealthChanged {
+        health: LinkHealth::Dead(LinkCause::ExtensionFaulted {
+            reason: "safe mode".into(),
+        }),
+    });
+    assert_eq!(
+        notice.map(|notice| (notice.title, notice.text)),
+        Some((
+            "The extension turned itself off".to_owned(),
+            "Safe mode".to_owned()
+        ))
+    );
+}

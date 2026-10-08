@@ -13,6 +13,12 @@ pub fn endpoint_file() -> Option<PathBuf> {
     Some(directory.join("endpoint.json"))
 }
 
+/// Where the extension writes `faulted` when it turns itself off: next to `endpoint.json`.
+#[must_use]
+pub fn fault_file() -> Option<PathBuf> {
+    Some(endpoint_file()?.with_file_name("faulted"))
+}
+
 #[cfg(target_os = "windows")]
 fn resource_path() -> Option<PathBuf> {
     Some(PathBuf::from(std::env::var_os("APPDATA")?).join("REAPER"))
