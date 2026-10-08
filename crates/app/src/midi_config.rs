@@ -12,7 +12,7 @@ use crate::midi_action::MidiAction;
 pub struct MidiConfig {
     /// Whether MIDI input is used at all.
     pub enabled: bool,
-    /// The device to listen to; the first one found when empty.
+    /// The only device to listen to; all devices when empty, as in v1.
     pub device_name: Option<String>,
     /// Only listen to this channel (0 to 15, as v1 counted); all channels when empty.
     pub channel: Option<u8>,

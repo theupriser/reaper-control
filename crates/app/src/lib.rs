@@ -42,6 +42,7 @@ pub mod midi_router;
 pub mod mirror_error;
 pub mod mirror_file;
 pub mod pending_command;
+pub mod performance_runs;
 pub mod process_check;
 pub mod queue_config;
 pub mod queue_rejection;

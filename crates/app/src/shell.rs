@@ -5,7 +5,7 @@ use tauri::{Emitter, Manager, State};
 use std::sync::Arc;
 use std::time::Duration;
 
-use protocol::{Command, LinkView, Phase};
+use protocol::{Command, LinkView};
 
 use crate::app_event::AppEvent;
 use crate::command_bus::CommandBus;
@@ -17,6 +17,7 @@ use crate::health_monitor::HealthMonitor;
 use crate::link_connection::LinkConnection;
 use crate::midi_listener::MidiListener;
 use crate::midi_router::MidiRouter;
+use crate::performance_runs::performance_runs;
 use crate::system_clock::SystemClock;
 use crate::system_process_check::SystemProcessCheck;
 
@@ -62,7 +63,7 @@ pub fn run() {
                     note,
                     velocity,
                 } => eprintln!("midi note {note} velocity {velocity} on channel {channel}"),
-                AppEvent::MidiDeviceChanged { device } => eprintln!("midi device: {device:?}"),
+                AppEvent::MidiDevicesChanged { devices } => eprintln!("midi devices: {devices:?}"),
                 AppEvent::CommandAcknowledged { id } => eprintln!("command {id} done"),
                 AppEvent::CommandTimedOut { id, command } => {
                     eprintln!("command {id} ({command:?}) was not answered in time");
@@ -104,14 +105,7 @@ pub fn run() {
                     bus.clone(),
                     events.clone(),
                     clock,
-                    move || {
-                        running.view().live.is_some_and(|live| {
-                            matches!(
-                                live.phase,
-                                Phase::Playing | Phase::CountingIn | Phase::HandingOver
-                            )
-                        })
-                    },
+                    move || performance_runs(&running.view()),
                 ));
                 if let Err(error) =
                     MidiListener::start(router, config.midi.device_name.clone(), events)

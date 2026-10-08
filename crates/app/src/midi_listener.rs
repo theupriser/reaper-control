@@ -1,5 +1,6 @@
-//! Listening to the MIDI device with `midir`, and following it when it is unplugged or plugged in.
+//! Listening to the MIDI devices with `midir`, and following them when they are unplugged or plugged in.
 
+use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -11,8 +12,8 @@ use crate::midi_router::MidiRouter;
 
 const CLIENT_NAME: &str = "Reaper Control";
 
-/// Keeps one MIDI input open: the configured device, or the first one found. `midir` reports no
-/// hotplug, so a thread looks at the device list every second.
+/// Keeps the MIDI inputs open: the wanted device, or every device when none is named (as v1 did).
+/// `midir` reports no hotplug, so a thread looks at the device list every second.
 pub struct MidiListener;
 
 impl MidiListener {
@@ -28,22 +29,26 @@ impl MidiListener {
         std::thread::Builder::new()
             .name("midi-input".into())
             .spawn(move || {
-                let mut open: Option<(String, MidiInputConnection<()>)> = None;
+                let mut open: BTreeMap<String, MidiInputConnection<()>> = BTreeMap::new();
                 loop {
-                    let names = device_names();
-                    if open.as_ref().is_some_and(|(name, _)| !names.contains(name)) {
-                        open = None;
-                        events.publish(&AppEvent::MidiDeviceChanged { device: None });
-                    }
-                    if open.is_none()
-                        && let Some(name) = names
-                            .iter()
-                            .find(|name| wanted.as_ref().is_none_or(|wanted| wanted == *name))
-                    {
-                        open = connect(name, &router);
-                        if open.is_some() {
-                            events.publish(&AppEvent::MidiDeviceChanged {
-                                device: Some(name.clone()),
+                    // A listing that failed says nothing about the devices, so nothing is closed.
+                    if let Some(names) = device_names() {
+                        let before = open.len();
+                        open.retain(|name, _| names.contains(name));
+                        let mut changed = open.len() != before;
+                        for name in names {
+                            let wanted = wanted.as_ref().is_none_or(|only| *only == name);
+                            if wanted
+                                && !open.contains_key(&name)
+                                && let Some(connection) = connect(&name, &router)
+                            {
+                                open.insert(name, connection);
+                                changed = true;
+                            }
+                        }
+                        if changed {
+                            events.publish(&AppEvent::MidiDevicesChanged {
+                                devices: open.keys().cloned().collect(),
                             });
                         }
                     }
@@ -54,28 +59,27 @@ impl MidiListener {
     }
 }
 
-/// The names of the input devices present now.
+/// The names of the input devices present now; `None` when the system cannot be asked.
 #[must_use]
-pub fn device_names() -> Vec<String> {
-    let Ok(input) = MidiInput::new(CLIENT_NAME) else {
-        return Vec::new();
-    };
-    input
-        .ports()
-        .iter()
-        .filter_map(|port| input.port_name(port).ok())
-        .collect()
+pub fn device_names() -> Option<Vec<String>> {
+    let input = MidiInput::new(CLIENT_NAME).ok()?;
+    Some(
+        input
+            .ports()
+            .iter()
+            .filter_map(|port| input.port_name(port).ok())
+            .collect(),
+    )
 }
 
-fn connect(name: &str, router: &Arc<MidiRouter>) -> Option<(String, MidiInputConnection<()>)> {
+fn connect(name: &str, router: &Arc<MidiRouter>) -> Option<MidiInputConnection<()>> {
     let input = MidiInput::new(CLIENT_NAME).ok()?;
     let port = input
         .ports()
         .into_iter()
         .find(|port| input.port_name(port).is_ok_and(|found| found == name))?;
     let router = Arc::clone(router);
-    let connection = input
+    input
         .connect(&port, "input", move |_, bytes, ()| router.handle(bytes), ())
-        .ok()?;
-    Some((name.to_owned(), connection))
+        .ok()
 }

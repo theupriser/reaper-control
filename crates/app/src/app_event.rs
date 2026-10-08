@@ -69,10 +69,10 @@ pub enum AppEvent {
         /// Velocity 0 to 127.
         velocity: u8,
     },
-    /// The MIDI device in use changed; `None` when there is none.
-    MidiDeviceChanged {
-        /// The device name.
-        device: Option<String>,
+    /// The MIDI devices being listened to changed.
+    MidiDevicesChanged {
+        /// The names of the devices now in use; empty when there are none.
+        devices: Vec<String>,
     },
     /// Something happened in the performance.
     PerformanceEvent(EventRecord),

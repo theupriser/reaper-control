@@ -66,11 +66,12 @@ impl MidiRouter {
         let Some(action) = self.config.notes.get(&note) else {
             return;
         };
+        // The debounce holds nothing that a panic could leave half done, so a poisoned lock is used as is.
         let counts = self
             .debounce
             .lock()
-            .map(|mut debounce| debounce.allows(note, self.clock.now()))
-            .unwrap_or(false);
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .allows(note, self.clock.now());
         if counts {
             // The bus announces a refusal on the event bus; a note has nobody to return it to.
             let _ = self.bus.dispatch(action.command((self.playing)()));

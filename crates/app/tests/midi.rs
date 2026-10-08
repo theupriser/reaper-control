@@ -93,15 +93,24 @@ fn the_v1_config_gives_the_mapping_and_names_what_has_no_counterpart() -> TestRe
     std::fs::write(
         &file,
         r#"{"reaper":{"host":"127.0.0.1"},"midi":{"enabled":true,"deviceName":"Pedal","channel":4,
-        "noteMapping":{"60":"nextRegion","61":"togglePlay","62":"somethingNew","200":"pause"}}}"#,
+        "noteMapping":{"60":"nextRegion","61":"togglePlay","62":"somethingNew","200":"pause","63":7}}}"#,
     )?;
     let (config, skipped) = LegacyConfigFile::read(&file)?.midi.into_config();
     assert_eq!(config.device_name.as_deref(), Some("Pedal"));
     assert_eq!(config.channel, Some(4));
     assert_eq!(config.notes.get(&60), Some(&MidiAction::Next));
     assert_eq!(config.notes.get(&61), Some(&MidiAction::TogglePlay));
-    assert_eq!(config.notes.len(), 2);
-    assert_eq!(skipped, vec!["200: pause", "62: somethingNew"]);
+    assert_eq!(config.notes.get(&44), Some(&MidiAction::RestartSong));
+    assert_eq!(skipped, vec!["200: pause", "62: somethingNew", "63: ?"]);
+    let odd = directory.join("odd.json");
+    std::fs::write(
+        &odd,
+        r#"{"midi":{"channel":-1,"noteMapping":{"60":"pause"}}}"#,
+    )?;
+    let (config, skipped) = LegacyConfigFile::read(&odd)?.midi.into_config();
+    assert_eq!(config.channel, None);
+    assert_eq!(skipped, vec!["channel: -1"]);
+    assert_eq!(config.notes.get(&60), Some(&MidiAction::Pause));
 
     let store = ConfigStore::new(directory.join("saved.json"));
     let mut saved = AppConfig {
