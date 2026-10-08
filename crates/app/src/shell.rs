@@ -30,15 +30,19 @@ pub fn run() {
         .setup(|app| {
             let handle = app.handle().clone();
             let file = endpoint_file().ok_or("the home folder is unknown")?;
-            let link = Arc::new(LinkConnection::start(file, move |view| {
-                let _ = handle.emit(VIEW_CHANGED, view);
-            }));
             let events = Arc::new(EventBus::default());
-            events.subscribe(|event| {
-                if let AppEvent::CommandRefused { command, error } = event {
+            events.subscribe(|event| match event {
+                AppEvent::CommandRefused { command, error } => {
                     eprintln!("command {command:?} refused: {error}");
                 }
+                AppEvent::ExtensionRefused { id, reason } => {
+                    eprintln!("command {id} refused by the extension: {reason}");
+                }
+                _ => {}
             });
+            let link = Arc::new(LinkConnection::start(file, events.clone(), move |view| {
+                let _ = handle.emit(VIEW_CHANGED, view);
+            }));
             app.manage(CommandBus::new(link.clone(), events));
             app.manage(link);
             Ok(())

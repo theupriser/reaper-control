@@ -1,6 +1,6 @@
 //! What the app announces about itself.
 
-use protocol::Command;
+use protocol::{Command, EventRecord};
 
 use crate::driver_error::DriverError;
 
@@ -15,5 +15,26 @@ pub enum AppEvent {
         command: Command,
         /// Why.
         error: DriverError,
+    },
+    /// The handshake with the extension is done.
+    LinkConnected {
+        /// Version of the extension build.
+        extension_version: String,
+    },
+    /// The connection to the extension is gone.
+    LinkLost,
+    /// The extension received a command and refused it.
+    ExtensionRefused {
+        /// Id the link gave the command when it was sent.
+        id: u64,
+        /// Why, as the extension says.
+        reason: String,
+    },
+    /// Something happened in the performance.
+    PerformanceEvent(EventRecord),
+    /// The app was away too long to be caught up on the performance events.
+    EventsMissed {
+        /// The oldest event id the extension still holds.
+        oldest_available: u64,
     },
 }

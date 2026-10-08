@@ -9,4 +9,6 @@ pub mod endpoint_location;
 pub mod event_bus;
 pub mod fake_driver;
 pub mod link_connection;
+pub mod link_session;
+pub mod message_translator;
 pub mod shell;

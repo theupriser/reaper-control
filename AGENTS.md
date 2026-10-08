@@ -74,7 +74,7 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 - **This MacBook is the homebase** for all development and testing. Windows x64 is covered by CI only for now; real Windows testing needs another machine later.
 
 ## Status and next steps
-See **`docs/STATUS.md`** (single source: done, in progress, next, Gate 1 checklist, open questions). Update it in the same PR whenever a feature, spike or bug completes. Do not duplicate status here.
+See **`docs/STATUS.md`** (single source: done, in progress, next, Gate 1 checklist, open questions). Update it in the same PR whenever a feature, spike or bug completes, and set the ✅/🟡/⬜ mark of the work package in `docs/PLAN.md`. Do not duplicate status here.
 
 ## Commands
 ```
