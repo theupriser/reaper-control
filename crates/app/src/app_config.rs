@@ -1,0 +1,41 @@
+//! The app's settings file.
+
+use serde::{Deserialize, Serialize};
+
+use crate::config_error::ConfigError;
+use crate::queue_config::QueueConfig;
+
+/// The schema version this build writes and understands.
+pub const SCHEMA_VERSION: u32 = 1;
+
+/// Everything the user can set; missing fields take their defaults.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct AppConfig {
+    /// Which layout of the file this is; see `config_migration`.
+    pub schema_version: u32,
+    /// Command queue limits.
+    pub queue: QueueConfig,
+}
+
+impl Default for AppConfig {
+    fn default() -> Self {
+        Self {
+            schema_version: SCHEMA_VERSION,
+            queue: QueueConfig::default(),
+        }
+    }
+}
+
+impl AppConfig {
+    /// Checks every value against its allowed range.
+    ///
+    /// # Errors
+    /// [`ConfigError::Invalid`] naming the first value out of range.
+    pub fn validate(&self) -> Result<(), ConfigError> {
+        match self.queue.problem() {
+            Some(problem) => Err(ConfigError::Invalid(problem)),
+            None => Ok(()),
+        }
+    }
+}

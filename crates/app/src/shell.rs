@@ -9,11 +9,12 @@ use protocol::{Command, LinkView};
 
 use crate::app_event::AppEvent;
 use crate::command_bus::CommandBus;
+use crate::config_location::config_file;
+use crate::config_store::ConfigStore;
 use crate::endpoint_location::endpoint_file;
 use crate::event_bus::EventBus;
 use crate::health_monitor::HealthMonitor;
 use crate::link_connection::LinkConnection;
-use crate::queue_settings::QueueSettings;
 use crate::system_clock::SystemClock;
 use crate::system_process_check::SystemProcessCheck;
 
@@ -60,6 +61,14 @@ pub fn run() {
                 }
                 _ => {}
             });
+            let config = config_file()
+                .map(|file| ConfigStore::new(file).load())
+                .transpose()
+                .unwrap_or_else(|error| {
+                    eprintln!("{error}; using the default settings");
+                    None
+                })
+                .unwrap_or_default();
             let clock = Arc::new(SystemClock::new());
             let health = Arc::new(HealthMonitor::new(
                 events.clone(),
@@ -78,7 +87,7 @@ pub fn run() {
                 link.clone(),
                 events,
                 clock,
-                QueueSettings::default(),
+                config.queue.settings(),
             ));
             let watched = Arc::clone(&bus);
             let ticker = std::thread::Builder::new()
