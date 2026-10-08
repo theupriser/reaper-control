@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 use serde::Deserialize;
 use serde_json::Value;
 
-use crate::midi_action::MidiAction;
+use crate::intent::Intent;
 use crate::midi_config::MidiConfig;
 
 /// What v1 stored about MIDI; v1 named notes and actions as text. Values are read loosely so one
@@ -45,7 +45,7 @@ impl LegacyMidi {
             ..MidiConfig::default()
         };
         for (note, name) in self.note_mapping {
-            let action = name.as_str().and_then(MidiAction::from_legacy_name);
+            let action = name.as_str().and_then(Intent::from_legacy_name);
             match (note.parse::<u8>().ok().filter(|note| *note <= 127), action) {
                 (Some(note), Some(action)) => {
                     config.notes.insert(note, action);

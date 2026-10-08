@@ -9,12 +9,13 @@ use app::config_store::ConfigStore;
 use app::event_bus::EventBus;
 use app::fake_clock::FakeClock;
 use app::fake_driver::FakeDriver;
+use app::intent::Intent;
+use app::intent_dispatcher::IntentDispatcher;
 use app::legacy_config_file::LegacyConfigFile;
-use app::midi_action::MidiAction;
 use app::midi_config::MidiConfig;
 use app::midi_router::MidiRouter;
 use app::queue_settings::QueueSettings;
-use protocol::Command;
+use protocol::{Command, LinkView, Live, Phase};
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
 
@@ -31,8 +32,20 @@ fn router(config: MidiConfig, playing: bool) -> (MidiRouter, Arc<FakeDriver>, Ar
             ..QueueSettings::default()
         },
     ));
+    let phase = if playing { Phase::Playing } else { Phase::Idle };
+    let intents = Arc::new(IntentDispatcher::new(bus, events.clone(), move || {
+        LinkView {
+            live: Some(Live {
+                phase,
+                current_song: Some(0),
+                next_song: Some(1),
+                ..Live::default()
+            }),
+            ..LinkView::default()
+        }
+    }));
     (
-        MidiRouter::new(config, bus, events, clock.clone(), move || playing),
+        MidiRouter::new(config, intents, events, clock.clone()),
         driver,
         clock,
     )
@@ -98,9 +111,9 @@ fn the_v1_config_gives_the_mapping_and_names_what_has_no_counterpart() -> TestRe
     let (config, skipped) = LegacyConfigFile::read(&file)?.midi.into_config();
     assert_eq!(config.device_name.as_deref(), Some("Pedal"));
     assert_eq!(config.channel, Some(4));
-    assert_eq!(config.notes.get(&60), Some(&MidiAction::Next));
-    assert_eq!(config.notes.get(&61), Some(&MidiAction::TogglePlay));
-    assert_eq!(config.notes.get(&44), Some(&MidiAction::RestartSong));
+    assert_eq!(config.notes.get(&60), Some(&Intent::Next));
+    assert_eq!(config.notes.get(&61), Some(&Intent::TogglePlay));
+    assert_eq!(config.notes.get(&44), Some(&Intent::RestartSong));
     assert_eq!(skipped, vec!["200: pause", "62: somethingNew", "63: ?"]);
     let odd = directory.join("odd.json");
     std::fs::write(
@@ -110,7 +123,7 @@ fn the_v1_config_gives_the_mapping_and_names_what_has_no_counterpart() -> TestRe
     let (config, skipped) = LegacyConfigFile::read(&odd)?.midi.into_config();
     assert_eq!(config.channel, None);
     assert_eq!(skipped, vec!["channel: -1"]);
-    assert_eq!(config.notes.get(&60), Some(&MidiAction::Pause));
+    assert_eq!(config.notes.get(&60), Some(&Intent::Pause));
 
     let store = ConfigStore::new(directory.join("saved.json"));
     let mut saved = AppConfig {

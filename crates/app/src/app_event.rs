@@ -4,6 +4,8 @@ use protocol::{Command, EventRecord};
 
 use crate::command_refusal::CommandRefusal;
 use crate::driver_error::DriverError;
+use crate::intent::Intent;
+use crate::intent_refusal::IntentRefusal;
 use crate::link_health::LinkHealth;
 
 /// Something that happened inside the app, for anyone who listens (log, UI, tests).
@@ -28,6 +30,13 @@ pub enum AppEvent {
         command: Command,
         /// What is wrong with it.
         refusal: CommandRefusal,
+    },
+    /// The current state made an intent pointless, so no command was made.
+    IntentRefused {
+        /// What was asked for.
+        intent: Intent,
+        /// Why not.
+        refusal: IntentRefusal,
     },
     /// The extension answered a command and it was done.
     CommandAcknowledged {

@@ -5,40 +5,37 @@ use std::time::Duration;
 
 use crate::app_event::AppEvent;
 use crate::clock::Clock;
-use crate::command_bus::CommandBus;
 use crate::event_bus::EventBus;
+use crate::intent_dispatcher::IntentDispatcher;
 use crate::midi_config::MidiConfig;
 use crate::midi_debounce::MidiDebounce;
 use crate::midi_message::MidiMessage;
 
 /// Turns what MIDI devices send into commands: channel filter, global debounce, note mapping,
-/// then the one `CommandBus::dispatch` every other source uses.
+/// then the one `IntentDispatcher` every other controller uses.
 pub struct MidiRouter {
     config: MidiConfig,
-    bus: Arc<CommandBus>,
+    intents: Arc<IntentDispatcher>,
     events: Arc<EventBus>,
     clock: Arc<dyn Clock>,
-    playing: Box<dyn Fn() -> bool + Send + Sync>,
     debounce: Mutex<MidiDebounce>,
 }
 
 impl MidiRouter {
-    /// A router for `config`; `playing` tells whether the performance runs, for the play toggle.
+    /// A router for `config` that hands intents to `intents`.
     #[must_use]
     pub fn new(
         config: MidiConfig,
-        bus: Arc<CommandBus>,
+        intents: Arc<IntentDispatcher>,
         events: Arc<EventBus>,
         clock: Arc<dyn Clock>,
-        playing: impl Fn() -> bool + Send + Sync + 'static,
     ) -> Self {
         let debounce = MidiDebounce::new(Duration::from_millis(config.debounce_milliseconds));
         Self {
             config,
-            bus,
+            intents,
             events,
             clock,
-            playing: Box::new(playing),
             debounce: Mutex::new(debounce),
         }
     }
@@ -63,7 +60,7 @@ impl MidiRouter {
             note,
             velocity,
         });
-        let Some(action) = self.config.notes.get(&note) else {
+        let Some(intent) = self.config.notes.get(&note) else {
             return;
         };
         // The debounce holds nothing that a panic could leave half done, so a poisoned lock is used as is.
@@ -73,8 +70,8 @@ impl MidiRouter {
             .unwrap_or_else(std::sync::PoisonError::into_inner)
             .allows(note, self.clock.now());
         if counts {
-            // The bus announces a refusal on the event bus; a note has nobody to return it to.
-            let _ = self.bus.dispatch(action.command((self.playing)()));
+            // The bus and the dispatcher announce a refusal on the event bus; a note has nobody to return it to.
+            let _ = self.intents.dispatch(*intent);
         }
     }
 }

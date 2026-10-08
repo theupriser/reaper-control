@@ -14,11 +14,11 @@ use crate::endpoint_location::endpoint_file;
 use crate::event_bus::EventBus;
 use crate::event_logger::log_event;
 use crate::health_monitor::HealthMonitor;
+use crate::intent_dispatcher::IntentDispatcher;
 use crate::link_connection::LinkConnection;
 use crate::logging::Logging;
 use crate::midi_listener::MidiListener;
 use crate::midi_router::MidiRouter;
-use crate::performance_runs::performance_runs;
 use crate::system_clock::SystemClock;
 use crate::system_process_check::SystemProcessCheck;
 
@@ -72,13 +72,17 @@ pub fn run() {
                 config.queue.settings(),
             ));
             if config.midi.enabled {
-                let running = link.clone();
-                let router = Arc::new(MidiRouter::new(
-                    config.midi.clone(),
+                let watched = link.clone();
+                let intents = Arc::new(IntentDispatcher::new(
                     bus.clone(),
                     events.clone(),
+                    move || watched.view(),
+                ));
+                let router = Arc::new(MidiRouter::new(
+                    config.midi.clone(),
+                    intents,
+                    events.clone(),
                     clock,
-                    move || performance_runs(&running.view()),
                 ));
                 if let Err(error) =
                     MidiListener::start(router, config.midi.device_name.clone(), events)

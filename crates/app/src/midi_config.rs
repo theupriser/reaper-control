@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::midi_action::MidiAction;
+use crate::intent::Intent;
 
 /// MIDI input settings; missing fields take the defaults v1 had.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -19,7 +19,7 @@ pub struct MidiConfig {
     /// Milliseconds inside which the same note counts as one press (0 to 5000).
     pub debounce_milliseconds: u64,
     /// Which note triggers which action (notes 0 to 127).
-    pub notes: BTreeMap<u8, MidiAction>,
+    pub notes: BTreeMap<u8, Intent>,
 }
 
 impl Default for MidiConfig {
@@ -30,14 +30,14 @@ impl Default for MidiConfig {
             channel: None,
             debounce_milliseconds: 200,
             notes: BTreeMap::from([
-                (44, MidiAction::RestartSong),
-                (45, MidiAction::ToggleAutoResume),
-                (46, MidiAction::ToggleCountInOnMarker),
-                (47, MidiAction::ToggleRecordArm),
-                (48, MidiAction::Previous),
-                (49, MidiAction::Pause),
-                (50, MidiAction::TogglePlay),
-                (51, MidiAction::Next),
+                (44, Intent::RestartSong),
+                (45, Intent::ToggleAutoResume),
+                (46, Intent::ToggleCountInOnMarker),
+                (47, Intent::ToggleRecordArm),
+                (48, Intent::Previous),
+                (49, Intent::Pause),
+                (50, Intent::TogglePlay),
+                (51, Intent::Next),
             ]),
         }
     }
