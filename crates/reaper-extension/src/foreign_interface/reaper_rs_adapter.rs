@@ -79,6 +79,10 @@ impl ReaperPort for ReaperRsAdapter {
         }
     }
 
+    fn change_count(&self) -> u64 {
+        u64::from(self.reaper.get_project_state_change_count(Self::project()))
+    }
+
     fn count_in(&self) -> bool {
         count_in::read(&self.reaper)
     }

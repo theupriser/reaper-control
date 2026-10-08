@@ -21,7 +21,8 @@ reaper-macros = { git = "https://github.com/helgoboss/reaper-rs", rev = "659b22b
 thiserror.workspace = true
 
 [features]
-# Test builds only: trigger files make the tick panic, to prove the guard in a real REAPER.
+# Test builds only: trigger files make the tick panic (`panic-main`) or stay slow (`slow-main`,
+# every tick while the file exists), to prove the guard and the watchdog in a real REAPER.
 fault-injection = []
 # Test builds only: a `probe-command` file makes the adapter read and act, to check it in a real REAPER.
 probe = []

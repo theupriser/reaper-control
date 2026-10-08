@@ -1,11 +1,13 @@
 use std::path::PathBuf;
 
+use performance::Input;
 use reaper_medium::ProjectContext;
 use reaper_port::ReaperPort;
 use shared_kernel::Seconds;
 
 use super::reaper_rs_adapter::ReaperRsAdapter;
 use crate::log::Log;
+use crate::timer_loop::TimerLoop;
 
 /// Test builds only: runs the commands in `probe-command` (one per line) against the adapter and
 /// logs what it reads, so the adapter can be checked in a real REAPER without a link.
@@ -21,7 +23,7 @@ impl Probe {
         }
     }
 
-    pub(super) fn run(&self, adapter: &mut ReaperRsAdapter, log: &Log) {
+    pub(super) fn run(&self, timer_loop: &mut TimerLoop<ReaperRsAdapter>, log: &Log) {
         let Ok(commands) = std::fs::read_to_string(&self.file) else {
             return;
         };
@@ -29,7 +31,27 @@ impl Probe {
         for line in commands.lines() {
             let words: Vec<&str> = line.split_whitespace().collect();
             log.line(&format!("probe> {line}"));
-            Self::command(&words, adapter, log);
+            match words.as_slice() {
+                ["perf", rest @ ..] => Self::perf(rest, timer_loop, log),
+                _ => Self::command(&words, timer_loop.port_mut(), log),
+            }
+        }
+    }
+
+    /// Drives the performance the way the link will: a command through the timer loop.
+    fn perf(words: &[&str], timer_loop: &mut TimerLoop<ReaperRsAdapter>, log: &Log) {
+        match words {
+            ["play"] => timer_loop.command(Input::Play),
+            ["pause"] => timer_loop.command(Input::Pause),
+            ["next"] => timer_loop.command(Input::Next),
+            ["previous"] => timer_loop.command(Input::Previous),
+            ["restart"] => timer_loop.command(Input::RestartSong),
+            ["phase"] => log.line(&format!(
+                "probe: phase {:?}, rebuilds {}",
+                timer_loop.phase(),
+                timer_loop.rebuilds()
+            )),
+            _ => log.line("probe: unknown perf command"),
         }
     }
 

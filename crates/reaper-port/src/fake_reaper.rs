@@ -18,6 +18,7 @@ pub struct FakeReaper {
     markers: Vec<Marker>,
     tempo_map: TempoMap,
     ext_state: BTreeMap<(String, String), String>,
+    change_count: u64,
 }
 
 impl FakeReaper {
@@ -32,7 +33,14 @@ impl FakeReaper {
             markers,
             tempo_map,
             ext_state: BTreeMap::new(),
+            change_count: 0,
         }
+    }
+
+    /// Edits the project the way a user does: the regions are replaced and the change count moves.
+    pub fn replace_regions(&mut self, regions: Vec<Region>) {
+        self.regions = regions;
+        self.change_count += 1;
     }
 
     /// Lets time pass. The clock always moves forward; the playhead moves with
@@ -64,6 +72,10 @@ impl ReaperPort for FakeReaper {
 
     fn count_in(&self) -> bool {
         self.count_in
+    }
+
+    fn change_count(&self) -> u64 {
+        self.change_count
     }
 
     fn regions(&self) -> Vec<Region> {
@@ -105,5 +117,6 @@ impl ReaperPort for FakeReaper {
     fn set_ext_state(&mut self, section: &str, key: &str, value: &str) {
         self.ext_state
             .insert((section.to_string(), key.to_string()), value.to_string());
+        self.change_count += 1;
     }
 }
