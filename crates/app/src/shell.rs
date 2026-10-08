@@ -7,14 +7,15 @@ use std::time::Duration;
 
 use protocol::{Command, LinkView};
 
-use crate::app_event::AppEvent;
 use crate::command_bus::CommandBus;
-use crate::config_location::config_file;
+use crate::config_location::{config_file, log_directory};
 use crate::config_store::ConfigStore;
 use crate::endpoint_location::endpoint_file;
 use crate::event_bus::EventBus;
+use crate::event_logger::log_event;
 use crate::health_monitor::HealthMonitor;
 use crate::link_connection::LinkConnection;
+use crate::logging::Logging;
 use crate::midi_listener::MidiListener;
 use crate::midi_router::MidiRouter;
 use crate::performance_runs::performance_runs;
@@ -35,46 +36,18 @@ fn dispatch(bus: State<'_, Arc<CommandBus>>, command: Command) -> Result<(), Str
 
 /// Starts the window and blocks until it closes.
 pub fn run() {
+    let logging = Logging::start(log_directory());
     let result = tauri::Builder::default()
         .setup(|app| {
             let handle = app.handle().clone();
             let file = endpoint_file().ok_or("the home folder is unknown")?;
             let events = Arc::new(EventBus::default());
-            events.subscribe(|event| match event {
-                AppEvent::CommandRefused { command, error } => {
-                    eprintln!("command {command:?} refused: {error}");
-                }
-                AppEvent::ExtensionRefused { id, reason } => {
-                    eprintln!("command {id} refused by the extension: {reason}");
-                }
-                AppEvent::CommandSent(command) => eprintln!("command {command:?} sent"),
-                AppEvent::CommandDropped(command) => {
-                    eprintln!("command {command:?} dropped as a rapid repeat");
-                }
-                AppEvent::CommandQueueFull(command) => {
-                    eprintln!("command {command:?} refused: too many commands are waiting");
-                }
-                AppEvent::CommandInvalid { command, refusal } => {
-                    eprintln!("command {command:?} refused: {refusal}");
-                }
-                AppEvent::LinkHealthChanged { health } => eprintln!("link health: {health:?}"),
-                AppEvent::MidiActivity {
-                    channel,
-                    note,
-                    velocity,
-                } => eprintln!("midi note {note} velocity {velocity} on channel {channel}"),
-                AppEvent::MidiDevicesChanged { devices } => eprintln!("midi devices: {devices:?}"),
-                AppEvent::CommandAcknowledged { id } => eprintln!("command {id} done"),
-                AppEvent::CommandTimedOut { id, command } => {
-                    eprintln!("command {id} ({command:?}) was not answered in time");
-                }
-                _ => {}
-            });
+            events.subscribe(log_event);
             let config = config_file()
                 .map(|file| ConfigStore::new(file).load())
                 .transpose()
                 .unwrap_or_else(|error| {
-                    eprintln!("{error}; using the default settings");
+                    tracing::warn!(%error, "using the default settings");
                     None
                 })
                 .unwrap_or_default();
@@ -110,7 +83,7 @@ pub fn run() {
                 if let Err(error) =
                     MidiListener::start(router, config.midi.device_name.clone(), events)
                 {
-                    eprintln!("midi thread failed to start: {error}");
+                    tracing::error!(%error, "midi thread failed to start");
                 }
             }
             let watched = Arc::clone(&bus);
@@ -123,7 +96,7 @@ pub fn run() {
                     }
                 });
             if let Err(error) = ticker {
-                eprintln!("command timeout thread failed to start: {error}");
+                tracing::error!(%error, "command timeout thread failed to start");
             }
             let health_ticker = std::thread::Builder::new()
                 .name("link-health".into())
@@ -134,7 +107,7 @@ pub fn run() {
                     }
                 });
             if let Err(error) = health_ticker {
-                eprintln!("link health thread failed to start: {error}");
+                tracing::error!(%error, "link health thread failed to start");
             }
             app.manage(bus);
             app.manage(link);
@@ -143,7 +116,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![current_view, dispatch])
         .run(tauri::generate_context!());
     if let Err(error) = result {
-        eprintln!("reaper control failed to start: {error}");
+        tracing::error!(%error, "reaper control failed to start");
+        drop(logging);
         std::process::exit(1);
     }
 }

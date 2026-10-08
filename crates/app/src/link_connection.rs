@@ -52,7 +52,7 @@ impl LinkConnection {
                 }
             });
         if let Err(error) = spawned {
-            eprintln!("link view thread failed to start: {error}");
+            tracing::error!(%error, "link view thread failed to start");
         }
         Self { client, view }
     }
