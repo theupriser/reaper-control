@@ -7,6 +7,7 @@ mod fault;
 mod fault_file;
 #[allow(unsafe_code)] // the one module that talks to REAPER and the C runtime (SPEC S-9.2)
 mod foreign_interface;
+mod journal;
 mod link_bridge;
 mod log;
 mod safe_mode_marker;

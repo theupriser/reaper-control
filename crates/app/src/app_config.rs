@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use protocol::{NoteMapping, Settings, SettingsView};
 
 use crate::config_error::ConfigError;
+use crate::log_config::LogConfig;
 use crate::midi_config::MidiConfig;
 use crate::queue_config::QueueConfig;
 
@@ -21,6 +22,8 @@ pub struct AppConfig {
     pub queue: QueueConfig,
     /// MIDI input.
     pub midi: MidiConfig,
+    /// The log level.
+    pub log: LogConfig,
 }
 
 impl Default for AppConfig {
@@ -29,6 +32,7 @@ impl Default for AppConfig {
             schema_version: SCHEMA_VERSION,
             queue: QueueConfig::default(),
             midi: MidiConfig::default(),
+            log: LogConfig::default(),
         }
     }
 }
@@ -39,7 +43,12 @@ impl AppConfig {
     /// # Errors
     /// [`ConfigError::Invalid`] naming the first value out of range.
     pub fn validate(&self) -> Result<(), ConfigError> {
-        match self.queue.problem().or_else(|| self.midi.problem()) {
+        match self
+            .queue
+            .problem()
+            .or_else(|| self.midi.problem())
+            .or_else(|| self.log.problem())
+        {
             Some(problem) => Err(ConfigError::Invalid(problem)),
             None => Ok(()),
         }
@@ -58,6 +67,7 @@ impl AppConfig {
             midi_device_name: self.midi.device_name.clone(),
             midi_channel: self.midi.channel,
             midi_debounce_milliseconds: clamp(self.midi.debounce_milliseconds),
+            log_level: self.log.level.clone(),
         }
     }
 
@@ -93,6 +103,7 @@ impl AppConfig {
             .filter(|name| !name.is_empty());
         config.midi.channel = settings.midi_channel;
         config.midi.debounce_milliseconds = settings.midi_debounce_milliseconds.into();
+        config.log.level.clone_from(&settings.log_level);
         config
     }
 }

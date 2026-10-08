@@ -93,3 +93,25 @@ fn the_first_start_takes_the_v1_midi_settings_once() -> TestResult {
     std::fs::remove_dir_all(directory)?;
     Ok(())
 }
+
+#[test]
+fn the_log_level_is_saved_and_an_unknown_one_is_refused() -> TestResult {
+    let (store, directory) = store("config-log-level")?;
+    assert_eq!(AppConfig::default().log.level, "info");
+    let mut config = AppConfig::default();
+    config.log.level = "debug".into();
+    store.save(&config)?;
+    assert_eq!(store.load()?.log.level, "debug");
+    assert_eq!(
+        AppConfig::default()
+            .with_settings(&config.settings())
+            .log
+            .level,
+        "debug"
+    );
+
+    config.log.level = "chatty".into();
+    assert!(matches!(store.save(&config), Err(ConfigError::Invalid(_))));
+    std::fs::remove_dir_all(directory)?;
+    Ok(())
+}

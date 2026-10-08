@@ -26,3 +26,5 @@ export const currentTransfer = (): Promise<SetlistTransferView> => invoke<Setlis
 export const restoreSetlists = (): Promise<number> => invoke<number>("restore_setlists");
 
 export const importSetlists = (ids: string[]): Promise<number> => invoke<number>("import_setlists", { ids });
+
+export const exportDiagnostics = (): Promise<string> => invoke<string>("export_diagnostics");

@@ -16,13 +16,13 @@ pub struct Logging {
 }
 
 impl Logging {
-    /// Starts logging at the level in `RC2_LOG` (default `info`) to standard error and, when the
+    /// Starts logging at the level in `RC2_LOG` or else `level` (from the config) to standard error and, when the
     /// folder can be written, to a daily file in it. Without a usable folder it logs to standard
     /// error only: the app never stops for a log.
     #[must_use]
-    pub fn start(directory: Option<PathBuf>) -> Self {
+    pub fn start(directory: Option<PathBuf>, level: &str) -> Self {
         let filter =
-            EnvFilter::try_from_env(FILTER_VARIABLE).unwrap_or_else(|_| EnvFilter::new("info"));
+            EnvFilter::try_from_env(FILTER_VARIABLE).unwrap_or_else(|_| EnvFilter::new(level));
         let appender = directory.and_then(|directory| {
             RollingFileAppender::builder()
                 .rotation(Rotation::DAILY)

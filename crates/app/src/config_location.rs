@@ -22,6 +22,12 @@ pub fn log_directory() -> Option<PathBuf> {
     Some(app_directory()?.join("logs"))
 }
 
+/// The folder the diagnostics bundles are written to, `diagnostics` next to the config file.
+#[must_use]
+pub fn diagnostics_directory() -> Option<PathBuf> {
+    Some(app_directory()?.join("diagnostics"))
+}
+
 /// The folder of the restore-only setlist copies, `setlist-mirror` next to the config file.
 #[must_use]
 pub fn mirror_directory() -> Option<PathBuf> {

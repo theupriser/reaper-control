@@ -364,7 +364,11 @@ midi_channel: number | null,
 /**
  * Milliseconds inside which the same note counts as one press (0 to 5000).
  */
-midi_debounce_milliseconds: number, };
+midi_debounce_milliseconds: number, 
+/**
+ * How much the app logs: error, warn, info, debug or trace. Applies after a restart.
+ */
+log_level: string, };
 
 /**
  * One MIDI note and the action it triggers, for display.

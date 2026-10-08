@@ -13,6 +13,12 @@ pub fn endpoint_file() -> Option<PathBuf> {
     Some(directory.join("endpoint.json"))
 }
 
+/// The extension's folder: `endpoint.json`, its log and its journal are in it.
+#[must_use]
+pub fn extension_directory() -> Option<PathBuf> {
+    endpoint_file()?.parent().map(std::path::Path::to_path_buf)
+}
+
 /// Where the extension writes `faulted` when it turns itself off: next to `endpoint.json`.
 #[must_use]
 pub fn fault_file() -> Option<PathBuf> {

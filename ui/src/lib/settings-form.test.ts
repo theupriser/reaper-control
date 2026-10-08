@@ -10,6 +10,7 @@ const saved: Settings = {
   midi_device_name: null,
   midi_channel: null,
   midi_debounce_milliseconds: 200,
+  log_level: "info",
 };
 
 describe("settings form", () => {

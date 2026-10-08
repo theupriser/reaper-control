@@ -10,15 +10,18 @@ use protocol::{Command, LinkView, SetlistTransferView, Settings, SettingsView};
 use crate::app_event::AppEvent;
 use crate::command_bus::CommandBus;
 use crate::config_location::{
-    config_file, legacy_config_file, legacy_setlists_directory, log_directory, mirror_directory,
+    config_file, diagnostics_directory, legacy_config_file, legacy_setlists_directory,
+    log_directory, mirror_directory,
 };
 use crate::config_store::ConfigStore;
-use crate::endpoint_location::{endpoint_file, fault_file};
+use crate::diagnostics_bundle::DiagnosticsBundle;
+use crate::endpoint_location::{endpoint_file, extension_directory, fault_file};
 use crate::event_bus::EventBus;
 use crate::event_logger::log_event;
 use crate::fault_file_check::FaultFileCheck;
 use crate::health_monitor::HealthMonitor;
 use crate::intent_dispatcher::IntentDispatcher;
+use crate::journal_import::JournalImport;
 use crate::legacy_config_import::import_legacy_config;
 use crate::link_connection::LinkConnection;
 use crate::logging::Logging;
@@ -86,19 +89,55 @@ fn import_setlists(
 }
 
 #[tauri::command]
+fn export_diagnostics(
+    bundle: State<'_, Arc<DiagnosticsBundle>>,
+    journal: State<'_, Arc<JournalImport>>,
+    link: State<'_, Arc<LinkConnection>>,
+) -> Result<String, String> {
+    journal.import();
+    let directory = diagnostics_directory().ok_or("the home folder is unknown")?;
+    let status = format!("{:?}", link.view().status);
+    bundle
+        .export(&directory, &status)
+        .map(|path| path.display().to_string())
+        .map_err(|error| error.to_string())
+}
+
+#[tauri::command]
 fn dispatch(bus: State<'_, Arc<CommandBus>>, command: Command) -> Result<(), String> {
     bus.dispatch(command).map_err(|error| error.to_string())
 }
 
 /// Starts the window and blocks until it closes.
 pub fn run() {
-    let logging = Logging::start(log_directory());
+    let level = config_file()
+        .and_then(|file| ConfigStore::new(file).load().ok())
+        .map_or_else(|| "info".to_owned(), |config| config.log.level);
+    let logging = Logging::start(log_directory(), &level);
     let result = tauri::Builder::default()
         .setup(|app| {
             let handle = app.handle().clone();
             let file = endpoint_file().ok_or("the home folder is unknown")?;
             let events = Arc::new(EventBus::default());
             events.subscribe(log_event);
+            let journal = Arc::new(JournalImport::new(
+                extension_directory()
+                    .ok_or("the home folder is unknown")?
+                    .join("journal.log"),
+            ));
+            journal.import();
+            let importing = journal.clone();
+            events.subscribe(move |event| {
+                if matches!(event, AppEvent::LinkConnected { .. } | AppEvent::LinkLost) {
+                    importing.import();
+                }
+            });
+            app.manage(journal);
+            app.manage(Arc::new(DiagnosticsBundle::new(
+                log_directory(),
+                extension_directory(),
+                config_file(),
+            )));
             let notices = handle.clone();
             events.subscribe(move |event| {
                 if let Some(notice) = notice_for_event(event) {
@@ -214,6 +253,7 @@ pub fn run() {
             current_transfer,
             restore_setlists,
             import_setlists,
+            export_diagnostics,
             dispatch
         ])
         .run(tauri::generate_context!());

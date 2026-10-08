@@ -9,9 +9,12 @@ export interface SettingsDraft {
   device: string;
   channel: string;
   debounce: string;
+  logLevel: string;
 }
 
 export const ALL_CHANNELS = "all";
+
+export const LOG_LEVELS = ["error", "warn", "info", "debug", "trace"];
 
 export const toDraft = (settings: Settings): SettingsDraft => ({
   repeatWindow: String(settings.queue_repeat_window_milliseconds),
@@ -21,6 +24,7 @@ export const toDraft = (settings: Settings): SettingsDraft => ({
   device: settings.midi_device_name ?? "",
   channel: settings.midi_channel === null ? ALL_CHANNELS : String(settings.midi_channel),
   debounce: String(settings.midi_debounce_milliseconds),
+  logLevel: settings.log_level,
 });
 
 const whole = (text: string, label: string): number | string => {
@@ -45,6 +49,7 @@ export function toSettings(draft: SettingsDraft): Settings | string {
     midi_device_name: draft.device === "" ? null : draft.device,
     midi_channel: draft.channel === ALL_CHANNELS ? null : Number(draft.channel),
     midi_debounce_milliseconds: debounce as number,
+    log_level: draft.logLevel,
   };
 }
 
