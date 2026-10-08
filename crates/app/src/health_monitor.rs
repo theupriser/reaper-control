@@ -8,6 +8,7 @@ use link::LinkEvent;
 use crate::app_event::AppEvent;
 use crate::clock::Clock;
 use crate::event_bus::EventBus;
+use crate::fault_check::FaultCheck;
 use crate::link_cause::LinkCause;
 use crate::link_health::LinkHealth;
 use crate::process_check::ProcessCheck;
@@ -27,6 +28,7 @@ pub struct HealthMonitor {
     events: Arc<EventBus>,
     clock: Arc<dyn Clock>,
     processes: Arc<dyn ProcessCheck>,
+    faults: Arc<dyn FaultCheck>,
 }
 
 impl HealthMonitor {
@@ -36,6 +38,7 @@ impl HealthMonitor {
         events: Arc<EventBus>,
         clock: Arc<dyn Clock>,
         processes: Arc<dyn ProcessCheck>,
+        faults: Arc<dyn FaultCheck>,
     ) -> Self {
         let lost_since = clock.now();
         Self {
@@ -47,6 +50,7 @@ impl HealthMonitor {
             events,
             clock,
             processes,
+            faults,
         }
     }
 
@@ -83,14 +87,17 @@ impl HealthMonitor {
         self.announce(changed);
     }
 
-    /// Lets time pass: a link that stays lost gets a cause, and a cause is looked at again.
+    /// Lets time pass: a link that stays lost gets a cause, a cause is looked at again, and a link
+    /// that still answers is checked for a fault the extension reported about itself.
     /// The operating system is asked outside the lock and at most every few seconds.
     pub fn tick(&self) {
         let now = self.clock.now();
         let Some(before) = self.due_for_process_check(now) else {
             return;
         };
-        let running = self.processes.reaper_is_running();
+        let up = matches!(before, LinkHealth::Connected | LinkHealth::Degraded);
+        let running = up || self.processes.reaper_is_running();
+        let fault = if running { self.faults.reason() } else { None };
         let changed = {
             let Ok(mut state) = self.state.lock() else {
                 return;
@@ -99,8 +106,12 @@ impl HealthMonitor {
                 return;
             }
             let next = match (&before, running) {
+                (LinkHealth::Connected | LinkHealth::Degraded, _) if fault.is_none() => return,
                 (LinkHealth::Dead(LinkCause::ExtensionOutdated { .. }), true) => return,
-                (_, true) => LinkHealth::Dead(LinkCause::ExtensionNotLoaded),
+                (_, true) => match fault {
+                    Some(reason) => LinkHealth::Dead(LinkCause::ExtensionFaulted { reason }),
+                    None => LinkHealth::Dead(LinkCause::ExtensionNotLoaded),
+                },
                 (_, false) => LinkHealth::Dead(LinkCause::ReaperNotRunning),
             };
             Self::change(&mut state, next)
@@ -114,7 +125,7 @@ impl HealthMonitor {
         let wanted = match state.health {
             LinkHealth::Lost => now.saturating_sub(state.lost_since) >= GRACE,
             LinkHealth::Dead(_) => true,
-            LinkHealth::Connected | LinkHealth::Degraded => false,
+            LinkHealth::Connected | LinkHealth::Degraded => true,
         };
         let recent = state
             .last_process_check

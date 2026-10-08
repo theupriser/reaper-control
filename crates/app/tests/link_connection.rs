@@ -48,6 +48,7 @@ fn monitor(events: &Arc<EventBus>) -> Arc<HealthMonitor> {
         Arc::clone(events),
         Arc::new(SystemClock::new()),
         Arc::new(FakeProcessCheck::default()),
+        Arc::new(app::fake_fault_check::FakeFaultCheck::default()),
     ))
 }
 

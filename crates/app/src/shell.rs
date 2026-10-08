@@ -7,12 +7,14 @@ use std::time::Duration;
 
 use protocol::{Command, LinkView};
 
+use crate::app_event::AppEvent;
 use crate::command_bus::CommandBus;
 use crate::config_location::{config_file, log_directory};
 use crate::config_store::ConfigStore;
-use crate::endpoint_location::endpoint_file;
+use crate::endpoint_location::{endpoint_file, fault_file};
 use crate::event_bus::EventBus;
 use crate::event_logger::log_event;
+use crate::fault_file_check::FaultFileCheck;
 use crate::health_monitor::HealthMonitor;
 use crate::intent_dispatcher::IntentDispatcher;
 use crate::link_connection::LinkConnection;
@@ -20,16 +22,22 @@ use crate::logging::Logging;
 use crate::metered_driver::MeteredDriver;
 use crate::midi_listener::MidiListener;
 use crate::midi_router::MidiRouter;
-use crate::notice_for_event::notice_for_event;
+use crate::notice_for_event::{link_problem, notice_for_event};
 use crate::system_clock::SystemClock;
 use crate::system_process_check::SystemProcessCheck;
 
 const VIEW_CHANGED: &str = "link-view";
 const NOTICE: &str = "notice";
+const LINK_PROBLEM: &str = "link-problem";
 
 #[tauri::command]
 fn current_view(link: State<'_, Arc<LinkConnection>>) -> LinkView {
     link.view()
+}
+
+#[tauri::command]
+fn current_problem(health: State<'_, Arc<HealthMonitor>>) -> Option<String> {
+    link_problem(&health.health())
 }
 
 #[tauri::command]
@@ -51,6 +59,9 @@ pub fn run() {
                 if let Some(notice) = notice_for_event(event) {
                     let _ = notices.emit(NOTICE, notice);
                 }
+                if let AppEvent::LinkHealthChanged { health } = event {
+                    let _ = notices.emit(LINK_PROBLEM, link_problem(health));
+                }
             });
             let config = config_file()
                 .map(|file| ConfigStore::new(file).load())
@@ -65,6 +76,9 @@ pub fn run() {
                 events.clone(),
                 clock.clone(),
                 Arc::new(SystemProcessCheck),
+                Arc::new(FaultFileCheck::new(
+                    fault_file().ok_or("the home folder is unknown")?,
+                )),
             ));
             let link = Arc::new(LinkConnection::start(
                 file,
@@ -112,22 +126,28 @@ pub fn run() {
             if let Err(error) = ticker {
                 tracing::error!(%error, "command timeout thread failed to start");
             }
+            let ticking = health.clone();
             let health_ticker = std::thread::Builder::new()
                 .name("link-health".into())
                 .spawn(move || {
                     loop {
                         std::thread::sleep(Duration::from_secs(1));
-                        health.tick();
+                        ticking.tick();
                     }
                 });
             if let Err(error) = health_ticker {
                 tracing::error!(%error, "link health thread failed to start");
             }
+            app.manage(health);
             app.manage(bus);
             app.manage(link);
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![current_view, dispatch])
+        .invoke_handler(tauri::generate_handler![
+            current_view,
+            current_problem,
+            dispatch
+        ])
         .run(tauri::generate_context!());
     if let Err(error) = result {
         tracing::error!(%error, "reaper control failed to start");

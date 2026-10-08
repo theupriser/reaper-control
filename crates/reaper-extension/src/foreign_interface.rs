@@ -16,6 +16,7 @@ use reaper_macros::reaper_extension_plugin;
 use reaper_medium::ReaperSession;
 
 use crate::fault::Fault;
+use crate::fault_file::FaultFile;
 use crate::log::Log;
 use crate::safe_mode_marker::SafeModeMarker;
 use crate::start_up::StartUp;
@@ -25,6 +26,7 @@ use surface::Surface;
 
 static FAULT: Fault = Fault::new();
 static LOG: OnceLock<Log> = OnceLock::new();
+static FAULTS: OnceLock<FaultFile> = OnceLock::new();
 static MARKER: OnceLock<SafeModeMarker> = OnceLock::new();
 
 unsafe extern "C" {
@@ -56,10 +58,12 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
     std::fs::create_dir_all(&directory)?;
 
     let log = LOG.get_or_init(|| Log::new(directory.join("extension.log")));
-    FAULT.install_panic_hook(log);
+    let faults = FAULTS.get_or_init(|| FaultFile::new(directory.join("faulted")));
+    FAULT.install_panic_hook(log, faults);
 
     if let Err(missing) = MissingFunctions::check(context) {
         log.line(&format!("REFUSING TO START: {missing}"));
+        let _ = faults.report(&format!("this REAPER is too old: {missing}"));
         session.reaper().show_console_msg(format!(
             "RC2: extension disabled, this REAPER is too old: {missing}\n"
         ));
@@ -69,12 +73,14 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
     match SafeModeMarker::claim(&directory.join("running"))? {
         StartUp::SafeMode => {
             log.line("SAFE MODE: REAPER did not shut down cleanly last time; extension disabled");
+            let _ = faults.report("REAPER did not shut down cleanly last time (safe mode)");
             session
                 .reaper()
                 .show_console_msg("RC2: safe mode, extension disabled\n");
             return Ok(());
         }
         StartUp::Normal(marker) => {
+            faults.clear();
             let _ = MARKER.set(marker);
         }
     }
@@ -85,6 +91,7 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
     session.plugin_register_add_csurf_inst(Box::new(Surface::new(
         &FAULT,
         log,
+        faults,
         directory,
         ReaperRsAdapter::new(session.reaper().clone()),
     )))?;

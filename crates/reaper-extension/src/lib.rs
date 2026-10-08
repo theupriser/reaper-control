@@ -4,6 +4,7 @@
 #![deny(unsafe_code)]
 
 mod fault;
+mod fault_file;
 #[allow(unsafe_code)] // the one module that talks to REAPER and the C runtime (SPEC S-9.2)
 mod foreign_interface;
 mod link_bridge;
@@ -14,6 +15,7 @@ mod tick_watchdog;
 mod timer_loop;
 
 pub use fault::Fault;
+pub use fault_file::FaultFile;
 pub use link_bridge::{BridgeError, LinkBridge};
 pub use log::Log;
 pub use safe_mode_marker::SafeModeMarker;
