@@ -52,15 +52,18 @@ fn expect(
     what: &str,
     pick: impl Fn(&LinkEvent) -> bool,
 ) -> LinkEvent {
-    let deadline = Instant::now() + Duration::from_secs(5);
+    let start = Instant::now();
+    let deadline = start + Duration::from_secs(5);
+    let mut seen = Vec::new();
     while Instant::now() < deadline {
-        if let Ok(event) = events.recv_timeout(Duration::from_millis(50))
-            && pick(&event)
-        {
-            return event;
+        if let Ok(event) = events.recv_timeout(Duration::from_millis(50)) {
+            if pick(&event) {
+                return event;
+            }
+            seen.push((start.elapsed(), event));
         }
     }
-    panic!("no event: {what}");
+    panic!("no event: {what}; skipped {seen:?}");
 }
 
 fn connected(events: &Receiver<LinkEvent>) {
