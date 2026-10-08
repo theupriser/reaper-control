@@ -37,12 +37,19 @@ fn playing(position: f64) -> AppState {
 }
 
 fn client_for(endpoint: &Arc<Mutex<Option<Endpoint>>>) -> (LinkClient, Receiver<LinkEvent>) {
+    client_that_waits(endpoint, Duration::from_millis(600))
+}
+
+fn client_that_waits(
+    endpoint: &Arc<Mutex<Option<Endpoint>>>,
+    dead_after: Duration,
+) -> (LinkClient, Receiver<LinkEvent>) {
     let endpoint = Arc::clone(endpoint);
     let mut config = ClientConfig::new(move || endpoint.lock().ok().and_then(|e| e.clone()));
     config.min_backoff = Duration::from_millis(30);
     config.max_backoff = Duration::from_millis(100);
     config.ping_after = Duration::from_millis(150);
-    config.dead_after = Duration::from_millis(600);
+    config.dead_after = dead_after;
     LinkClient::start(config)
 }
 
@@ -163,7 +170,9 @@ fn command_is_answered_with_the_handlers_outcome() -> TestResult {
 #[test]
 fn a_panicking_handler_rejects_the_command_and_keeps_the_connection() -> TestResult {
     let (_server, endpoint) = started()?;
-    let (client, events) = client_for(&endpoint);
+    // The first panic on a slow Windows runner can stall the connection thread; this test is
+    // about the rejection, not about how long a silent link is tolerated.
+    let (client, events) = client_that_waits(&endpoint, Duration::from_secs(4));
     connected(&events);
     let bad = client.send(Command::Stop)?;
     let answer = expect(
