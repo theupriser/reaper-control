@@ -70,7 +70,9 @@ impl LinkConnection {
 }
 
 impl Driver for LinkConnection {
-    fn send(&self, command: Command) -> Result<(), DriverError> {
-        Self::send(self, command).map_err(|_| DriverError::NotConnected)
+    fn send(&self, command: Command) -> Result<u64, DriverError> {
+        self.client
+            .send(command)
+            .map_err(|_| DriverError::NotConnected)
     }
 }

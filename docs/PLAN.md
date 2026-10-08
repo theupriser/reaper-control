@@ -99,7 +99,7 @@ reaper-control-app-v2/
 | ⬜ 4.17 | Control context: `ControlBinding`, `IntentTranslator` (one validation path for UI/MIDI/keyboard/remote) | 2 |
 | 🟡 4.2 | Link client over `protocol`: connect via endpoint file, handshake, reconnect with back-off, resume from last event id; decorators Timeout/Metrics/Logging **Missing: Timeout/Metrics/Logging decorators, tests for replay after reconnect and the 1 s heartbeat, Windows.** | 3.5 |
 | 🟡 4.3 | `ExtensionDriver`: state decode, version check, command send/ack **Missing: a protocol mismatch looks like "REAPER not running" to the app (it needs the `ExtensionOutdated` cause of 4.6). The rest is done: `LinkConnection` is the driver (decode in `link`, ack in 4.16).** | 2.5 |
-| ⬜ 4.4 | Command queue: ordered, id'd, de-duplication of rapid repeats, per-command timeout, back-pressure | 2.5 |
+| 🟡 4.4 | Command queue: ordered, id'd, de-duplication of rapid repeats, per-command timeout, back-pressure **Missing: the limits (250 ms, 5 s, 32) are fixed until config (4.7), the UI shows no timeout or dropped command.** | 2.5 |
 | ⬜ 4.5 | Command bus + handlers (one per Command), single dispatch entry | 2 |
 | ⬜ 4.6 | Link health model: Connected/Degraded/Lost/Dead + causes ReaperNotRunning/ExtensionNotLoaded/ExtensionOutdated/ExtensionFaulted; events | 1.5 |
 | ⬜ 4.7 | Config: typed struct, defaults, validation, atomic write, schema version + migrations | 2 |

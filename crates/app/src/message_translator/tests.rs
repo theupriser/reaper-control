@@ -38,12 +38,15 @@ fn a_refused_command_is_announced_with_its_id_and_reason() {
 }
 
 #[test]
-fn a_command_that_was_done_is_not_announced() {
+fn a_command_that_was_done_is_acknowledged() {
     let done = LinkEvent::Ack {
         id: 7,
         outcome: Outcome::Done,
     };
-    assert_eq!(MessageTranslator::translate(&done), None);
+    assert_eq!(
+        MessageTranslator::translate(&done),
+        Some(AppEvent::CommandAcknowledged { id: 7 })
+    );
 }
 
 #[test]

@@ -5,8 +5,11 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use app::app_event::AppEvent;
+use app::command_bus::CommandBus;
 use app::event_bus::EventBus;
 use app::link_connection::LinkConnection;
+use app::queue_settings::QueueSettings;
+use app::system_clock::SystemClock;
 use link::{CommandHandler, LinkServer, SendError};
 use protocol::message::Outcome;
 use protocol::{Command, LinkStatus, LinkView, Live, Phase};
@@ -148,6 +151,62 @@ fn connecting_and_a_refused_command_are_announced_on_the_event_bus() -> TestResu
         announced.recv_timeout(Duration::from_secs(5))?,
         AppEvent::LinkLost
     );
+    std::fs::remove_dir_all(&directory)?;
+    Ok(())
+}
+
+#[test]
+fn the_bus_sends_in_order_drops_a_rapid_repeat_and_hears_the_answers() -> TestResult {
+    let directory = temporary_directory("app-link-bus")?;
+    let file = directory.join("endpoint.json");
+    let (sender, received) = channel();
+    let mut server = LinkServer::start("9.9.9", Recorder(Mutex::new(sender)))?;
+    server.endpoint().write(&file)?;
+
+    let events = Arc::new(EventBus::default());
+    let (announce, announced) = channel();
+    let announce = Mutex::new(announce);
+    events.subscribe(move |event| {
+        if let Ok(announce) = announce.lock() {
+            let _ = announce.send(event.clone());
+        }
+    });
+    let connection = Arc::new(LinkConnection::start(file, events.clone(), |_| {}));
+    wait_for(&connection, "connected", |view| {
+        matches!(view.status, LinkStatus::Connected { .. })
+    });
+    let bus = CommandBus::new(
+        connection,
+        events,
+        Arc::new(SystemClock::new()),
+        QueueSettings::default(),
+    );
+
+    bus.dispatch(Command::Next)?;
+    bus.dispatch(Command::Next)?;
+    bus.dispatch(Command::Play)?;
+    assert_eq!(
+        received.recv_timeout(Duration::from_secs(5))?,
+        Command::Next
+    );
+    assert_eq!(
+        received.recv_timeout(Duration::from_secs(5))?,
+        Command::Play
+    );
+    assert!(received.recv_timeout(Duration::from_millis(300)).is_err());
+
+    let mut acknowledged = 0;
+    let mut dropped = 0;
+    while acknowledged < 2 {
+        match announced.recv_timeout(Duration::from_secs(5))? {
+            AppEvent::CommandAcknowledged { .. } => acknowledged += 1,
+            AppEvent::CommandDropped(_) => dropped += 1,
+            _ => {}
+        }
+    }
+    assert_eq!(dropped, 1);
+
+    server.stop();
     std::fs::remove_dir_all(&directory)?;
     Ok(())
 }

@@ -3,6 +3,7 @@
 use tauri::{Emitter, Manager, State};
 
 use std::sync::Arc;
+use std::time::Duration;
 
 use protocol::{Command, LinkView};
 
@@ -11,6 +12,8 @@ use crate::command_bus::CommandBus;
 use crate::endpoint_location::endpoint_file;
 use crate::event_bus::EventBus;
 use crate::link_connection::LinkConnection;
+use crate::queue_settings::QueueSettings;
+use crate::system_clock::SystemClock;
 
 const VIEW_CHANGED: &str = "link-view";
 
@@ -20,7 +23,7 @@ fn current_view(link: State<'_, Arc<LinkConnection>>) -> LinkView {
 }
 
 #[tauri::command]
-fn dispatch(bus: State<'_, CommandBus>, command: Command) -> Result<(), String> {
+fn dispatch(bus: State<'_, Arc<CommandBus>>, command: Command) -> Result<(), String> {
     bus.dispatch(command).map_err(|error| error.to_string())
 }
 
@@ -38,12 +41,41 @@ pub fn run() {
                 AppEvent::ExtensionRefused { id, reason } => {
                     eprintln!("command {id} refused by the extension: {reason}");
                 }
+                AppEvent::CommandSent(command) => eprintln!("command {command:?} sent"),
+                AppEvent::CommandDropped(command) => {
+                    eprintln!("command {command:?} dropped as a rapid repeat");
+                }
+                AppEvent::CommandQueueFull(command) => {
+                    eprintln!("command {command:?} refused: too many commands are waiting");
+                }
+                AppEvent::CommandAcknowledged { id } => eprintln!("command {id} done"),
+                AppEvent::CommandTimedOut { id, command } => {
+                    eprintln!("command {id} ({command:?}) was not answered in time");
+                }
                 _ => {}
             });
             let link = Arc::new(LinkConnection::start(file, events.clone(), move |view| {
                 let _ = handle.emit(VIEW_CHANGED, view);
             }));
-            app.manage(CommandBus::new(link.clone(), events));
+            let bus = Arc::new(CommandBus::new(
+                link.clone(),
+                events,
+                Arc::new(SystemClock::new()),
+                QueueSettings::default(),
+            ));
+            let watched = Arc::clone(&bus);
+            let ticker = std::thread::Builder::new()
+                .name("command-timeouts".into())
+                .spawn(move || {
+                    loop {
+                        std::thread::sleep(Duration::from_millis(500));
+                        watched.expire();
+                    }
+                });
+            if let Err(error) = ticker {
+                eprintln!("command timeout thread failed to start: {error}");
+            }
+            app.manage(bus);
             app.manage(link);
             Ok(())
         })
