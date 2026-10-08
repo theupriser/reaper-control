@@ -1,5 +1,10 @@
 [
   {"name": "!1008", "directives": ["hard_stop"], "hidden": true},
+  {"name": "!hardstop", "directives": ["hard_stop"], "hidden": true},
+  {"name": "!hardstop !length:210", "directives": ["hard_stop", "length=210"], "hidden": true},
+  {"name": "!bpm:128.5 !hardstop", "directives": ["bpm=128.5", "hard_stop"], "hidden": true},
+  {"name": "!hardstops", "directives": [], "hidden": false},
+  {"name": "!HardStop", "directives": [], "hidden": false},
   {"name": "!length:210", "directives": ["length=210"], "hidden": true},
   {"name": "!bpm:128.5", "directives": ["bpm=128.5"], "hidden": true},
   {"name": "!length:12", "directives": ["length=12"], "hidden": true},

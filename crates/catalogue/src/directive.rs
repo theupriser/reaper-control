@@ -3,7 +3,7 @@ use shared_kernel::{Bpm, Seconds};
 /// One special token in a marker name (SPEC §4).
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Directive {
-    /// `!1008`: pause (hard stop) when playback reaches the song's end.
+    /// `!1008` or `!hardstop`: pause (hard stop) when playback reaches the song's end.
     HardStop,
     /// `!length:N`: the song lasts N seconds instead of its region length.
     Length(Seconds),
@@ -15,7 +15,7 @@ impl Directive {
     /// Classifies one whitespace-free token. `None` when it is not one of ours
     /// (also for a malformed number, so the token stays plain text).
     pub fn parse(token: &str) -> Option<Self> {
-        if token == "!1008" {
+        if token == "!1008" || token == "!hardstop" {
             return Some(Self::HardStop);
         }
         if let Some(number) = token.strip_prefix("!length:") {
