@@ -78,7 +78,9 @@ describe("keyboard controls", () => {
   it("knows the v1 keys that exist so far", () => {
     expect(keyIntent(" ")).toBe("PlayPause");
     expect(keyIntent("a")).toBe("ToggleAutoResume");
-    expect(keyIntent("ArrowRight")).toBeNull();
+    expect(keyIntent("ArrowLeft")).toBe("Previous");
+    expect(keyIntent("ArrowRight")).toBe("Next");
+    expect(keyIntent("ArrowUp")).toBeNull();
     expect(keyIntent("A")).toBeNull();
   });
 });

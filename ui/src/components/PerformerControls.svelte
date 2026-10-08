@@ -3,22 +3,30 @@
     playing,
     canPrevious,
     canNext,
+    canRewind,
     canPlay,
     onPlayPause,
+    onPrevious,
+    onRewind,
+    onNext,
   }: {
     playing: boolean;
     canPrevious: boolean;
     canNext: boolean;
+    canRewind: boolean;
     canPlay: boolean;
     onPlayPause: () => void;
+    onPrevious: () => void;
+    onRewind: () => void;
+    onNext: () => void;
   } = $props();
 </script>
 
 <div class="controls">
-  <button aria-label="Previous song" disabled={!canPrevious}>
+  <button aria-label="Previous song" disabled={!canPrevious} onclick={onPrevious}>
     <svg viewBox="0 0 24 24" width="36" height="36"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" fill="currentColor" /></svg>
   </button>
-  <button aria-label="Rewind to start of song" disabled>
+  <button aria-label="Rewind to start of song" disabled={!canRewind} onclick={onRewind}>
     <svg viewBox="0 0 24 24" width="36" height="36"><path d="M12 12l9 6V6l-9 6zm-1 0l-9 6V6l9 6z" fill="currentColor" /></svg>
   </button>
   <button class="play" aria-label={playing ? "Pause" : "Play"} disabled={!canPlay} onclick={onPlayPause}>
@@ -28,7 +36,7 @@
       <svg viewBox="0 0 24 24" width="48" height="48"><path d="M8 5v14l11-7z" fill="currentColor" /></svg>
     {/if}
   </button>
-  <button aria-label="Next song" disabled={!canNext}>
+  <button aria-label="Next song" disabled={!canNext} onclick={onNext}>
     <svg viewBox="0 0 24 24" width="36" height="36"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" fill="currentColor" /></svg>
   </button>
 </div>

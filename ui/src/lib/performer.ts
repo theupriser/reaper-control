@@ -40,6 +40,7 @@ export interface PerformerView {
   setlistName: string | null;
   song: SongView | null;
   nextSong: { name: string; duration: number } | null;
+  hasPrevious: boolean;
   songPosition: number;
   totalElapsed: number;
   totalDuration: number;
@@ -103,11 +104,12 @@ export function seekCommand(target: SeekTarget, countInOnMarker: boolean): Comma
   return { Seek: { position: target.position, count_in: target.onCue && countInOnMarker } };
 }
 
-export type KeyIntent = "PlayPause" | "ToggleAutoResume";
+export type KeyIntent = "PlayPause" | "ToggleAutoResume" | "Previous" | "Next";
 
-// v1 keys that exist in v2 so far. Arrow keys (previous/next song) wait for the setlist.
 export function keyIntent(key: string): KeyIntent | null {
   if (key === " ") return "PlayPause";
   if (key === "a") return "ToggleAutoResume";
+  if (key === "ArrowLeft") return "Previous";
+  if (key === "ArrowRight") return "Next";
   return null;
 }

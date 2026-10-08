@@ -16,6 +16,7 @@ const base: PerformerView = {
   phase: "Idle",
   setlistName: "Example Setlist",
   song,
+  hasPrevious: true,
   nextSong: { name: "Another Song", duration: 187 },
   songPosition: 0,
   totalElapsed: 0,
