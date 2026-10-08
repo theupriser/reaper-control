@@ -64,6 +64,9 @@ fn a_panic_in_a_worker_thread_is_reported_and_kept_for_the_window() -> TestResul
     let reported = Arc::new(Mutex::new(Vec::<String>::new()));
     let reporting = reported.clone();
     install_panic_hook(move |panic| {
+        if !panic.contains("test-worker") {
+            return;
+        }
         recorder.record(panic);
         reporting
             .lock()
