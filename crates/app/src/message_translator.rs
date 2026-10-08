@@ -9,8 +9,7 @@ use crate::app_event::AppEvent;
 pub struct MessageTranslator;
 
 impl MessageTranslator {
-    /// The announcement a link event stands for. `None` for state pushes (the view shows those)
-    /// and for a command that was done.
+    /// The announcement a link event stands for. `None` for state pushes (the view shows those).
     #[must_use]
     pub fn translate(event: &LinkEvent) -> Option<AppEvent> {
         match event {
@@ -25,11 +24,15 @@ impl MessageTranslator {
                 id: *id,
                 reason: reason.clone(),
             }),
+            LinkEvent::Ack {
+                id,
+                outcome: Outcome::Done,
+            } => Some(AppEvent::CommandAcknowledged { id: *id }),
             LinkEvent::Event(record) => Some(AppEvent::PerformanceEvent(record.clone())),
             LinkEvent::EventsLost { oldest_available } => Some(AppEvent::EventsMissed {
                 oldest_available: *oldest_available,
             }),
-            LinkEvent::Ack { .. } | LinkEvent::Live(_) | LinkEvent::Catalog(_) => None,
+            LinkEvent::Live(_) | LinkEvent::Catalog(_) => None,
         }
     }
 }

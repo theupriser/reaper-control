@@ -16,6 +16,22 @@ pub enum AppEvent {
         /// Why.
         error: DriverError,
     },
+    /// An identical command was sent a moment ago, so this one was dropped as a rapid repeat.
+    CommandDropped(Command),
+    /// Too many commands were waiting for REAPER, so this one was not sent.
+    CommandQueueFull(Command),
+    /// The extension answered a command and it was done.
+    CommandAcknowledged {
+        /// Id the link gave the command when it was sent.
+        id: u64,
+    },
+    /// The extension did not answer a command in time.
+    CommandTimedOut {
+        /// Id the link gave the command when it was sent.
+        id: u64,
+        /// What was sent.
+        command: Command,
+    },
     /// The handshake with the extension is done.
     LinkConnected {
         /// Version of the extension build.

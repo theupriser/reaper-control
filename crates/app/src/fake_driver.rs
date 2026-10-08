@@ -33,13 +33,12 @@ impl FakeDriver {
 }
 
 impl Driver for FakeDriver {
-    fn send(&self, command: Command) -> Result<(), DriverError> {
+    fn send(&self, command: Command) -> Result<u64, DriverError> {
         if self.disconnected.lock().is_ok_and(|flag| *flag) {
             return Err(DriverError::NotConnected);
         }
-        if let Ok(mut sent) = self.sent.lock() {
-            sent.push(command);
-        }
-        Ok(())
+        let mut sent = self.sent.lock().map_err(|_| DriverError::NotConnected)?;
+        sent.push(command);
+        Ok(sent.len() as u64)
     }
 }
