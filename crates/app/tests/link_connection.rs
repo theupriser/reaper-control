@@ -12,6 +12,7 @@ use app::health_monitor::HealthMonitor;
 use app::link_cause::LinkCause;
 use app::link_connection::LinkConnection;
 use app::link_health::LinkHealth;
+use app::link_view_source::LinkViewSource;
 use app::queue_settings::QueueSettings;
 use app::system_clock::SystemClock;
 use link::{CommandHandler, LinkServer, SendError};

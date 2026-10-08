@@ -9,7 +9,7 @@ use crate::fault_file::FaultFile;
 use crate::link_bridge::LinkBridge;
 use crate::log::Log;
 use crate::tick_watchdog::{TickWatchdog, Verdict};
-use crate::timer_loop::TimerLoop;
+use timer_loop::TimerLoop;
 
 const HEARTBEAT_EVERY: u64 = 300;
 

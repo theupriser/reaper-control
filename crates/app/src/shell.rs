@@ -18,21 +18,24 @@ use crate::diagnostics_bundle::DiagnosticsBundle;
 use crate::endpoint_location::{endpoint_file, extension_directory, fault_file};
 use crate::event_bus::EventBus;
 use crate::event_logger::log_event;
+use crate::fake_process_check::FakeProcessCheck;
 use crate::fault_file_check::FaultFileCheck;
 use crate::health_monitor::HealthMonitor;
 use crate::intent_dispatcher::IntentDispatcher;
 use crate::journal_import::JournalImport;
 use crate::legacy_config_import::import_legacy_config;
-use crate::link_connection::LinkConnection;
+use crate::link_view_source::LinkViewSource;
 use crate::logging::Logging;
 use crate::metered_driver::MeteredDriver;
 use crate::midi_listener::{MidiListener, device_names};
 use crate::midi_router::MidiRouter;
 use crate::mirror_keeper::MirrorKeeper;
 use crate::notice_for_event::{link_problem, notice_for_event};
+use crate::process_check::ProcessCheck;
 use crate::setlist_mirror::SetlistMirror;
 use crate::setlist_transfer::SetlistTransfer;
 use crate::settings_service::SettingsService;
+use crate::start_link::start_link;
 use crate::system_clock::SystemClock;
 use crate::system_process_check::SystemProcessCheck;
 
@@ -41,7 +44,7 @@ const NOTICE: &str = "notice";
 const LINK_PROBLEM: &str = "link-problem";
 
 #[tauri::command]
-fn current_view(link: State<'_, Arc<LinkConnection>>) -> LinkView {
+fn current_view(link: State<'_, Arc<dyn LinkViewSource>>) -> LinkView {
     link.view()
 }
 
@@ -66,7 +69,7 @@ fn save_settings(
 #[tauri::command]
 fn current_transfer(
     transfer: State<'_, Arc<SetlistTransfer>>,
-    link: State<'_, Arc<LinkConnection>>,
+    link: State<'_, Arc<dyn LinkViewSource>>,
 ) -> SetlistTransferView {
     transfer.view(&link.view())
 }
@@ -74,7 +77,7 @@ fn current_transfer(
 #[tauri::command]
 fn restore_setlists(
     transfer: State<'_, Arc<SetlistTransfer>>,
-    link: State<'_, Arc<LinkConnection>>,
+    link: State<'_, Arc<dyn LinkViewSource>>,
 ) -> Result<usize, String> {
     transfer.restore(&link.view())
 }
@@ -82,7 +85,7 @@ fn restore_setlists(
 #[tauri::command]
 fn import_setlists(
     transfer: State<'_, Arc<SetlistTransfer>>,
-    link: State<'_, Arc<LinkConnection>>,
+    link: State<'_, Arc<dyn LinkViewSource>>,
     ids: Vec<String>,
 ) -> Result<usize, String> {
     transfer.import(&link.view(), &ids)
@@ -92,7 +95,7 @@ fn import_setlists(
 fn export_diagnostics(
     bundle: State<'_, Arc<DiagnosticsBundle>>,
     journal: State<'_, Arc<JournalImport>>,
-    link: State<'_, Arc<LinkConnection>>,
+    link: State<'_, Arc<dyn LinkViewSource>>,
 ) -> Result<String, String> {
     journal.import();
     let directory = diagnostics_directory().ok_or("the home folder is unknown")?;
@@ -165,10 +168,18 @@ pub fn run() {
                 })
                 .unwrap_or_default();
             let clock = Arc::new(SystemClock::new());
+            let simulated = std::env::var_os("RC2_SIMULATOR").is_some();
+            let processes: Arc<dyn ProcessCheck> = if simulated {
+                let simulated_reaper = FakeProcessCheck::default();
+                simulated_reaper.set_running(true);
+                Arc::new(simulated_reaper)
+            } else {
+                Arc::new(SystemProcessCheck)
+            };
             let health = Arc::new(HealthMonitor::new(
                 events.clone(),
                 clock.clone(),
-                Arc::new(SystemProcessCheck),
+                processes,
                 Arc::new(FaultFileCheck::new(
                     fault_file().ok_or("the home folder is unknown")?,
                 )),
@@ -176,7 +187,8 @@ pub fn run() {
             let mirror =
                 SetlistMirror::new(mirror_directory().ok_or("the home folder is unknown")?);
             let keeper = MirrorKeeper::new(mirror.clone());
-            let link = Arc::new(LinkConnection::start(
+            let (link_driver, link) = start_link(
+                simulated,
                 file,
                 events.clone(),
                 health.clone(),
@@ -184,8 +196,8 @@ pub fn run() {
                     keeper.observe(&view);
                     let _ = handle.emit(VIEW_CHANGED, view);
                 },
-            ));
-            let driver = Arc::new(MeteredDriver::new(link.clone(), clock.clone(), &events));
+            );
+            let driver = Arc::new(MeteredDriver::new(link_driver, clock.clone(), &events));
             let bus = Arc::new(CommandBus::new(
                 driver,
                 events.clone(),

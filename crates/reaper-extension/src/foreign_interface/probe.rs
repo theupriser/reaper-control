@@ -7,7 +7,7 @@ use shared_kernel::Seconds;
 
 use super::reaper_rs_adapter::ReaperRsAdapter;
 use crate::log::Log;
-use crate::timer_loop::TimerLoop;
+use timer_loop::TimerLoop;
 
 /// Test builds only: runs the commands in `probe-command` (one per line) against the adapter and
 /// logs what it reads, so the adapter can be checked in a real REAPER without a link.
