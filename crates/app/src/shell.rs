@@ -11,9 +11,11 @@ use crate::app_event::AppEvent;
 use crate::command_bus::CommandBus;
 use crate::endpoint_location::endpoint_file;
 use crate::event_bus::EventBus;
+use crate::health_monitor::HealthMonitor;
 use crate::link_connection::LinkConnection;
 use crate::queue_settings::QueueSettings;
 use crate::system_clock::SystemClock;
+use crate::system_process_check::SystemProcessCheck;
 
 const VIEW_CHANGED: &str = "link-view";
 
@@ -51,19 +53,31 @@ pub fn run() {
                 AppEvent::CommandInvalid { command, refusal } => {
                     eprintln!("command {command:?} refused: {refusal}");
                 }
+                AppEvent::LinkHealthChanged { health } => eprintln!("link health: {health:?}"),
                 AppEvent::CommandAcknowledged { id } => eprintln!("command {id} done"),
                 AppEvent::CommandTimedOut { id, command } => {
                     eprintln!("command {id} ({command:?}) was not answered in time");
                 }
                 _ => {}
             });
-            let link = Arc::new(LinkConnection::start(file, events.clone(), move |view| {
-                let _ = handle.emit(VIEW_CHANGED, view);
-            }));
+            let clock = Arc::new(SystemClock::new());
+            let health = Arc::new(HealthMonitor::new(
+                events.clone(),
+                clock.clone(),
+                Arc::new(SystemProcessCheck),
+            ));
+            let link = Arc::new(LinkConnection::start(
+                file,
+                events.clone(),
+                health.clone(),
+                move |view| {
+                    let _ = handle.emit(VIEW_CHANGED, view);
+                },
+            ));
             let bus = Arc::new(CommandBus::new(
                 link.clone(),
                 events,
-                Arc::new(SystemClock::new()),
+                clock,
                 QueueSettings::default(),
             ));
             let watched = Arc::clone(&bus);
@@ -77,6 +91,17 @@ pub fn run() {
                 });
             if let Err(error) = ticker {
                 eprintln!("command timeout thread failed to start: {error}");
+            }
+            let health_ticker = std::thread::Builder::new()
+                .name("link-health".into())
+                .spawn(move || {
+                    loop {
+                        std::thread::sleep(Duration::from_secs(1));
+                        health.tick();
+                    }
+                });
+            if let Err(error) = health_ticker {
+                eprintln!("link health thread failed to start: {error}");
             }
             app.manage(bus);
             app.manage(link);

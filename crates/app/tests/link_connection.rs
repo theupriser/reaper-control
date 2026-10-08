@@ -7,7 +7,11 @@ use std::time::{Duration, Instant};
 use app::app_event::AppEvent;
 use app::command_bus::CommandBus;
 use app::event_bus::EventBus;
+use app::fake_process_check::FakeProcessCheck;
+use app::health_monitor::HealthMonitor;
+use app::link_cause::LinkCause;
 use app::link_connection::LinkConnection;
+use app::link_health::LinkHealth;
 use app::queue_settings::QueueSettings;
 use app::system_clock::SystemClock;
 use link::{CommandHandler, LinkServer, SendError};
@@ -39,6 +43,14 @@ fn wait_for(connection: &LinkConnection, what: &str, done: impl Fn(&LinkView) ->
     panic!("timed out: {what}; view {:?}", connection.view());
 }
 
+fn monitor(events: &Arc<EventBus>) -> Arc<HealthMonitor> {
+    Arc::new(HealthMonitor::new(
+        Arc::clone(events),
+        Arc::new(SystemClock::new()),
+        Arc::new(FakeProcessCheck::default()),
+    ))
+}
+
 fn temporary_directory(name: &str) -> Result<std::path::PathBuf, std::io::Error> {
     let directory = std::env::temp_dir().join(format!("{name}-{}", std::process::id()));
     std::fs::create_dir_all(&directory)?;
@@ -48,7 +60,12 @@ fn temporary_directory(name: &str) -> Result<std::path::PathBuf, std::io::Error>
 #[test]
 fn a_missing_endpoint_file_shows_not_running_and_refuses_commands() -> TestResult {
     let directory = temporary_directory("app-link-missing")?;
-    let connection = LinkConnection::start(directory.join("endpoint.json"), Arc::default(), |_| {});
+    let connection = LinkConnection::start(
+        directory.join("endpoint.json"),
+        Arc::default(),
+        monitor(&Arc::default()),
+        |_| {},
+    );
     assert_eq!(connection.view(), LinkView::default());
     assert_eq!(connection.send(Command::Play), Err(SendError::NotConnected));
     std::fs::remove_dir_all(&directory)?;
@@ -70,11 +87,12 @@ fn it_follows_the_extension_and_sends_commands_to_it() -> TestResult {
 
     let changes = Arc::new(Mutex::new(0u32));
     let counted = Arc::clone(&changes);
-    let connection = LinkConnection::start(file, Arc::default(), move |_| {
-        if let Ok(mut count) = counted.lock() {
-            *count += 1;
-        }
-    });
+    let connection =
+        LinkConnection::start(file, Arc::default(), monitor(&Arc::default()), move |_| {
+            if let Ok(mut count) = counted.lock() {
+                *count += 1;
+            }
+        });
     wait_for(&connection, "connected with state", |view| {
         matches!(view.status, LinkStatus::Connected { .. })
             && view
@@ -127,11 +145,14 @@ fn connecting_and_a_refused_command_are_announced_on_the_event_bus() -> TestResu
     let (sender, announced) = channel();
     let sender = Mutex::new(sender);
     events.subscribe(move |event| {
-        if let Ok(sender) = sender.lock() {
+        if let (false, Ok(sender)) = (
+            matches!(event, AppEvent::LinkHealthChanged { .. }),
+            sender.lock(),
+        ) {
             let _ = sender.send(event.clone());
         }
     });
-    let connection = LinkConnection::start(file, events, |_| {});
+    let connection = LinkConnection::start(file, events.clone(), monitor(&events), |_| {});
     assert_eq!(
         announced.recv_timeout(Duration::from_secs(5))?,
         AppEvent::LinkConnected {
@@ -171,7 +192,12 @@ fn the_bus_sends_in_order_drops_a_rapid_repeat_and_hears_the_answers() -> TestRe
             let _ = announce.send(event.clone());
         }
     });
-    let connection = Arc::new(LinkConnection::start(file, events.clone(), |_| {}));
+    let connection = Arc::new(LinkConnection::start(
+        file,
+        events.clone(),
+        monitor(&events),
+        |_| {},
+    ));
     wait_for(&connection, "connected", |view| {
         matches!(view.status, LinkStatus::Connected { .. })
     });
@@ -207,6 +233,45 @@ fn the_bus_sends_in_order_drops_a_rapid_repeat_and_hears_the_answers() -> TestRe
     assert_eq!(dropped, 1);
 
     server.stop();
+    std::fs::remove_dir_all(&directory)?;
+    Ok(())
+}
+
+#[test]
+fn health_follows_the_link_and_names_an_outdated_extension() -> TestResult {
+    let directory = temporary_directory("app-link-health")?;
+    let file = directory.join("endpoint.json");
+    let mut server = LinkServer::start("9.9.9", Refuser)?;
+    server.endpoint().write(&file)?;
+
+    let events = Arc::new(EventBus::default());
+    let (sender, announced) = channel();
+    let sender = Mutex::new(sender);
+    events.subscribe(move |event| {
+        if let (AppEvent::LinkHealthChanged { health }, Ok(sender)) = (event, sender.lock()) {
+            let _ = sender.send(health.clone());
+        }
+    });
+    let health = monitor(&events);
+    let _connection = LinkConnection::start(file.clone(), events, Arc::clone(&health), |_| {});
+    assert_eq!(
+        announced.recv_timeout(Duration::from_secs(5))?,
+        LinkHealth::Connected
+    );
+
+    server.stop();
+    assert_eq!(
+        announced.recv_timeout(Duration::from_secs(5))?,
+        LinkHealth::Lost
+    );
+
+    let mut older = server.endpoint().clone();
+    older.protocol = 0;
+    older.write(&file)?;
+    assert_eq!(
+        announced.recv_timeout(Duration::from_secs(5))?,
+        LinkHealth::Dead(LinkCause::ExtensionOutdated { found: 0 })
+    );
     std::fs::remove_dir_all(&directory)?;
     Ok(())
 }

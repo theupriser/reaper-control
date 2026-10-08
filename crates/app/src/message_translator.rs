@@ -9,7 +9,7 @@ use crate::app_event::AppEvent;
 pub struct MessageTranslator;
 
 impl MessageTranslator {
-    /// The announcement a link event stands for. `None` for state pushes (the view shows those).
+    /// The announcement a link event stands for. `None` for state pushes (the view shows those) and for health signs (the health monitor announces those).
     #[must_use]
     pub fn translate(event: &LinkEvent) -> Option<AppEvent> {
         match event {
@@ -32,7 +32,11 @@ impl MessageTranslator {
             LinkEvent::EventsLost { oldest_available } => Some(AppEvent::EventsMissed {
                 oldest_available: *oldest_available,
             }),
-            LinkEvent::Live(_) | LinkEvent::Catalog(_) => None,
+            LinkEvent::Live(_)
+            | LinkEvent::Catalog(_)
+            | LinkEvent::Outdated { .. }
+            | LinkEvent::Quiet
+            | LinkEvent::Recovered => None,
         }
     }
 }

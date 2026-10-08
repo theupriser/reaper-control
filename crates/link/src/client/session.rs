@@ -24,6 +24,7 @@ pub(super) struct Session<'a> {
     pub(super) stop: &'a AtomicBool,
     pub(super) last_event_id: &'a Cell<Option<u64>>,
     pub(super) welcomed_last: u64,
+    pub(super) quiet: bool,
 }
 
 impl Session<'_> {
@@ -36,6 +37,9 @@ impl Session<'_> {
             match self.link.poll()? {
                 Some(message) => {
                     self.heartbeat.heard();
+                    if std::mem::take(&mut self.quiet) {
+                        let _ = self.events.send(LinkEvent::Recovered);
+                    }
                     if let Some(event) = LinkEvent::from_server(message) {
                         self.note(&event)?;
                         let _ = self.events.send(event);
@@ -43,6 +47,9 @@ impl Session<'_> {
                 }
                 None if self.heartbeat.is_dead() => return Err(ReadError::Closed),
                 None => {}
+            }
+            if self.heartbeat.is_quiet() && !std::mem::replace(&mut self.quiet, true) {
+                let _ = self.events.send(LinkEvent::Quiet);
             }
             if self.heartbeat.ping_due() {
                 self.link

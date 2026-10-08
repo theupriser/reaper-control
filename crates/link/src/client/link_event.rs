@@ -30,6 +30,15 @@ pub enum LinkEvent {
     },
     /// The connection is gone; the client is trying again.
     Disconnected,
+    /// The extension speaks another protocol than the app, so the client does not connect.
+    Outdated {
+        /// Protocol version the extension announced; 0 when it announced none.
+        found: u32,
+    },
+    /// Connected, but the extension has been silent for a while.
+    Quiet,
+    /// The extension spoke again after being quiet.
+    Recovered,
 }
 
 impl LinkEvent {

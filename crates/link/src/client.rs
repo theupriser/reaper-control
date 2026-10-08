@@ -48,6 +48,7 @@ impl LinkClient {
             connected: Arc::clone(&connected),
             stop: Arc::clone(&stop),
             last_event_id: Default::default(),
+            reported_outdated: Default::default(),
         };
         let thread = thread::Builder::new()
             .name("link-client".into())

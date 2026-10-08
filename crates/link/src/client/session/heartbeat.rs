@@ -3,16 +3,22 @@ use std::time::{Duration, Instant};
 /// Decides when to ping and when the extension counts as gone.
 pub(in crate::client) struct Heartbeat {
     ping_after: Duration,
+    quiet_after: Duration,
     dead_after: Duration,
     last_heard: Instant,
     last_ping: Instant,
 }
 
 impl Heartbeat {
-    pub(in crate::client) fn new(ping_after: Duration, dead_after: Duration) -> Self {
+    pub(in crate::client) fn new(
+        ping_after: Duration,
+        quiet_after: Duration,
+        dead_after: Duration,
+    ) -> Self {
         let now = Instant::now();
         Self {
             ping_after,
+            quiet_after,
             dead_after,
             last_heard: now,
             last_ping: now,
@@ -21,6 +27,10 @@ impl Heartbeat {
 
     pub(in crate::client) fn heard(&mut self) {
         self.last_heard = Instant::now();
+    }
+
+    pub(in crate::client) fn is_quiet(&self) -> bool {
+        self.last_heard.elapsed() > self.quiet_after
     }
 
     pub(in crate::client) fn is_dead(&self) -> bool {

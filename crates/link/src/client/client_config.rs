@@ -12,6 +12,8 @@ pub struct ClientConfig {
     pub max_backoff: Duration,
     /// Send a Ping after this much silence.
     pub ping_after: Duration,
+    /// Report the link as quiet after this much silence (the ping has had time to be answered).
+    pub quiet_after: Duration,
     /// Declare the link dead after this much silence.
     pub dead_after: Duration,
 }
@@ -24,6 +26,7 @@ impl ClientConfig {
             min_backoff: Duration::from_millis(100),
             max_backoff: Duration::from_secs(2),
             ping_after: Duration::from_secs(1),
+            quiet_after: Duration::from_secs(2),
             dead_after: Duration::from_secs(3),
         }
     }

@@ -4,6 +4,7 @@ use protocol::{Command, EventRecord};
 
 use crate::command_refusal::CommandRefusal;
 use crate::driver_error::DriverError;
+use crate::link_health::LinkHealth;
 
 /// Something that happened inside the app, for anyone who listens (log, UI, tests).
 #[derive(Debug, Clone, PartialEq)]
@@ -47,6 +48,11 @@ pub enum AppEvent {
     },
     /// The connection to the extension is gone.
     LinkLost,
+    /// The health of the link changed.
+    LinkHealthChanged {
+        /// The new health.
+        health: LinkHealth,
+    },
     /// The extension received a command and refused it.
     ExtensionRefused {
         /// Id the link gave the command when it was sent.
