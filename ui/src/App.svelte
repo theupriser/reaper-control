@@ -14,7 +14,7 @@
   let link = $state<LinkView>({
     status: "NotRunning",
     live: null,
-    catalog: { revision: 0, setlist_revision: 0, songs: [], cues: [], setlists: [], active_setlist: null },
+    catalog: { revision: 0, setlist_revision: 0, songs: [], project_songs: [], cues: [], setlists: [], active_setlist: null },
   });
   let error = $state<string | null>(null);
   let screen = $state<ScreenId>("player");

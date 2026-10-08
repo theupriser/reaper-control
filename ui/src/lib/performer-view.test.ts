@@ -38,6 +38,7 @@ const link = (current: number | null, position = 0): LinkView => ({
     revision: 1,
     setlist_revision: 0,
     songs,
+    project_songs: songs,
     cues: [
       { id: "cue-0", name: "Chorus", position: 130 },
       { id: "cue-1", name: "Outro", position: 50 },

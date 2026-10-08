@@ -2,6 +2,7 @@ mod build_catalog;
 mod link_command;
 mod plan_songs;
 mod project_setlists;
+mod setlist_edit;
 mod wire_event;
 
 use performance::{Effect, Flags, HandOverPolicy, Input, Performance, Phase, PlannedSong};
@@ -13,6 +14,7 @@ use build_catalog::build_catalog;
 use link_command::to_input;
 use plan_songs::plan_songs;
 use project_setlists::ProjectSetlists;
+use setlist_edit::SetlistEdit;
 use wire_event::to_wire_event;
 
 /// Events nobody has collected yet; the oldest go first when a link never collects them.
@@ -78,12 +80,37 @@ impl<Port: ReaperPort> TimerLoop<Port> {
 
     /// Carries out a command from the link, or says why it cannot.
     pub fn link_command(&mut self, command: Command) -> Outcome {
+        if let Command::SaveSetlist {
+            id,
+            name,
+            entries,
+            expected_revision,
+        } = &command
+        {
+            let edit = SetlistEdit {
+                id,
+                name,
+                entries,
+                expected_revision: *expected_revision,
+            };
+            let saved = self.project_setlists.save(&mut self.port, edit);
+            self.refresh_if_changed();
+            return self.outcome(saved);
+        }
         let start = self.song_start();
         match to_input(command, start, self.performance.flags()) {
             Ok(input) => {
                 self.command(input);
                 Outcome::Done
             }
+            Err(reason) => self.outcome(Err(reason)),
+        }
+    }
+
+    /// `Done`, or a refusal that is also recorded as an event.
+    fn outcome(&mut self, result: Result<(), &'static str>) -> Outcome {
+        match result {
+            Ok(()) => Outcome::Done,
             Err(reason) => {
                 self.record(WireEvent::CommandRejected {
                     reason: reason.into(),

@@ -314,3 +314,87 @@ fn a_hand_over_is_reported_when_a_song_ends() {
         "{events:?}"
     );
 }
+
+fn save(id: &str, songs: &[&str], expected_revision: u64) -> protocol::Command {
+    protocol::Command::SaveSetlist {
+        id: id.into(),
+        name: "Saturday".into(),
+        entries: songs
+            .iter()
+            .zip(1..)
+            .map(|(song_id, id)| protocol::EntryInfo {
+                id,
+                song_id: (*song_id).into(),
+            })
+            .collect(),
+        expected_revision,
+    }
+}
+
+#[test]
+fn a_saved_setlist_is_stored_in_the_project_and_shows_in_the_catalog() {
+    use protocol::message::Outcome;
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    let before = timer_loop.catalog().setlist_revision;
+    assert_eq!(
+        timer_loop.link_command(save("sat", &["B", "A"], 0)),
+        Outcome::Done
+    );
+    let setlists = &timer_loop.catalog().setlists;
+    assert_eq!(setlists.len(), 1);
+    assert_eq!(
+        (setlists[0].name.as_str(), setlists[0].revision),
+        ("Saturday", 1)
+    );
+    assert_eq!(setlists[0].entries.len(), 2);
+    assert_eq!(timer_loop.catalog().setlist_revision, before + 1);
+    let stored = timer_loop.port_mut().ext_state("RC2", "setlists");
+    assert!(stored.is_some_and(|text| text.contains("Saturday")));
+}
+
+#[test]
+fn saving_again_needs_the_revision_that_was_seen() {
+    use protocol::message::Outcome;
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    timer_loop.link_command(save("sat", &["A"], 0));
+    assert!(matches!(
+        timer_loop.link_command(save("sat", &["B"], 0)),
+        Outcome::Rejected { .. }
+    ));
+    assert_eq!(timer_loop.catalog().setlists[0].entries[0].song_id, "A");
+    assert_eq!(
+        timer_loop.link_command(save("sat", &["B"], 1)),
+        Outcome::Done
+    );
+    assert_eq!(timer_loop.catalog().setlists[0].entries[0].song_id, "B");
+    assert_eq!(timer_loop.catalog().setlists[0].revision, 2);
+}
+
+#[test]
+fn a_setlist_that_cannot_hold_together_is_refused_and_reported() {
+    use protocol::message::Outcome;
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    let mut nameless = save("sat", &["A"], 0);
+    if let protocol::Command::SaveSetlist { name, .. } = &mut nameless {
+        name.clear();
+    }
+    assert!(matches!(
+        timer_loop.link_command(nameless),
+        Outcome::Rejected { .. }
+    ));
+    assert!(timer_loop.catalog().setlists.is_empty());
+    assert_eq!(timer_loop.take_events().len(), 1);
+}
+
+#[test]
+fn the_catalog_lists_every_song_in_timeline_order_whatever_is_played() {
+    let timer_loop = with_setlist(FRIDAY, "friday");
+    let names: Vec<_> = timer_loop
+        .catalog()
+        .project_songs
+        .iter()
+        .map(|song| song.name.as_str())
+        .collect();
+    assert_eq!(names, ["A", "B"]);
+    assert_eq!(timer_loop.catalog().songs.len(), 3);
+}
