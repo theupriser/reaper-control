@@ -25,6 +25,21 @@ pub enum Intent {
 }
 
 impl Intent {
+    /// The action in words, as the Settings screen shows it.
+    #[must_use]
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::RestartSong => "Restart song",
+            Self::ToggleAutoResume => "Toggle auto-resume",
+            Self::ToggleCountInOnMarker => "Toggle count-in",
+            Self::ToggleRecordArm => "Toggle record arm",
+            Self::Previous => "Previous song",
+            Self::Pause => "Pause",
+            Self::TogglePlay => "Play / pause",
+            Self::Next => "Next song",
+        }
+    }
+
     /// The intent behind a name v1 stored in its config; `None` for a name v2 does not know.
     #[must_use]
     pub fn from_legacy_name(name: &str) -> Option<Self> {

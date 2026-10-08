@@ -328,3 +328,66 @@ title: string,
  * What it means or what to do.
  */
 text: string, };
+
+/**
+ * The settings a person can change on the Settings screen.
+ */
+export type Settings = { 
+/**
+ * Milliseconds inside which an identical command counts as a repeat (0 to 5000).
+ */
+queue_repeat_window_milliseconds: number, 
+/**
+ * Milliseconds after which an unanswered command is reported (500 to 60000).
+ */
+queue_timeout_milliseconds: number, 
+/**
+ * How many commands may wait for an answer (1 to 256).
+ */
+queue_capacity: number, 
+/**
+ * Whether MIDI input is used at all.
+ */
+midi_enabled: boolean, 
+/**
+ * The only device to listen to; all devices when empty.
+ */
+midi_device_name: string | null, 
+/**
+ * Only listen to this channel (0 to 15); all channels when empty.
+ */
+midi_channel: number | null, 
+/**
+ * Milliseconds inside which the same note counts as one press (0 to 5000).
+ */
+midi_debounce_milliseconds: number, };
+
+/**
+ * One MIDI note and the action it triggers, for display.
+ */
+export type NoteMapping = { 
+/**
+ * The MIDI note number (0 to 127).
+ */
+note: number, 
+/**
+ * What it does, in words.
+ */
+action: string, };
+
+/**
+ * What the Settings screen shows: the values, the MIDI devices found and the note table.
+ */
+export type SettingsView = { 
+/**
+ * The saved values.
+ */
+settings: Settings, 
+/**
+ * The names of the MIDI input devices found now.
+ */
+devices: Array<string>, 
+/**
+ * The note table, read only until MIDI learn exists.
+ */
+notes: Array<NoteMapping>, };

@@ -30,6 +30,11 @@ impl CommandQueue {
         }
     }
 
+    /// Uses these limits from now on; commands already waiting keep waiting.
+    pub fn apply(&mut self, settings: QueueSettings) {
+        self.settings = settings;
+    }
+
     /// Whether `command` may go out now.
     pub fn admit(&self, command: &Command) -> Result<(), QueueRejection> {
         let now = self.clock.now();

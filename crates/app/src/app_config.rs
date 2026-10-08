@@ -2,6 +2,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use protocol::{NoteMapping, Settings, SettingsView};
+
 use crate::config_error::ConfigError;
 use crate::midi_config::MidiConfig;
 use crate::queue_config::QueueConfig;
@@ -42,4 +44,59 @@ impl AppConfig {
             None => Ok(()),
         }
     }
+}
+
+impl AppConfig {
+    /// The values the Settings screen edits.
+    #[must_use]
+    pub fn settings(&self) -> Settings {
+        Settings {
+            queue_repeat_window_milliseconds: clamp(self.queue.repeat_window_milliseconds),
+            queue_timeout_milliseconds: clamp(self.queue.timeout_milliseconds),
+            queue_capacity: clamp(self.queue.capacity),
+            midi_enabled: self.midi.enabled,
+            midi_device_name: self.midi.device_name.clone(),
+            midi_channel: self.midi.channel,
+            midi_debounce_milliseconds: clamp(self.midi.debounce_milliseconds),
+        }
+    }
+
+    /// What the Settings screen shows: these values, the devices found and the note table.
+    #[must_use]
+    pub fn view(&self, devices: Vec<String>) -> SettingsView {
+        SettingsView {
+            settings: self.settings(),
+            devices,
+            notes: self
+                .midi
+                .notes
+                .iter()
+                .map(|(note, intent)| NoteMapping {
+                    note: *note,
+                    action: intent.label().to_owned(),
+                })
+                .collect(),
+        }
+    }
+
+    /// This config with the edited values in place; the note table stays as it is.
+    #[must_use]
+    pub fn with_settings(&self, settings: &Settings) -> Self {
+        let mut config = self.clone();
+        config.queue.repeat_window_milliseconds = settings.queue_repeat_window_milliseconds.into();
+        config.queue.timeout_milliseconds = settings.queue_timeout_milliseconds.into();
+        config.queue.capacity = usize::try_from(settings.queue_capacity).unwrap_or(usize::MAX);
+        config.midi.enabled = settings.midi_enabled;
+        config.midi.device_name = settings
+            .midi_device_name
+            .clone()
+            .filter(|name| !name.is_empty());
+        config.midi.channel = settings.midi_channel;
+        config.midi.debounce_milliseconds = settings.midi_debounce_milliseconds.into();
+        config
+    }
+}
+
+fn clamp<T: TryInto<u32>>(value: T) -> u32 {
+    value.try_into().unwrap_or(u32::MAX)
 }

@@ -61,6 +61,7 @@ pub mod queue_rejection;
 pub mod queue_settings;
 pub mod resolved_setlist;
 pub mod setlist_mirror;
+pub mod settings_service;
 pub mod shell;
 pub mod system_clock;
 pub mod system_process_check;
