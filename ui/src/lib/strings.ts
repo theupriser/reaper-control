@@ -92,6 +92,18 @@ export const strings = {
     cpu: (percent: number) => `CPU ${percent}%`,
   },
 
+  player: {
+    songs: "Songs in the setlist",
+    noSetlist: "No setlist is being played. Choose one on the Setlists screen.",
+    current: "Playing now",
+    next: "Next",
+    played: "Played",
+    bpm: (value: number) => `${Math.round(value)} BPM`,
+    hardStop: "Hard stop",
+    controls: "Transport",
+    settings: "Behaviour",
+  },
+
   pending: { sending: "Sending…" },
   notices: { dismiss: "Dismiss" },
 

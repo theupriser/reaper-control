@@ -47,7 +47,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 2rem;
+    gap: clamp(0.5rem, 3vw, 2rem);
   }
   button {
     background: none;
@@ -68,6 +68,7 @@
     cursor: not-allowed;
   }
   .play {
+    flex-shrink: 0;
     background: var(--track);
     width: 100px;
     height: 100px;
