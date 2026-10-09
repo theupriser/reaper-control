@@ -14,12 +14,13 @@ fn megabytes(bytes: u64) -> u32 {
 
 /// Reads CPU and memory with `sysinfo`.
 pub struct SysinfoStatsSource {
-    system: System,
+    // Boxed: `System` is about 250 bytes.
+    system: Box<System>,
 }
 
 impl Default for SysinfoStatsSource {
     fn default() -> Self {
-        let mut system = System::new();
+        let mut system = Box::new(System::new());
         system.refresh_cpu_usage();
         Self { system }
     }

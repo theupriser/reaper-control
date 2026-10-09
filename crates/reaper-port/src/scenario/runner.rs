@@ -20,8 +20,9 @@ const LONGEST_ADVANCE: f64 = 3600.0;
 
 /// Plays a scenario against a `FakeReaper` and the real `Performance`.
 pub struct ScenarioRunner {
-    reaper: FakeReaper,
-    performance: Performance,
+    // Boxed: the two together are over 200 bytes.
+    reaper: Box<FakeReaper>,
+    performance: Box<Performance>,
     trace: Trace,
     events: Vec<String>,
 }
@@ -58,8 +59,8 @@ impl ScenarioRunner {
             count_in: scenario.count_in,
         };
         Ok(Self {
-            reaper,
-            performance: Performance::new(planned, flags, HandOverPolicy::default()),
+            reaper: Box::new(reaper),
+            performance: Box::new(Performance::new(planned, flags, HandOverPolicy::default())),
             trace: Trace::default(),
             events: Vec::new(),
         })
@@ -69,7 +70,12 @@ impl ScenarioRunner {
         match step {
             Step::Advance { seconds } => self.advance(*seconds),
             Step::Expect(expect) => {
-                let result = check(expect, &self.performance, &self.reaper, &self.events);
+                let result = check(
+                    expect,
+                    &self.performance,
+                    self.reaper.as_ref(),
+                    &self.events,
+                );
                 self.events.clear();
                 result.map_err(|message| ScenarioError::Failed {
                     step: number,
@@ -108,7 +114,7 @@ impl ScenarioRunner {
         let quiet = matches!(input, Input::Tick { .. });
         let output = self.performance.step(input);
         for effect in &output.effects {
-            apply_effect(&mut self.reaper, *effect);
+            apply_effect(self.reaper.as_mut(), *effect);
         }
         self.events.extend(output.events.iter().map(event_name));
         if !(quiet && output == Output::default()) {

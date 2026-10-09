@@ -11,7 +11,8 @@ pub struct LinkView {
     /// Last pushed live state; none while nothing has been pushed.
     pub live: Option<Live>,
     /// Last pushed catalog; empty while nothing has been pushed.
-    pub catalog: Catalog,
+    // Boxed: a catalog is 160 bytes; the view is cloned on every push.
+    pub catalog: Box<Catalog>,
 }
 
 impl Default for LinkView {
@@ -19,7 +20,7 @@ impl Default for LinkView {
         Self {
             status: LinkStatus::NotRunning,
             live: None,
-            catalog: Catalog::default(),
+            catalog: Box::default(),
         }
     }
 }

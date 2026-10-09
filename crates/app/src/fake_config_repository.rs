@@ -9,7 +9,8 @@ use crate::config_repository::ConfigRepository;
 /// For tests: keeps the last saved config, and can be told to refuse writes.
 #[derive(Debug, Default)]
 pub struct FakeConfigRepository {
-    saved: Mutex<Option<AppConfig>>,
+    // Boxed: a config is 120 bytes.
+    saved: Mutex<Option<Box<AppConfig>>>,
     refuse_writes: Mutex<bool>,
 }
 
@@ -32,7 +33,7 @@ impl ConfigRepository for FakeConfigRepository {
             .saved
             .lock()
             .ok()
-            .and_then(|saved| saved.clone())
+            .and_then(|saved| saved.as_deref().cloned())
             .unwrap_or_default())
     }
 
@@ -42,7 +43,7 @@ impl ConfigRepository for FakeConfigRepository {
             return Err(std::io::Error::other("the disk is full").into());
         }
         if let Ok(mut saved) = self.saved.lock() {
-            *saved = Some(config.clone());
+            *saved = Some(Box::new(config.clone()));
         }
         Ok(())
     }

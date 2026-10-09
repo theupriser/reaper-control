@@ -129,11 +129,11 @@ fn a_catalog_reaches_connected_clients_and_late_ones() -> TestResult {
     };
     server.publish_catalog(catalog.clone());
     expect(&early_events, "pushed catalog", |e| {
-        *e == LinkEvent::Catalog(catalog.clone())
+        *e == LinkEvent::Catalog(Box::new(catalog.clone()))
     });
     let (_late, late_events) = client_for(&endpoint);
     expect(&late_events, "catalog on connect", |e| {
-        *e == LinkEvent::Catalog(catalog.clone())
+        *e == LinkEvent::Catalog(Box::new(catalog.clone()))
     });
     Ok(())
 }

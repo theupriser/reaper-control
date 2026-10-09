@@ -73,7 +73,8 @@ impl SimulatorState {
         let revisions = (catalog.revision, catalog.setlist_revision);
         if self.published_revisions != Some(revisions) {
             self.published_revisions = Some(revisions);
-            self.pipeline.deliver(LinkEvent::Catalog(catalog.clone()));
+            self.pipeline
+                .deliver(LinkEvent::Catalog(Box::new(catalog.clone())));
         }
         let live = self.timer_loop.live();
         if self.published.as_ref() != Some(&live) {

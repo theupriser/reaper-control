@@ -59,7 +59,11 @@ impl Hub {
             }
         }
         messages.extend(self.live.clone().map(ServerMessage::Live));
-        messages.extend(self.catalog.clone().map(ServerMessage::Catalog));
+        messages.extend(
+            self.catalog
+                .clone()
+                .map(|catalog| ServerMessage::Catalog(Box::new(catalog))),
+        );
         for message in messages {
             outbox
                 .try_send(Arc::new(encode_message(&message)?))
@@ -111,7 +115,7 @@ impl Hub {
     /// The current catalog as a frame, for a client that asked for it.
     pub(super) fn catalog_frame(&self) -> Option<Frame> {
         let catalog = self.catalog.clone()?;
-        encode_message(&ServerMessage::Catalog(catalog))
+        encode_message(&ServerMessage::Catalog(Box::new(catalog)))
             .ok()
             .map(Arc::new)
     }

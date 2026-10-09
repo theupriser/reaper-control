@@ -59,14 +59,14 @@ impl DiagnosticsBundle {
             std::env::consts::OS,
             std::env::consts::ARCH,
         );
-        add(&mut zip, "about.txt", about.as_bytes(), options)?;
+        add(&mut zip, "about.txt", about.as_bytes(), &options)?;
         if let Some(config) = &self.config {
-            add_file(&mut zip, "config.json", config, options)?;
+            add_file(&mut zip, "config.json", config, &options)?;
         }
         if let Some(logs) = &self.logs {
             for entry in std::fs::read_dir(logs).into_iter().flatten().flatten() {
                 let name = format!("logs/{}", entry.file_name().to_string_lossy());
-                add_file(&mut zip, &name, &entry.path(), options)?;
+                add_file(&mut zip, &name, &entry.path(), &options)?;
             }
         }
         if let Some(extension) = &self.extension {
@@ -75,7 +75,7 @@ impl DiagnosticsBundle {
                     &mut zip,
                     &format!("extension/{name}"),
                     &extension.join(name),
-                    options,
+                    &options,
                 )?;
             }
         }
@@ -88,7 +88,7 @@ fn add_file(
     zip: &mut ZipWriter<std::fs::File>,
     name: &str,
     source: &Path,
-    options: SimpleFileOptions,
+    options: &SimpleFileOptions,
 ) -> Result<(), DiagnosticsError> {
     match std::fs::read(source) {
         Ok(bytes) => add(zip, name, &bytes, options),
@@ -100,9 +100,9 @@ fn add(
     zip: &mut ZipWriter<std::fs::File>,
     name: &str,
     bytes: &[u8],
-    options: SimpleFileOptions,
+    options: &SimpleFileOptions,
 ) -> Result<(), DiagnosticsError> {
-    zip.start_file(name, options)?;
+    zip.start_file(name, *options)?;
     zip.write_all(bytes)?;
     Ok(())
 }

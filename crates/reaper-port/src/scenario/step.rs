@@ -39,5 +39,6 @@ pub enum Step {
         seconds: f64,
     },
     /// Check the state.
-    Expect(Expectation),
+    // Boxed: an expectation is 120 bytes and every other step is under 32.
+    Expect(Box<Expectation>),
 }

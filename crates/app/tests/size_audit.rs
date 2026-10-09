@@ -2,12 +2,32 @@
 //! "under 128 bytes, ideally 64 or less" (AGENTS.md "Memory and layout") can be checked.
 //!
 //! `cargo test -p app --test size_audit -- --nocapture` prints the table.
+//! The budget (AGENTS.md): at most 128 bytes, ideally 64. `Catalog` is the one exception, a bag of
+//! lists that is only ever held behind a `Box`; the hot types are named in `HOT_TYPES`.
 //! Generic types and the extension's types are not listed.
 
 use std::mem::size_of;
 use std::path::Path;
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
+
+/// Over the 128 byte budget on purpose, with the reason.
+const ALLOWED_OVER_BUDGET: &[&str] = &[
+    // Five lists and a string; always boxed in messages, events and views.
+    "protocol::Catalog",
+];
+
+/// Types that travel through queues and channels; named so a failure says which one grew.
+const HOT_TYPES: &[&str] = &[
+    "protocol::Command",
+    "app::app_event::AppEvent",
+    "performance::Input",
+    "performance::Effect",
+    "protocol::Live",
+    "protocol::message::ClientMessage",
+    "protocol::message::ServerMessage",
+    "link::LinkEvent",
+];
 
 macro_rules! sizes {
     ($($path:path),* $(,)?) => {
@@ -271,4 +291,33 @@ fn every_public_type_is_in_the_table() -> TestResult {
         missing.join("\n")
     );
     Ok(())
+}
+
+#[test]
+fn no_type_is_over_128_bytes_unless_allowed() {
+    let too_big: Vec<String> = all_sizes()
+        .into_iter()
+        .filter(|(name, size)| *size > 128 && !ALLOWED_OVER_BUDGET.contains(&name.as_str()))
+        .map(|(name, size)| format!("{name}: {size} bytes"))
+        .collect();
+    assert!(
+        too_big.is_empty(),
+        "over 128 bytes, box the heavy part with a one-line comment:\n{}",
+        too_big.join("\n")
+    );
+}
+
+#[test]
+fn the_hot_types_stay_within_the_budget() {
+    let sizes = all_sizes();
+    for name in HOT_TYPES {
+        let size = sizes
+            .iter()
+            .find(|(listed, _)| listed == name)
+            .map(|(_, size)| *size);
+        assert!(
+            size.is_some_and(|size| size <= 96),
+            "{name} is {size:?} bytes; hot types stay at 96 or less"
+        );
+    }
 }

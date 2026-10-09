@@ -90,9 +90,12 @@ mod tests {
             revision: 3,
             ..Catalog::default()
         };
-        let view = apply_event(LinkView::default(), LinkEvent::Catalog(catalog.clone()));
+        let view = apply_event(
+            LinkView::default(),
+            LinkEvent::Catalog(Box::new(catalog.clone())),
+        );
         let view = apply_event(view, LinkEvent::Live(playing()));
-        assert_eq!(view.catalog, catalog);
+        assert_eq!(*view.catalog, catalog);
         assert_eq!(view.live, Some(playing()));
     }
 
@@ -103,7 +106,7 @@ mod tests {
                 extension_version: "1".into(),
             },
             live: Some(playing()),
-            catalog: Catalog::default(),
+            catalog: Box::default(),
         };
         assert_eq!(
             apply_event(view, LinkEvent::Disconnected),
