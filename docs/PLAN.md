@@ -138,7 +138,7 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 | ✅ 5.4 | Navigation shell, keyboard layer (space, ←/→, a — via command bus), focus management | 2 |
 | ✅ 5.5 | UI strings kept in one module (no hard-coded copy in components) so translation can be added in v2.1 **`ui/src/lib/strings.ts`; `strings.test.ts` fails when a component holds copy of its own** | 0.5 |
 | ✅ 5.6 | Accessibility baseline (contrast, focus, ARIA, reduced motion) | 1.5 |
-| 🟡 5.7 | Frame-budget tooling: input→paint measurement, performance budget in CI (Playwright trace) | 1.5 |
+| ✅ 5.7 | Frame-budget tooling: input→paint measurement, performance budget in CI (Playwright trace) | 1.5 |
 
 **Gate 5:** designs for all 8 screens approved (§10 of SPEC); kit storybook-style page complete.
 
@@ -146,7 +146,7 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 | WP | Screen | Parity | d |
 |----|--------|--------|---|
 | ⬜ 6.1 | Player: transport, timeline w/ markers, region/setlist list, toggles, BPM, record arm | F2–F4, F7, F9 | 5 |
-| ⬜ 6.2 | Setlist editor: create/rename/delete, add/remove/reorder (drag), select, validation (missing regions) | F5 | 5 |
+| 🟡 6.2 | Setlist editor: create/rename/delete, add/remove/reorder (drag), select, validation (missing regions) | F5 | 5 |
 | ⬜ 6.3 | **Performer**: title, song/total time, next song, hard-stop prompt, clock, toggles, exit; stage-lock | F11 | 5 |
 | ⬜ 6.4 | Connection/health: header status, popovers, banners (Lost/NotLoaded/Outdated/Faulted), diagnostics | F1, F14 | 3 |
 | ⬜ 6.5 | Settings: connection status + repair, MIDI (devices, channel, mapping), behaviour, appearance | F12, F13 | 4 |

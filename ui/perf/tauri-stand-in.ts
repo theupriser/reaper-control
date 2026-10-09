@@ -26,6 +26,7 @@ export function tauriStandIn(initial: unknown): void {
         listeners.set(args.event, [...(listeners.get(args.event) ?? []), args.handler]);
         return args.handler;
       }
+      if (command === "dispatch") (w.__dispatched ??= []).push(args.command);
       return command in answers ? answers[command] : null;
     },
   };

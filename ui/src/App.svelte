@@ -3,6 +3,7 @@
   import ComingSoon from "./components/ComingSoon.svelte";
   import Notices from "./components/Notices.svelte";
   import PerformerScreen from "./components/PerformerScreen.svelte";
+  import SetlistsScreen from "./components/SetlistsScreen.svelte";
   import SettingsScreen from "./components/SettingsScreen.svelte";
   import Sidebar from "./components/Sidebar.svelte";
   import { createAppStore } from "./lib/app-store";
@@ -91,6 +92,8 @@
         />
         {#if $appState.error}<p class="error" role="alert">{$appState.error}</p>{/if}
         {#if $appState.pending.length > 0}<p class="pending" role="status">{strings.pending.sending}</p>{/if}
+      {:else if screen === "setlists"}
+        <SetlistsScreen catalog={$appState.link.catalog} {send} />
       {:else if screen === "settings"}
         <SettingsScreen />
       {:else}
