@@ -3,16 +3,16 @@
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use app::app_event::AppEvent;
-use app::command_bus::CommandBus;
-use app::event_bus::EventBus;
-use app::fake_clock::FakeClock;
-use app::fake_driver::FakeDriver;
-use app::intent::Intent;
-use app::intent_dispatcher::IntentDispatcher;
-use app::intent_error::IntentError;
-use app::intent_refusal::IntentRefusal;
-use app::queue_settings::QueueSettings;
+use app::AppEvent;
+use app::CommandBus;
+use app::EventBus;
+use app::FakeClock;
+use app::FakeDriver;
+use app::Intent;
+use app::IntentDispatcher;
+use app::IntentError;
+use app::IntentRefusal;
+use app::QueueSettings;
 use protocol::{Command, LinkView, Live, Phase};
 
 #[test]

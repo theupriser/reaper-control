@@ -3,19 +3,19 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use app::app_config::AppConfig;
-use app::command_bus::CommandBus;
-use app::config_repository::ConfigRepository;
-use app::config_store::ConfigStore;
-use app::event_bus::EventBus;
-use app::fake_clock::FakeClock;
-use app::fake_driver::FakeDriver;
-use app::intent::Intent;
-use app::intent_dispatcher::IntentDispatcher;
-use app::legacy_config_file::LegacyConfigFile;
-use app::midi_config::MidiConfig;
-use app::midi_router::MidiRouter;
-use app::queue_settings::QueueSettings;
+use app::AppConfig;
+use app::CommandBus;
+use app::ConfigRepository;
+use app::ConfigStore;
+use app::EventBus;
+use app::FakeClock;
+use app::FakeDriver;
+use app::Intent;
+use app::IntentDispatcher;
+use app::LegacyConfigFile;
+use app::MidiConfig;
+use app::MidiRouter;
+use app::QueueSettings;
 use protocol::{Command, LinkView, Live, Phase};
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
@@ -142,7 +142,7 @@ fn the_v1_config_gives_the_mapping_and_names_what_has_no_counterpart() -> TestRe
 #[cfg(target_os = "macos")]
 #[test]
 fn a_note_from_a_real_midi_port_reaches_the_bus() -> TestResult {
-    use app::midi_listener::MidiListener;
+    use app::MidiListener;
     use midir::MidiOutput;
     use midir::os::unix::VirtualOutput;
 
@@ -153,7 +153,7 @@ fn a_note_from_a_real_midi_port_reaches_the_bus() -> TestResult {
         .map_err(|error| error.to_string())?;
     let (router, driver, _) = router(MidiConfig::default(), false);
     MidiListener::start(
-        Arc::new(app::midir_source::MidirSource),
+        Arc::new(app::MidirSource),
         Arc::new(router),
         Some(name),
         Arc::default(),
@@ -170,25 +170,21 @@ fn a_note_from_a_real_midi_port_reaches_the_bus() -> TestResult {
 type Changes = Arc<std::sync::Mutex<Vec<Vec<String>>>>;
 
 fn follower(
-    source: &Arc<app::fake_midi_source::FakeMidiSource>,
+    source: &Arc<app::FakeMidiSource>,
     wanted: Option<&str>,
-) -> (
-    app::midi_device_follower::MidiDeviceFollower,
-    Arc<FakeDriver>,
-    Changes,
-) {
+) -> (app::MidiDeviceFollower, Arc<FakeDriver>, Changes) {
     let (router, driver, _) = router(MidiConfig::default(), false);
     let events = Arc::new(EventBus::default());
     let changes = Arc::new(std::sync::Mutex::new(Vec::new()));
     let seen = Arc::clone(&changes);
     events.subscribe(move |event| {
-        if let app::app_event::AppEvent::MidiDevicesChanged { devices } = event
+        if let app::AppEvent::MidiDevicesChanged { devices } = event
             && let Ok(mut seen) = seen.lock()
         {
             seen.push(devices.clone());
         }
     });
-    let follower = app::midi_device_follower::MidiDeviceFollower::new(
+    let follower = app::MidiDeviceFollower::new(
         source.clone(),
         Arc::new(router),
         wanted.map(str::to_owned),
@@ -199,7 +195,7 @@ fn follower(
 
 #[test]
 fn a_plugged_in_device_is_opened_once_and_its_notes_reach_the_bus() {
-    let source = Arc::new(app::fake_midi_source::FakeMidiSource::default());
+    let source = Arc::new(app::FakeMidiSource::default());
     let (mut follower, driver, changes) = follower(&source, None);
     source.plug(Some(&["FootCtrl Mini"]));
     follower.poll();
@@ -212,7 +208,7 @@ fn a_plugged_in_device_is_opened_once_and_its_notes_reach_the_bus() {
 
 #[test]
 fn an_unplugged_device_is_closed_and_a_failed_listing_closes_nothing() {
-    let source = Arc::new(app::fake_midi_source::FakeMidiSource::default());
+    let source = Arc::new(app::FakeMidiSource::default());
     let (mut follower, _, changes) = follower(&source, None);
     source.plug(Some(&["A", "B"]));
     follower.poll();
@@ -232,7 +228,7 @@ fn an_unplugged_device_is_closed_and_a_failed_listing_closes_nothing() {
 
 #[test]
 fn only_the_named_device_is_opened_when_one_is_named() {
-    let source = Arc::new(app::fake_midi_source::FakeMidiSource::default());
+    let source = Arc::new(app::FakeMidiSource::default());
     let (mut follower, _, _) = follower(&source, Some("B"));
     source.plug(Some(&["A", "B"]));
     follower.poll();

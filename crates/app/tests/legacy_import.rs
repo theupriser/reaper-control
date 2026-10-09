@@ -1,10 +1,10 @@
 //! Reading v1 setlist files, mapping them onto songs, and the restore-only mirror.
 
-use app::legacy_file::LegacyFile;
-use app::legacy_resolver::resolve;
-use app::mirror_error::MirrorError;
-use app::mirror_repository::MirrorRepository;
-use app::setlist_mirror::SetlistMirror;
+use app::LegacyFile;
+use app::MirrorError;
+use app::MirrorRepository;
+use app::SetlistMirror;
+use app::resolve;
 use protocol::SongInfo;
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;

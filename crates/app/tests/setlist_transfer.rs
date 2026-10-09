@@ -3,15 +3,15 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use app::command_bus::CommandBus;
-use app::event_bus::EventBus;
-use app::fake_clock::FakeClock;
-use app::fake_driver::FakeDriver;
-use app::mirror_keeper::MirrorKeeper;
-use app::mirror_repository::MirrorRepository;
-use app::queue_settings::QueueSettings;
-use app::setlist_mirror::SetlistMirror;
-use app::setlist_transfer::SetlistTransfer;
+use app::CommandBus;
+use app::EventBus;
+use app::FakeClock;
+use app::FakeDriver;
+use app::MirrorKeeper;
+use app::MirrorRepository;
+use app::QueueSettings;
+use app::SetlistMirror;
+use app::SetlistTransfer;
 use protocol::{Catalog, Command, EntryInfo, LinkView, SetlistInfo, SongInfo};
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;

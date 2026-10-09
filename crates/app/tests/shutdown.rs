@@ -3,10 +3,10 @@
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use app::app_fault::AppFault;
-use app::panic_hook::install_panic_hook;
-use app::periodic_thread::PeriodicThread;
-use app::shutdown_sequence::ShutdownSequence;
+use app::AppFault;
+use app::PeriodicThread;
+use app::ShutdownSequence;
+use app::install_panic_hook;
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
 

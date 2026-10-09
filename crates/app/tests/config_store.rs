@@ -1,9 +1,9 @@
 //! The config file: defaults, migration, validation, atomic save.
 
-use app::app_config::AppConfig;
-use app::config_error::ConfigError;
-use app::config_repository::ConfigRepository;
-use app::config_store::ConfigStore;
+use app::AppConfig;
+use app::ConfigError;
+use app::ConfigRepository;
+use app::ConfigStore;
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
 
@@ -71,7 +71,7 @@ fn bad_files_are_refused_with_a_reason() -> TestResult {
 
 #[test]
 fn the_first_start_takes_the_v1_midi_settings_once() -> TestResult {
-    use app::legacy_config_import::import_legacy_config;
+    use app::import_legacy_config;
     let directory = std::env::temp_dir().join(format!("app-config-import-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&directory);
     std::fs::create_dir_all(&directory)?;
