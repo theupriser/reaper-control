@@ -3,6 +3,7 @@
   import ComingSoon from "./components/ComingSoon.svelte";
   import Notices from "./components/Notices.svelte";
   import PerformerScreen from "./components/PerformerScreen.svelte";
+  import PlayerScreen from "./components/PlayerScreen.svelte";
   import SetlistsScreen from "./components/SetlistsScreen.svelte";
   import SettingsScreen from "./components/SettingsScreen.svelte";
   import Sidebar from "./components/Sidebar.svelte";
@@ -14,6 +15,7 @@
   import { keyAction, toKeyPress } from "./lib/keyboard";
   import { seekCommand, type PerformerPhase, type SeekTarget } from "./lib/performer";
   import { performerView } from "./lib/performer-view";
+  import { playerRows } from "./lib/player-rows";
   import { strings } from "./lib/strings";
   import { isLocked, lock, open, settle, tapUnlock, type StageLock } from "./lib/stage-lock";
 
@@ -33,6 +35,8 @@
   const forced = new URLSearchParams(location.search).get("phase") as PerformerPhase | null;
   const live = $derived($appState.link.live);
   const view = $derived(forced && phases.includes(forced) ? fixtureFor(forced) : performerView($appState.link, $appState.problem));
+
+  const currentTempo = $derived($appState.link.catalog.songs[live?.current_song ?? -1]?.bpm ?? null);
 
   const connection = $derived(connectionBadge($appState.link.status, $appState.problem));
 
@@ -95,8 +99,10 @@
     <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} />
     <main class="content" tabindex="-1" bind:this={content}>
       {#if screen === "player"}
-        <PerformerScreen
+        <PlayerScreen
           {view}
+          rows={playerRows($appState.link.catalog, live)}
+          tempo={currentTempo}
           onPlayPause={playPause}
           onPrevious={previous}
           onRewind={rewind}
