@@ -11,7 +11,8 @@ use crate::wizard_step_list::wizard_step_list;
 
 /// Looks at one REAPER and installs the bundled extension into it.
 pub struct InstallationService {
-    installer: ExtensionInstaller,
+    // Boxed: with Windows paths the installer alone is over 100 bytes.
+    installer: Box<ExtensionInstaller>,
     install: ReaperInstall,
     process_check: Arc<dyn ProcessCheck>,
 }
@@ -24,7 +25,7 @@ impl InstallationService {
         process_check: Arc<dyn ProcessCheck>,
     ) -> Self {
         Self {
-            installer,
+            installer: Box::new(installer),
             install,
             process_check,
         }
