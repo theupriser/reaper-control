@@ -56,7 +56,7 @@ impl SettingsService {
             .config
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
-        let changed = config.with_settings(settings);
+        let changed = config.with_settings(settings)?;
         self.store.save(&changed)?;
         self.bus.apply(changed.queue.settings());
         let midi_differs = changed.midi != config.midi;

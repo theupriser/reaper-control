@@ -105,7 +105,7 @@ fn the_log_level_is_saved_and_an_unknown_one_is_refused() -> TestResult {
     assert_eq!(store.load()?.log.level, "debug");
     assert_eq!(
         AppConfig::default()
-            .with_settings(&config.settings())
+            .with_settings(&config.settings())?
             .log
             .level,
         "debug"

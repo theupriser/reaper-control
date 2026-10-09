@@ -1,7 +1,12 @@
-import type { Settings } from "./generated/protocol";
+import type { NoteMapping, Settings } from "./generated/protocol";
 import { strings } from "./strings";
 
 /** The form's fields as typed: numbers stay text until they are saved. */
+export interface NoteRow {
+  note: string;
+  action: string;
+}
+
 export interface SettingsDraft {
   repeatWindow: string;
   timeout: string;
@@ -10,6 +15,7 @@ export interface SettingsDraft {
   device: string;
   channel: string;
   debounce: string;
+  notes: NoteRow[];
   logLevel: string;
 }
 
@@ -25,6 +31,7 @@ export const toDraft = (settings: Settings): SettingsDraft => ({
   device: settings.midi_device_name ?? "",
   channel: settings.midi_channel === null ? ALL_CHANNELS : String(settings.midi_channel),
   debounce: String(settings.midi_debounce_milliseconds),
+  notes: settings.midi_notes.map((mapping) => ({ note: String(mapping.note), action: mapping.action })),
   logLevel: settings.log_level,
 });
 
@@ -33,13 +40,31 @@ const whole = (text: string, label: string): number | string => {
   return /^\d+$/.test(trimmed) ? Number(trimmed) : strings.settings.mustBeWhole(label);
 };
 
+const MOST_NOTES = 127;
+
+/** The note table to save, or the first thing wrong with it. */
+function toNotes(rows: NoteRow[]): NoteMapping[] | string {
+  const seen = new Set<number>();
+  const notes: NoteMapping[] = [];
+  for (const row of rows) {
+    const note = whole(row.note, strings.settings.midi.note);
+    if (typeof note === "string") return note;
+    if (note > MOST_NOTES) return strings.settings.midi.noteRange;
+    if (seen.has(note)) return strings.settings.midi.noteTwice(note);
+    seen.add(note);
+    notes.push({ note, action: row.action });
+  }
+  return notes;
+}
+
 /** The settings to save, or the first thing wrong with the typed values. Ranges are checked by the app. */
 export function toSettings(draft: SettingsDraft): Settings | string {
   const repeat = whole(draft.repeatWindow, strings.settings.fields.repeatWindow);
   const timeout = whole(draft.timeout, strings.settings.fields.timeout);
   const capacity = whole(draft.capacity, strings.settings.fields.queueSize);
   const debounce = whole(draft.debounce, strings.settings.fields.debounce);
-  for (const value of [repeat, timeout, capacity, debounce]) {
+  const notes = toNotes(draft.notes);
+  for (const value of [repeat, timeout, capacity, debounce, notes]) {
     if (typeof value === "string") return value;
   }
   return {
@@ -50,6 +75,7 @@ export function toSettings(draft: SettingsDraft): Settings | string {
     midi_device_name: draft.device === "" ? null : draft.device,
     midi_channel: draft.channel === ALL_CHANNELS ? null : Number(draft.channel),
     midi_debounce_milliseconds: debounce as number,
+    midi_notes: notes as NoteMapping[],
     log_level: draft.logLevel,
   };
 }

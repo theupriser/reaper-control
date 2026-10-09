@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+use crate::NoteMapping;
+
 /// The settings a person can change on the Settings screen.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
 pub struct Settings {
@@ -18,6 +20,8 @@ pub struct Settings {
     pub midi_channel: Option<u8>,
     /// Milliseconds inside which the same note counts as one press (0 to 5000).
     pub midi_debounce_milliseconds: u32,
+    /// Which note triggers which action (notes 0 to 127, each note once).
+    pub midi_notes: Vec<NoteMapping>,
     /// How much the app logs: error, warn, info, debug or trace. Applies after a restart.
     pub log_level: String,
 }

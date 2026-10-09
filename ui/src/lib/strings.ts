@@ -132,7 +132,7 @@ export const strings = {
     fields: { repeatWindow: "Repeat window", timeout: "Timeout", queueSize: "Queue size", debounce: "Debounce" },
     midi: {
       title: "MIDI control",
-      hint: "Trigger actions from a foot controller or keyboard. Changes apply after a restart.",
+      hint: "Trigger actions from a foot controller or keyboard. Changes apply at once.",
       enabled: "Enabled",
       device: "Device",
       allDevices: "All devices",
@@ -140,6 +140,11 @@ export const strings = {
       allChannels: "All channels",
       note: "Note",
       action: "Action",
+      noteRange: "Note must be between 0 and 127",
+      noteTwice: (note: number) => `Note ${note} is used twice`,
+      add: "Add a note",
+      remove: (note: string) => `Remove note ${note}`,
+      empty: "No notes yet. Add one to control the app from a controller.",
     },
     queue: {
       title: "Command queue",

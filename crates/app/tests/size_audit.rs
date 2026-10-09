@@ -182,6 +182,7 @@ fn all_sizes() -> Vec<(String, usize)> {
         protocol::message::HandshakeError,
         protocol::message::Outcome,
         protocol::message::ServerMessage,
+        protocol::ActionChoice,
         protocol::NoteMapping,
         protocol::NoticeLevel,
         protocol::Notice,

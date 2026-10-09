@@ -378,12 +378,16 @@ midi_channel: number | null,
  */
 midi_debounce_milliseconds: number, 
 /**
+ * Which note triggers which action (notes 0 to 127, each note once).
+ */
+midi_notes: Array<NoteMapping>, 
+/**
  * How much the app logs: error, warn, info, debug or trace. Applies after a restart.
  */
 log_level: string, };
 
 /**
- * One MIDI note and the action it triggers, for display.
+ * One MIDI note and the action it triggers.
  */
 export type NoteMapping = { 
 /**
@@ -391,12 +395,25 @@ export type NoteMapping = {
  */
 note: number, 
 /**
- * What it does, in words.
+ * The id of the action, as listed in `SettingsView::actions`.
  */
 action: string, };
 
 /**
- * What the Settings screen shows: the values, the MIDI devices found and the note table.
+ * One action a MIDI note can trigger.
+ */
+export type ActionChoice = { 
+/**
+ * The id a `NoteMapping` refers to.
+ */
+id: string, 
+/**
+ * What it does, in words.
+ */
+label: string, };
+
+/**
+ * What the Settings screen shows: the values, the MIDI devices found and the actions a note can have.
  */
 export type SettingsView = { 
 /**
@@ -408,9 +425,9 @@ settings: Settings,
  */
 devices: Array<string>, 
 /**
- * The note table, read only until MIDI learn exists.
+ * Every action a note can trigger.
  */
-notes: Array<NoteMapping>, };
+actions: Array<ActionChoice>, };
 
 /**
  * One v1 setlist that can be brought into the project.

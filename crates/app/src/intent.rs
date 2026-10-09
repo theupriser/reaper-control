@@ -25,6 +25,33 @@ pub enum Intent {
 }
 
 impl Intent {
+    /// Every intent, in the order the Settings screen offers them.
+    pub const ALL: [Self; 8] = [
+        Self::Previous,
+        Self::Next,
+        Self::TogglePlay,
+        Self::Pause,
+        Self::RestartSong,
+        Self::ToggleAutoResume,
+        Self::ToggleCountInOnMarker,
+        Self::ToggleRecordArm,
+    ];
+
+    /// The stable name the Settings screen and the config file use.
+    #[must_use]
+    pub fn id(self) -> String {
+        serde_json::to_value(self)
+            .ok()
+            .and_then(|value| value.as_str().map(str::to_owned))
+            .unwrap_or_default()
+    }
+
+    /// The intent with this id; `None` for an id v2 does not know.
+    #[must_use]
+    pub fn from_id(id: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|intent| intent.id() == id)
+    }
+
     /// The action in words, as the Settings screen shows it.
     #[must_use]
     pub fn label(self) -> &'static str {

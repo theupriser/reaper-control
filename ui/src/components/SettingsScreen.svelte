@@ -3,6 +3,7 @@
   import Button from "../kit/Button.svelte";
   import Panel from "../kit/Panel.svelte";
   import { onMount } from "svelte";
+  import NoteTable from "./NoteTable.svelte";
   import DiagnosticsCard from "./DiagnosticsCard.svelte";
   import SetlistTransferCard from "./SetlistTransferCard.svelte";
   import { currentSettings, saveSettings } from "../lib/ipc";
@@ -68,14 +69,7 @@
         </label>
         <label class="channel">{strings.settings.milliseconds(strings.settings.fields.debounce)}<input inputmode="numeric" bind:value={draft.debounce} /></label>
       </div>
-      <table>
-        <thead><tr><th>{strings.settings.midi.note}</th><th>{strings.settings.midi.action}</th></tr></thead>
-        <tbody>
-          {#each view.notes as mapping (mapping.note)}
-            <tr><td class="note">{mapping.note}</td><td>{mapping.action}</td></tr>
-          {/each}
-        </tbody>
-      </table>
+      <NoteTable rows={draft.notes} actions={view.actions} onchange={(rows) => draft && (draft.notes = rows)} />
     </Panel>
 
     <Panel title={strings.settings.queue.title} hint={strings.settings.queue.hint}>
@@ -110,10 +104,6 @@
   .toggle { flex-direction: row; align-items: center; gap: 10px; font-size: 14px; color: var(--text); min-height: 44px; }
   input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--green); }
   select, input:not([type="checkbox"]) { height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); padding: 0 14px; font-size: 15px; font-family: inherit; }
-  table { border: 1px solid var(--line); border-radius: 12px; border-collapse: collapse; overflow: hidden; }
-  th { text-align: left; padding: 10px 16px; background: var(--raised); font-size: 12px; letter-spacing: 0.6px; color: var(--muted); }
-  td { padding: 0 16px; height: 42px; border-top: 1px solid var(--line-soft); font-size: 15px; }
-  .note { width: 110px; font-family: ui-monospace, Menlo, monospace; color: var(--amber); font-weight: 700; }
   .actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .message { font-size: 14px; }
   .message.ok { color: var(--green); }

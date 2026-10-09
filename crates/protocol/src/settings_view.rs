@@ -1,15 +1,16 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
-use crate::{NoteMapping, Settings};
+use crate::{ActionChoice, Settings};
 
-/// What the Settings screen shows: the values, the MIDI devices found and the note table.
+/// What the Settings screen shows: the values, the MIDI devices found and the actions a note can have.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
 pub struct SettingsView {
     /// The saved values.
-    pub settings: Settings,
+    // Boxed: with the note table the settings are over 100 bytes.
+    pub settings: Box<Settings>,
     /// The names of the MIDI input devices found now.
     pub devices: Vec<String>,
-    /// The note table, read only until MIDI learn exists.
-    pub notes: Vec<NoteMapping>,
+    /// Every action a note can trigger.
+    pub actions: Vec<ActionChoice>,
 }
