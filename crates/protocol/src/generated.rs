@@ -7,10 +7,11 @@ use std::path::PathBuf;
 use ts_rs::{Config, TS};
 
 use crate::{
-    ActionChoice, AppearanceChoice, Catalog, Command, CueInfo, EntryInfo, EventRecord, ImportOffer,
-    InstallationView, LinkStatus, LinkView, Live, NoteMapping, Notice, NoticeLevel, Phase,
-    SetlistInfo, SetlistTransferView, Setting, Settings, SettingsView, SongInfo, SystemStats,
-    Transport, WireEvent, WizardStep, WizardStepId, WizardStepStatus,
+    ActionChoice, AppearanceChoice, Catalog, CheckId, CheckItem, CheckStatus, ChecklistView,
+    Command, CueInfo, EntryInfo, EventRecord, ImportOffer, InstallationView, LinkStatus, LinkView,
+    Live, NoteMapping, Notice, NoticeLevel, Phase, SetlistInfo, SetlistTransferView, Setting,
+    Settings, SettingsView, SongInfo, SystemStats, Transport, WireEvent, WizardStep, WizardStepId,
+    WizardStepStatus,
 };
 
 const HEADER: &str =
@@ -48,6 +49,10 @@ fn render() -> Result<String, ts_rs::ExportError> {
         WizardStepStatus::export_to_string(&config)?,
         WizardStep::export_to_string(&config)?,
         InstallationView::export_to_string(&config)?,
+        CheckId::export_to_string(&config)?,
+        CheckStatus::export_to_string(&config)?,
+        CheckItem::export_to_string(&config)?,
+        ChecklistView::export_to_string(&config)?,
     ] {
         out.push('\n');
         out.push_str(&strip_imports(&declaration));

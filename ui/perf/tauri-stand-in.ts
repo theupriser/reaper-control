@@ -14,6 +14,7 @@ export function tauriStandIn(initial: unknown): void {
       actions: [{ id: "TogglePlay", label: "Play / pause" }, { id: "Next", label: "Next song" }, { id: "Previous", label: "Previous song" }],
     },
     current_transfer: { restorable: 0, offers: [] },
+    current_checklist: { items: [], ready: true },
     current_installation: { steps: ["FindReaper", "InstallExtension", "RestartReaper", "Connect"].map((id) => ({ id, status: "Done", advice: "" })), folder: "/reaper", can_install: false, complete: true },
   };
   w.__TAURI_INTERNALS__ = {

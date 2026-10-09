@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
+  import ChecklistScreen from "./components/ChecklistScreen.svelte";
   import ComingSoon from "./components/ComingSoon.svelte";
   import ConnectionBanner from "./components/ConnectionBanner.svelte";
   import HealthDialog from "./components/HealthDialog.svelte";
@@ -147,6 +148,8 @@
         {#if $appState.pending.length > 0}<p class="pending" role="status">{strings.pending.sending}</p>{/if}
       {:else if screen === "setlists"}
         <SetlistsScreen catalog={$appState.link.catalog} {send} />
+      {:else if screen === "checklist"}
+        <ChecklistScreen onSetup={() => (wizardOpen = true)} />
       {:else if screen === "settings"}
         <SettingsScreen onSetup={() => (wizardOpen = true)} />
       {:else}

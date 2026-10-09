@@ -6,12 +6,13 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use protocol::{
-    Command, InstallationView, LinkStatus, LinkView, SetlistTransferView, Settings, SettingsView,
-    SystemStats,
+    ChecklistView, Command, InstallationView, LinkStatus, LinkView, SetlistTransferView, Settings,
+    SettingsView, SystemStats,
 };
 
 use crate::app_event::AppEvent;
 use crate::app_fault::AppFault;
+use crate::check_list::check_list;
 use crate::command_bus::CommandBus;
 use crate::config_location::{
     config_file, diagnostics_directory, legacy_config_file, legacy_setlists_directory,
@@ -105,6 +106,20 @@ fn install_extension(
 ) -> Result<InstallationView, String> {
     let service = installation.as_ref().ok_or(UNSUPPORTED_SYSTEM)?;
     service.install(is_connected(&link.view().status))
+}
+
+#[tauri::command]
+fn current_checklist(
+    installation: State<'_, Option<Arc<InstallationService>>>,
+    link: State<'_, Arc<dyn LinkViewSource>>,
+    settings: State<'_, Arc<SettingsService>>,
+) -> ChecklistView {
+    let view = link.view();
+    let installed = installation
+        .as_ref()
+        .map(|service| service.view(is_connected(&view.status)));
+    let found = settings.view(MidirSource.device_names().unwrap_or_default());
+    check_list(&view, &found.settings, &found.devices, installed.as_ref())
 }
 
 fn is_connected(status: &LinkStatus) -> bool {
@@ -313,6 +328,7 @@ pub fn run() {
             current_settings,
             current_installation,
             install_extension,
+            current_checklist,
             save_settings,
             current_transfer,
             restore_setlists,
