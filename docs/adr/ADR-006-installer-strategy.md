@@ -16,8 +16,20 @@ How does the app put the extension into REAPER, on macOS arm64 and Windows x64, 
 - A user with two REAPERs has to pick the folder (or use the shortcut argument) for each.
 - No swap-at-next-start code to write or test; the update flow is "close REAPER, copy, start REAPER".
 
+## Measured on macOS (2026-10-09, isolated REAPER, Apple Silicon)
+The extension dylib was copied into `UserPlugins` with the quarantine attribute set, as a browser download would leave it.
+
+| Case | Result |
+|---|---|
+| Quarantined, linker-signed (ad-hoc) | Gatekeeper dialog ("not opened, may harm your Mac"); in the repeat run the extension did not load |
+| Quarantined, re-signed with `codesign --force -s -` | Same dialog, extension did not load |
+| Signature removed, quarantined | Did not load |
+| Quarantine removed by the installer (`xattr -d com.apple.quarantine`), ad-hoc signed | Loads, link listens, ticks run |
+
+Decision: the macOS installer copies the dylib, ensures an ad-hoc signature (`codesign --force -s -`), and removes `com.apple.quarantine` from the copy. The first run on a quarantined file once appeared to load before the dialog showed; do not rely on it.
+
 ## Not yet measured
-Whether a downloaded ad-hoc signed dylib loads in REAPER after the quarantine step; what SmartScreen and antivirus tools say about the unsigned DLL; the macOS launcher form. WP 1.4 stays 🟡 until these are tried.
+What SmartScreen and antivirus tools say about the unsigned DLL (needs a real Windows PC, owner); the macOS launcher form. WP 1.4 stays 🟡 until these are tried.
 
 ## Undo if
 A Developer ID or certificate becomes available (then sign and notarize, WP 8.1), or users cannot get past the OS warning without help.

@@ -1,0 +1,5 @@
+resource folder: ok - found
+writable: ok - can be written
+reaper running: manual - REAPER is running; close it to update the extension, then check again
+architecture: ok - matches
+extension: fixable - installed, but not the version that ships with the app
