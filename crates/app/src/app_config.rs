@@ -4,8 +4,9 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use protocol::{ActionChoice, NoteMapping, Settings, SettingsView};
+use protocol::{ActionChoice, AppearanceChoice, NoteMapping, Settings, SettingsView};
 
+use crate::appearance_config::AppearanceConfig;
 use crate::config_error::ConfigError;
 use crate::intent::Intent;
 use crate::log_config::LogConfig;
@@ -27,6 +28,8 @@ pub struct AppConfig {
     pub midi: MidiConfig,
     /// The log level.
     pub log: LogConfig,
+    /// Theme, density and touch size.
+    pub appearance: Box<AppearanceConfig>, // boxed to keep `AppConfig` small
 }
 
 impl Default for AppConfig {
@@ -36,6 +39,7 @@ impl Default for AppConfig {
             queue: QueueConfig::default(),
             midi: MidiConfig::default(),
             log: LogConfig::default(),
+            appearance: Box::default(),
         }
     }
 }
@@ -51,6 +55,7 @@ impl AppConfig {
             .problem()
             .or_else(|| self.midi.problem())
             .or_else(|| self.log.problem())
+            .or_else(|| self.appearance.problem())
         {
             Some(problem) => Err(ConfigError::Invalid(problem)),
             None => Ok(()),
@@ -80,6 +85,11 @@ impl AppConfig {
                 })
                 .collect(),
             log_level: self.log.level.clone(),
+            appearance: Box::new(AppearanceChoice {
+                theme: self.appearance.theme.clone(),
+                density: self.appearance.density.clone(),
+                touch: self.appearance.touch.clone(),
+            }),
         }
     }
 
@@ -117,6 +127,18 @@ impl AppConfig {
         config.midi.debounce_milliseconds = settings.midi_debounce_milliseconds.into();
         config.midi.notes = notes_of(&settings.midi_notes)?;
         config.log.level.clone_from(&settings.log_level);
+        config
+            .appearance
+            .theme
+            .clone_from(&settings.appearance.theme);
+        config
+            .appearance
+            .density
+            .clone_from(&settings.appearance.density);
+        config
+            .appearance
+            .touch
+            .clone_from(&settings.appearance.touch);
         Ok(config)
     }
 }

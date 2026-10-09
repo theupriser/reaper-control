@@ -384,7 +384,11 @@ midi_notes: Array<NoteMapping>,
 /**
  * How much the app logs: error, warn, info, debug or trace. Applies after a restart.
  */
-log_level: string, };
+log_level: string, 
+/**
+ * Theme, density and touch size. Applies at once.
+ */
+appearance: AppearanceChoice, };
 
 /**
  * One MIDI note and the action it triggers.
@@ -411,6 +415,23 @@ id: string,
  * What it does, in words.
  */
 label: string, };
+
+/**
+ * How the screens look.
+ */
+export type AppearanceChoice = { 
+/**
+ * The colours: dark, stage-dark or light.
+ */
+theme: string, 
+/**
+ * How tight the layout is: comfortable or compact.
+ */
+density: string, 
+/**
+ * How large the touch targets are: normal or large.
+ */
+touch: string, };
 
 /**
  * What the Settings screen shows: the values, the MIDI devices found and the actions a note can have.

@@ -12,6 +12,7 @@ const saved: Settings = {
   midi_debounce_milliseconds: 200,
   midi_notes: [{ note: 50, action: "TogglePlay" }],
   log_level: "info",
+  appearance: { theme: "dark", density: "comfortable", touch: "normal" },
 };
 
 describe("settings form", () => {
@@ -35,6 +36,12 @@ describe("settings form", () => {
     expect(toSettings(rows(["x", "Next"]))).toBe("Note must be a whole number");
     expect(toSettings(rows(["128", "Next"]))).toBe("Note must be between 0 and 127");
     expect(toSettings(rows(["60", "Next"], ["60", "Pause"]))).toBe("Note 60 is used twice");
+  });
+
+  it("saves a chosen theme, density and touch size", () => {
+    const draft = { ...toDraft(saved), theme: "light", density: "compact", touch: "large" };
+    expect(toSettings(draft)).toMatchObject({ appearance: { theme: "light", density: "compact", touch: "large" } });
+    expect(isChanged(draft, saved)).toBe(true);
   });
 
   it("saves an edited note table", () => {

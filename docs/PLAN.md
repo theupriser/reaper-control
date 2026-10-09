@@ -149,7 +149,7 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 | ✅ 6.2 | Setlist editor (drag to reorder is not done: buttons): create/rename/delete, add/remove/reorder (drag), select, validation (missing regions) | F5 | 5 |
 | ✅ 6.3 | **Performer** (the v1 parts were done in Phase 3; this WP added stage-lock): title, song/total time, next song, hard-stop prompt, clock, toggles, exit; stage-lock | F11 | 5 |
 | ✅ 6.4 | Connection/health (banner shows the cause text from the app's health monitor; the sidebar status opens a dialog with CPU and memory instead of a popover; diagnostics stay in Settings): header status, popovers, banners (Lost/NotLoaded/Outdated/Faulted), diagnostics | F1, F14 | 3 |
-| 🟡 6.5 | Settings: connection status + repair, MIDI (devices, channel, mapping), behaviour, appearance **MIDI device, channel and the editable note table are done; connection card with repair (needs 6.6) and appearance controls are not.** | F12, F13 | 4 |
+| 🟡 6.5 | Settings: connection status + repair, MIDI (devices, channel, mapping), behaviour, appearance **MIDI device, channel, the editable note table and the appearance controls (theme, density, touch) are done; the connection card with repair (needs 6.6) is not.** | F12, F13 | 4 |
 | ⬜ 6.6 | First-run wizard + Repair screen driven by `InstallReport`: find REAPER → install extension → restart REAPER → connect; per-step status (Ok/Fixed/Manual), instruction cards with copy/reveal buttons, "Check again", REAPER-running handling, safe-mode re-enable, success only on live handshake | new (D3, R-INST) | 5 |
 | ⬜ 6.7 | Pre-show checklist | S-7 | 2 |
 | ⬜ 6.8 | Help + marker guide (+ optional marker helper) | F15, F8 | 3 |

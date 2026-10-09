@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
-use crate::NoteMapping;
+use crate::{AppearanceChoice, NoteMapping};
 
 /// The settings a person can change on the Settings screen.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
@@ -24,4 +24,6 @@ pub struct Settings {
     pub midi_notes: Vec<NoteMapping>,
     /// How much the app logs: error, warn, info, debug or trace. Applies after a restart.
     pub log_level: String,
+    /// Theme, density and touch size. Applies at once.
+    pub appearance: Box<AppearanceChoice>, // boxed to keep `Settings` small
 }

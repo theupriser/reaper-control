@@ -7,9 +7,10 @@ use std::path::PathBuf;
 use ts_rs::{Config, TS};
 
 use crate::{
-    ActionChoice, Catalog, Command, CueInfo, EntryInfo, EventRecord, ImportOffer, LinkStatus,
-    LinkView, Live, NoteMapping, Notice, NoticeLevel, Phase, SetlistInfo, SetlistTransferView,
-    Setting, Settings, SettingsView, SongInfo, SystemStats, Transport, WireEvent,
+    ActionChoice, AppearanceChoice, Catalog, Command, CueInfo, EntryInfo, EventRecord, ImportOffer,
+    LinkStatus, LinkView, Live, NoteMapping, Notice, NoticeLevel, Phase, SetlistInfo,
+    SetlistTransferView, Setting, Settings, SettingsView, SongInfo, SystemStats, Transport,
+    WireEvent,
 };
 
 const HEADER: &str =
@@ -38,6 +39,7 @@ fn render() -> Result<String, ts_rs::ExportError> {
         Settings::export_to_string(&config)?,
         NoteMapping::export_to_string(&config)?,
         ActionChoice::export_to_string(&config)?,
+        AppearanceChoice::export_to_string(&config)?,
         SettingsView::export_to_string(&config)?,
         ImportOffer::export_to_string(&config)?,
         SetlistTransferView::export_to_string(&config)?,

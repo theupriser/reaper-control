@@ -17,6 +17,9 @@ export interface SettingsDraft {
   debounce: string;
   notes: NoteRow[];
   logLevel: string;
+  theme: string;
+  density: string;
+  touch: string;
 }
 
 export const ALL_CHANNELS = "all";
@@ -33,6 +36,9 @@ export const toDraft = (settings: Settings): SettingsDraft => ({
   debounce: String(settings.midi_debounce_milliseconds),
   notes: settings.midi_notes.map((mapping) => ({ note: String(mapping.note), action: mapping.action })),
   logLevel: settings.log_level,
+  theme: settings.appearance.theme,
+  density: settings.appearance.density,
+  touch: settings.appearance.touch,
 });
 
 const whole = (text: string, label: string): number | string => {
@@ -77,6 +83,7 @@ export function toSettings(draft: SettingsDraft): Settings | string {
     midi_debounce_milliseconds: debounce as number,
     midi_notes: notes as NoteMapping[],
     log_level: draft.logLevel,
+    appearance: { theme: draft.theme, density: draft.density, touch: draft.touch },
   };
 }
 
