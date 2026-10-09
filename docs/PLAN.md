@@ -38,7 +38,7 @@ reaper-control-app-v2/
 | ✅ 0.2 | CI: build+lint+test on macOS (arm64) and Windows x64; cross-build matrix for the extension (2 targets); dependency check (cargo-deny, audit) | 2 |
 | ✅ 0.3 | Layer/context dependency check in CI (SPEC §14.5) — merged with 0.9 | 0.5 |
 | ✅ 0.4 | Type generation pipeline Rust → TS (specta/ts-rs) with CI drift check | 1 |
-| 🟡 0.5 | ADR template + ADR-001 (Tauri), 002 (extension-owned playback), 003 (local socket link), 004 (hexagonal + DDD contexts) **Missing: ADR-001, 003 and 004 still to write.** | 1 |
+| ✅ 0.5 | ADR template + ADR-001 (Tauri), 002 (extension-owned playback), 003 (local socket link), 004 (hexagonal + DDD contexts) | 1 |
 | ⬜ 0.6 | Licence decision (v1 is proprietary source-available; v2 public → choose) | 0.5 |
 | ⬜ 0.8 | **Domain discovery**: event storming per context (timeline of events, commands, aggregates, invariants), glossary `docs/language.md`, context map ADR-007, invariant tables `docs/domain/*.md` | 4 |
 | ✅ 0.9 | Crate-per-context workspace skeleton + CI dependency rules (§14.5), banned-synonym lint (`crates/architecture-tests/tests/vocabulary.rs`: "transition" and "playlist" in Rust sources and UI script/markup, CSS skipped) | 1.5 |
