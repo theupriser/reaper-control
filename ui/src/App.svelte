@@ -134,7 +134,10 @@
         <PlayerScreen
           {view}
           rows={playerRows($appState.link.catalog, live)}
+          setlists={$appState.link.catalog.setlists}
+          active={$appState.link.catalog.active_setlist}
           tempo={currentTempo}
+          onChooseSetlist={(id) => send({ SetActiveSetlist: { id } })}
           onPlayPause={playPause}
           onPrevious={previous}
           onRewind={rewind}
