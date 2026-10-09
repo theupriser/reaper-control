@@ -4,7 +4,9 @@
 # The resource directory is a throwaway copy (git-ignored .dev/); this never touches the real REAPER.
 set -euo pipefail
 
-extension=$1; resource=$2; project=$3
+extension=$1
+resource=$(cd "$2" && pwd)   # REAPER resolves -cfgfile from its own working directory
+project=$(cd "$(dirname "$3")" && pwd)/$(basename "$3")
 version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
 
 mkdir -p "$resource/UserPlugins"
