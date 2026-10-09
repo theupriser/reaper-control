@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { strings } from "../lib/strings";
   import { onMount } from "svelte";
   import DiagnosticsCard from "./DiagnosticsCard.svelte";
   import SetlistTransferCard from "./SetlistTransferCard.svelte";
@@ -35,7 +36,7 @@
     }
     try {
       await saveSettings(settings);
-      message = { tone: "ok", text: "Saved. Queue limits apply now; MIDI and log level changes apply after a restart." };
+      message = { tone: "ok", text: strings.settings.saved };
       await load();
     } catch (e) {
       message = { tone: "error", text: String(e) };
@@ -46,33 +47,33 @@
 </script>
 
 <section class="screen">
-  <h1>Settings</h1>
+  <h1>{strings.settings.title}</h1>
   {#if view && draft}
     <div class="card">
       <div class="head">
         <div>
-          <h2>MIDI control</h2>
-          <p class="hint">Trigger actions from a foot controller or keyboard. Changes apply after a restart.</p>
+          <h2>{strings.settings.midi.title}</h2>
+          <p class="hint">{strings.settings.midi.hint}</p>
         </div>
-        <label class="toggle"><input type="checkbox" bind:checked={draft.midiEnabled} />Enabled</label>
+        <label class="toggle"><input type="checkbox" bind:checked={draft.midiEnabled} />{strings.settings.midi.enabled}</label>
       </div>
       <div class="row">
-        <label class="grow">Device
+        <label class="grow">{strings.settings.midi.device}
           <select bind:value={draft.device}>
-            <option value="">All devices</option>
+            <option value="">{strings.settings.midi.allDevices}</option>
             {#each devices as device (device)}<option value={device}>{device}</option>{/each}
           </select>
         </label>
-        <label class="channel">Channel
+        <label class="channel">{strings.settings.midi.channel}
           <select bind:value={draft.channel}>
-            <option value={ALL_CHANNELS}>All channels</option>
+            <option value={ALL_CHANNELS}>{strings.settings.midi.allChannels}</option>
             {#each Array.from({ length: 16 }, (_, n) => n) as channel (channel)}<option value={String(channel)}>{channel}</option>{/each}
           </select>
         </label>
-        <label class="channel">Debounce (ms)<input inputmode="numeric" bind:value={draft.debounce} /></label>
+        <label class="channel">{strings.settings.milliseconds(strings.settings.fields.debounce)}<input inputmode="numeric" bind:value={draft.debounce} /></label>
       </div>
       <table>
-        <thead><tr><th>Note</th><th>Action</th></tr></thead>
+        <thead><tr><th>{strings.settings.midi.note}</th><th>{strings.settings.midi.action}</th></tr></thead>
         <tbody>
           {#each view.notes as mapping (mapping.note)}
             <tr><td class="note">{mapping.note}</td><td>{mapping.action}</td></tr>
@@ -82,12 +83,12 @@
     </div>
 
     <div class="card">
-      <h2>Command queue</h2>
-      <p class="hint">How the app guards the commands it sends to REAPER. Applies at once.</p>
+      <h2>{strings.settings.queue.title}</h2>
+      <p class="hint">{strings.settings.queue.hint}</p>
       <div class="row">
-        <label class="grow">Repeat window (ms)<input inputmode="numeric" bind:value={draft.repeatWindow} /></label>
-        <label class="grow">Timeout (ms)<input inputmode="numeric" bind:value={draft.timeout} /></label>
-        <label class="grow">Queue size<input inputmode="numeric" bind:value={draft.capacity} /></label>
+        <label class="grow">{strings.settings.milliseconds(strings.settings.fields.repeatWindow)}<input inputmode="numeric" bind:value={draft.repeatWindow} /></label>
+        <label class="grow">{strings.settings.milliseconds(strings.settings.fields.timeout)}<input inputmode="numeric" bind:value={draft.timeout} /></label>
+        <label class="grow">{strings.settings.fields.queueSize}<input inputmode="numeric" bind:value={draft.capacity} /></label>
       </div>
     </div>
 
@@ -96,8 +97,8 @@
     <DiagnosticsCard bind:level={draft.logLevel} levels={LOG_LEVELS} />
 
     <div class="actions">
-      <button class="primary" disabled={!changed} onclick={save}>Save</button>
-      <button disabled={!changed} onclick={() => view && (draft = toDraft(view.settings))}>Discard changes</button>
+      <button class="primary" disabled={!changed} onclick={save}>{strings.settings.save}</button>
+      <button disabled={!changed} onclick={() => view && (draft = toDraft(view.settings))}>{strings.settings.discard}</button>
       {#if message}<span class="message {message.tone}" role="status">{message.text}</span>{/if}
     </div>
   {:else if message}

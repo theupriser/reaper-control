@@ -1,4 +1,5 @@
 import type { Settings } from "./generated/protocol";
+import { strings } from "./strings";
 
 /** The form's fields as typed: numbers stay text until they are saved. */
 export interface SettingsDraft {
@@ -29,15 +30,15 @@ export const toDraft = (settings: Settings): SettingsDraft => ({
 
 const whole = (text: string, label: string): number | string => {
   const trimmed = text.trim();
-  return /^\d+$/.test(trimmed) ? Number(trimmed) : `${label} must be a whole number`;
+  return /^\d+$/.test(trimmed) ? Number(trimmed) : strings.settings.mustBeWhole(label);
 };
 
 /** The settings to save, or the first thing wrong with the typed values. Ranges are checked by the app. */
 export function toSettings(draft: SettingsDraft): Settings | string {
-  const repeat = whole(draft.repeatWindow, "Repeat window");
-  const timeout = whole(draft.timeout, "Timeout");
-  const capacity = whole(draft.capacity, "Queue size");
-  const debounce = whole(draft.debounce, "Debounce");
+  const repeat = whole(draft.repeatWindow, strings.settings.fields.repeatWindow);
+  const timeout = whole(draft.timeout, strings.settings.fields.timeout);
+  const capacity = whole(draft.capacity, strings.settings.fields.queueSize);
+  const debounce = whole(draft.debounce, strings.settings.fields.debounce);
   for (const value of [repeat, timeout, capacity, debounce]) {
     if (typeof value === "string") return value;
   }

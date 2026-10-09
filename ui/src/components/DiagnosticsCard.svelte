@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { strings } from "../lib/strings";
   import { exportDiagnostics } from "../lib/ipc";
 
   let { level = $bindable(), levels }: { level: string; levels: string[] } = $props();
@@ -6,7 +7,7 @@
 
   const exportBundle = async () => {
     try {
-      message = { tone: "ok", text: `Saved to ${await exportDiagnostics()}` };
+      message = { tone: "ok", text: strings.settings.diagnostics.savedTo(await exportDiagnostics()) };
     } catch (e) {
       message = { tone: "error", text: String(e) };
     }
@@ -14,15 +15,15 @@
 </script>
 
 <div class="card">
-  <h2>Diagnostics</h2>
-  <p class="hint">The log has the app's lines and the hand-over journal from REAPER. Export one zip to send when something went wrong. The log level applies after a restart.</p>
+  <h2>{strings.settings.diagnostics.title}</h2>
+  <p class="hint">{strings.settings.diagnostics.hint}</p>
   <div class="row">
-    <label>Log level
+    <label>{strings.settings.diagnostics.logLevel}
       <select bind:value={level}>
         {#each levels as option (option)}<option value={option}>{option}</option>{/each}
       </select>
     </label>
-    <button onclick={exportBundle}>Export diagnostics</button>
+    <button onclick={exportBundle}>{strings.settings.diagnostics.export}</button>
   </div>
   {#if message}<p class="message {message.tone}" role="status">{message.text}</p>{/if}
 </div>

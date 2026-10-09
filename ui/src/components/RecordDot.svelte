@@ -1,8 +1,9 @@
 <script lang="ts">
+  import { strings } from "../lib/strings";
   let { armed, onToggle }: { armed: boolean; onToggle: () => void } = $props();
 </script>
 
-<button class="record" class:armed aria-label="Toggle recording" aria-pressed={armed} onclick={onToggle}>
+<button class="record" class:armed aria-label={strings.performer.toggleRecording} aria-pressed={armed} onclick={onToggle}>
   <span class="dot"></span>
 </button>
 
