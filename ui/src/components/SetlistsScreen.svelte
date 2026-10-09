@@ -1,11 +1,10 @@
 <script lang="ts">
-  import Button from "../kit/Button.svelte";
-  import ListRow from "../kit/ListRow.svelte";
-  import StatusBadge from "../kit/StatusBadge.svelte";
   import type { Catalog, Command } from "../lib/generated/protocol";
   import * as edit from "../lib/setlist-edit";
   import { strings } from "../lib/strings";
   import SetlistEditor from "./SetlistEditor.svelte";
+  import SetlistList from "./SetlistList.svelte";
+  import SongPool from "./SongPool.svelte";
   import DeleteSetlistDialog from "./DeleteSetlistDialog.svelte";
 
   let { catalog, send }: { catalog: Catalog; send: (command: Command) => Promise<void> } = $props();
@@ -41,64 +40,50 @@
 </script>
 
 <section class="screen">
-  <h1>{strings.setlists.title}</h1>
+  <header>
+    <h1>{strings.setlists.title}</h1>
+    <span class="saved"><span class="dot"></span>{strings.setlists.savedHint}</span>
+  </header>
   <div class="columns">
-    <div class="side">
-      <div role="list" aria-label={strings.setlists.listLabel}>
-        {#each catalog.setlists as setlist (setlist.id)}
-          <ListRow selected={draft?.id === setlist.id} onclick={() => open(setlist.id)}>
-            {setlist.name}
-            {#snippet trailing()}
-              {#if catalog.active_setlist === setlist.id}<StatusBadge tone="ok" label={strings.setlists.playing} />{/if}
-              <span>{strings.setlists.songs(setlist.entries.length)}</span>
-            {/snippet}
-          </ListRow>
-        {:else}
-          <p class="hint">{strings.setlists.none}</p>
-        {/each}
-      </div>
-      <Button kind="primary" onclick={create}>{strings.setlists.create}</Button>
-    </div>
+    <SetlistList setlists={catalog.setlists} selected={draft?.id ?? null} playing={catalog.active_setlist} onOpen={open} onCreate={create} />
 
     {#if draft}
-      <div class="editor">
-        <SetlistEditor
-          {draft}
-          songs={catalog.project_songs}
-          {changed}
-          problem={edit.saveProblem(draft)}
-          {stale}
-          onRename={(name) => change((current) => edit.rename(current, name))}
-          onAdd={(songId) => change((current) => edit.addSong(current, songId))}
-          onMove={(entryId, direction) => change((current) => edit.moveEntry(current, entryId, direction))}
-          onRemove={(entryId) => change((current) => edit.removeEntry(current, entryId))}
-          onSave={save}
-          onDiscard={discard}
-          onReload={discard}
-        />
-        {#if saved}
-          <Button
-            disabled={catalog.active_setlist === saved.id}
-            onclick={() => send({ SetActiveSetlist: { id: saved.id } })}>{strings.setlists.play}</Button>
-          <Button kind="danger" onclick={() => (deleting = true)}>{strings.setlists.delete}</Button>
-          <DeleteSetlistDialog
-            open={deleting}
-            name={saved.name}
-            playing={catalog.active_setlist === saved.id}
-            onConfirm={remove}
-            onCancel={() => (deleting = false)} />
-        {/if}
-      </div>
+      <SetlistEditor
+        {draft}
+        songs={catalog.project_songs}
+        {changed}
+        problem={edit.saveProblem(draft)}
+        {stale}
+        saved={saved !== undefined}
+        playing={saved !== undefined && catalog.active_setlist === saved.id}
+        onRename={(name) => change((current) => edit.rename(current, name))}
+        onMove={(entryId, direction) => change((current) => edit.moveEntry(current, entryId, direction))}
+        onRemove={(entryId) => change((current) => edit.removeEntry(current, entryId))}
+        onSave={save}
+        onDiscard={discard}
+        onReload={discard}
+        onPlay={() => saved && send({ SetActiveSetlist: { id: saved.id } })}
+        onDelete={() => (deleting = true)}
+      />
+      <SongPool songs={catalog.project_songs} onAdd={(songId) => change((current) => edit.addSong(current, songId))} />
+      {#if saved}
+        <DeleteSetlistDialog
+          open={deleting}
+          name={saved.name}
+          playing={catalog.active_setlist === saved.id}
+          onConfirm={remove}
+          onCancel={() => (deleting = false)} />
+      {/if}
     {/if}
   </div>
 </section>
 
 <style>
-  .screen { padding: 28px 32px; display: flex; flex-direction: column; gap: var(--space-4); }
-  h1 { margin: 0 0 4px 0; font-size: 28px; font-weight: 800; }
-  .columns { display: flex; gap: var(--space-5); align-items: flex-start; flex-wrap: wrap; }
-  .side { display: flex; flex-direction: column; gap: var(--space-3); width: 320px; }
-  .editor { flex: 1; min-width: 360px; display: flex; flex-direction: column; gap: var(--space-3); align-items: flex-start; }
-  .editor > :global(*:first-child) { align-self: stretch; }
-  .hint { color: var(--muted); margin: 0; }
+  .screen { display: flex; flex-direction: column; gap: var(--space-4); padding: 28px 32px; min-height: 0; }
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
+  h1 { margin: 0; font-size: 28px; font-weight: 800; }
+  .saved { display: flex; align-items: center; gap: var(--space-2); font-size: 13px; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .columns { display: grid; grid-template-columns: 240px minmax(0, 1fr) 250px; gap: var(--space-4); align-items: start; }
+  .columns > :global(:first-child:last-child) { grid-column: 1; }
 </style>
