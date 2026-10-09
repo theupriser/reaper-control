@@ -138,7 +138,7 @@ pub use diagnostics_error::DiagnosticsError;
 pub use dispatch_error::DispatchError;
 pub use driver::Driver;
 pub use driver_error::DriverError;
-pub use endpoint_location::{endpoint_file, extension_directory, fault_file};
+pub use endpoint_location::{endpoint_file, endpoint_file_from, extension_directory, fault_file};
 pub use event_bus::EventBus;
 pub use event_logger::log_event;
 pub use extension_installer::ExtensionInstaller;

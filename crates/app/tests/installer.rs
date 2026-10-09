@@ -449,3 +449,22 @@ fn on_macos_the_copy_is_signed_and_not_quarantined() -> TestResult {
     assert!(!quarantine.status.success());
     Ok(())
 }
+
+#[test]
+fn the_endpoint_file_follows_the_isolated_directory_then_the_chosen_reaper_then_the_default() {
+    use app::endpoint_file_from;
+    let some = |text: &str| Some(PathBuf::from(text));
+    assert_eq!(
+        endpoint_file_from(some("/iso"), some("/portable"), some("/default")),
+        Some(PathBuf::from("/iso").join("endpoint.json"))
+    );
+    assert_eq!(
+        endpoint_file_from(None, some("/portable"), some("/default")),
+        Some(PathBuf::from("/portable/RC2").join("endpoint.json"))
+    );
+    assert_eq!(
+        endpoint_file_from(None, None, some("/default")),
+        Some(PathBuf::from("/default/RC2").join("endpoint.json"))
+    );
+    assert_eq!(endpoint_file_from(None, None, None), None);
+}

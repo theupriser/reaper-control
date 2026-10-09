@@ -28,8 +28,11 @@ The extension dylib was copied into `UserPlugins` with the quarantine attribute 
 
 Decision: the macOS installer copies the dylib, ensures an ad-hoc signature (`codesign --force -s -`), and removes `com.apple.quarantine` from the copy. The first run on a quarantined file once appeared to load before the dialog showed; do not rely on it.
 
+## The launcher argument (2026-10-09)
+The app reads `--reaper-folder <path>` (or `--reaper-folder=<path>`) at start and looks for that REAPER's `RC2/endpoint.json` (`RC2_DIRECTORY` still wins, for isolated test setups). Tried live: the app started with only `--reaper-folder .dev/reaper-test` connected to the isolated REAPER ("Connected, extension 0.0.0"). The macOS shortcut form `open -a "Reaper Control" --args --reaper-folder <path>` relies on `open` passing what follows `--args` to the program; the same mechanism starts the isolated REAPER in our tests (`open -n -a REAPER.app --args -cfgfile ...`). The `.command` file itself is not produced yet: there is no app bundle to open until the installer build (WP 8.1).
+
 ## Not yet measured
-What SmartScreen and antivirus tools say about the unsigned DLL (needs a real Windows PC, owner); the macOS launcher form. WP 1.4 stays 🟡 until these are tried.
+What SmartScreen and antivirus tools say about the unsigned DLL (needs a real Windows PC, owner). WP 1.4 stays 🟡 until that is tried.
 
 ## Undo if
 A Developer ID or certificate becomes available (then sign and notarize, WP 8.1), or users cannot get past the OS warning without help.

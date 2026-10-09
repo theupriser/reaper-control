@@ -4,6 +4,7 @@ import { performerView } from "./performer-view";
 
 const song = (id: string, start: number, end: number, extra: Partial<SongInfo> = {}): SongInfo => ({
   id,
+  number: 0,
   name: `Song ${id}`,
   start,
   end,
