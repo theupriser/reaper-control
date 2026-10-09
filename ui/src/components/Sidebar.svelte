@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { strings } from "../lib/strings";
   import { screens, type ScreenId } from "../lib/screens";
 
   let {
@@ -14,12 +15,12 @@
   } = $props();
 </script>
 
-<nav aria-label="Main">
+<nav aria-label={strings.screens.mainNavigation}>
   <div class="brand">
     <div class="logo">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0a1a0b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3l2-7 4 14 3-10 2 3h4" /></svg>
     </div>
-    <div class="name">Reaper Control</div>
+    <div class="name">{strings.app.name}</div>
   </div>
 
   {#each screens as screen (screen.id)}
@@ -33,7 +34,7 @@
 
   <button class="performer" onclick={onPerformer}>
     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-    Performer mode
+    {strings.screens.performerMode}
   </button>
 
   <div class="connection">

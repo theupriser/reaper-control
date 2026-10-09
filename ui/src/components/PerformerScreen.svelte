@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { strings } from "../lib/strings";
   import Clock from "./Clock.svelte";
   import PerformerControls from "./PerformerControls.svelte";
   import PerformerToggles from "./PerformerToggles.svelte";
@@ -44,7 +45,7 @@
 
 <div class="performer" class:flash={waiting} data-phase={view.phase}>
   <header>
-    <span class="setlist">{view.setlistName ? `Setlist: ${view.setlistName}` : ""}</span>
+    <span class="setlist">{view.setlistName ? strings.performer.setlist(view.setlistName) : ""}</span>
     <span class="clock">
       <RecordDot armed={view.recordArmed} onToggle={onToggleRecord} />
       <Clock />
@@ -53,26 +54,26 @@
   </header>
 
   <div class="content">
-    <h1>{view.song?.name ?? "No Song Selected"}</h1>
+    <h1>{view.song?.name ?? strings.performer.noSong}</h1>
     <div class="times">
       <div>
-        <span class="label">Song:</span>
+        <span class="label">{strings.performer.songTime}</span>
         {formatTime(view.songPosition)} <span class="sep">/</span> {formatTime(songLength)}
         <span class="remaining">({formatTime(songLength - view.songPosition)})</span>
       </div>
       <div>
-        <span class="label">Total:</span>
+        <span class="label">{strings.performer.totalTime}</span>
         {formatLongTime(view.totalElapsed)} <span class="sep">/</span> {formatLongTime(view.totalDuration)}
         <span class="remaining">({formatLongTime(view.totalDuration - view.totalElapsed)})</span>
       </div>
     </div>
     {#if view.song}<SongProgress song={view.song} position={view.songPosition} {onSeek} />{/if}
-    {#if view.phase === "CountingIn"}<p class="count-in">Count-in</p>{/if}
+    {#if view.phase === "CountingIn"}<p class="count-in">{strings.performer.countIn}</p>{/if}
 
     <div class="next">
-      <h2>{view.nextSong ? `Next: ${view.nextSong.name}` : "End of setlist"}</h2>
-      <div class="duration">{view.nextSong ? `Duration: ${formatTime(view.nextSong.duration)}` : " "}</div>
-      {#if waiting}<div class="hold">Press play to continue</div>{/if}
+      <h2>{view.nextSong ? strings.performer.next(view.nextSong.name) : strings.performer.endOfSetlist}</h2>
+      <div class="duration">{view.nextSong ? strings.performer.duration(formatTime(view.nextSong.duration)) : " "}</div>
+      {#if waiting}<div class="hold">{strings.performer.pressPlay}</div>{/if}
     </div>
   </div>
 
@@ -93,7 +94,7 @@
     onAutoResume={onToggleAutoResume}
     onCountIn={onToggleCountIn}
   />
-  {#if onExit}<div class="exit"><button onclick={onExit}>Exit Performer Mode</button></div>{/if}
+  {#if onExit}<div class="exit"><button onclick={onExit}>{strings.performer.exit}</button></div>{/if}
 </div>
 
 <style>

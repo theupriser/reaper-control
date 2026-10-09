@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { strings } from "../lib/strings";
   import type { Notice } from "../lib/generated/protocol";
 
   let { notices, onDismiss }: { notices: Notice[]; onDismiss: (key: string) => void } = $props();
@@ -13,7 +14,7 @@
           <div class="title">{notice.title}</div>
           <div class="text">{notice.text}</div>
         </div>
-        <button aria-label="Dismiss" onclick={() => onDismiss(notice.key)}>
+        <button aria-label={strings.notices.dismiss} onclick={() => onDismiss(notice.key)}>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
       </div>

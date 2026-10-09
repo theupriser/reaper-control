@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { strings } from "../lib/strings";
   import { onMount } from "svelte";
   import { currentTransfer, importSetlists, restoreSetlists } from "../lib/ipc";
   import type { SetlistTransferView } from "../lib/generated/protocol";
@@ -17,7 +18,7 @@
     }
   };
 
-  const run = async (action: () => Promise<number>, what: string) => {
+  const run = async (action: () => Promise<number>, what: "restore" | "import") => {
     try {
       message = { tone: "ok", text: doneText(await action(), what) };
     } catch (e) {
@@ -32,25 +33,25 @@
 <div class="card">
   <div class="head">
     <div>
-      <h2>Setlists backup and v1 import</h2>
-      <p class="hint">The app keeps a copy of this project's setlists. Bring back a lost setlist, or take over the ones you made in v1.</p>
+      <h2>{strings.settings.transfer.title}</h2>
+      <p class="hint">{strings.settings.transfer.hint}</p>
     </div>
-    <button onclick={load}>Refresh</button>
+    <button onclick={load}>{strings.settings.transfer.refresh}</button>
   </div>
   {#if view?.problem}<p class="message error">{view.problem}</p>{:else if view}
     <div class="block">
-      <h3>Backup copy</h3>
+      <h3>{strings.settings.transfer.backup}</h3>
       {#if view.restorable.length === 0}
-        <p class="hint">Nothing to restore: the project has every setlist the copy has.</p>
+        <p class="hint">{strings.settings.transfer.nothingToRestore}</p>
       {:else}
-        <p>Missing from the project: {view.restorable.join(", ")}</p>
-        <div><button class="primary" onclick={() => run(restoreSetlists, "restore")}>Restore {view.restorable.length}</button></div>
+        <p>{strings.settings.transfer.missing(view.restorable.join(", "))}</p>
+        <div><button class="primary" onclick={() => run(restoreSetlists, "restore")}>{strings.settings.transfer.restore(view.restorable.length)}</button></div>
       {/if}
     </div>
     <div class="block">
-      <h3>From v1</h3>
+      <h3>{strings.settings.transfer.fromV1}</h3>
       {#if view.imports.length === 0}
-        <p class="hint">No v1 setlists to import for this project.</p>
+        <p class="hint">{strings.settings.transfer.nothingToImport}</p>
       {:else}
         {#each view.imports as offer (offer.id)}
           <label class="offer">
@@ -58,7 +59,7 @@
             <span><strong>{offer.name}</strong> <span class="hint">{offerText(offer)}</span></span>
           </label>
         {/each}
-        <div><button class="primary" disabled={chosen.length === 0} onclick={() => run(() => importSetlists(chosen), "import")}>Import {chosen.length}</button></div>
+        <div><button class="primary" disabled={chosen.length === 0} onclick={() => run(() => importSetlists(chosen), "import")}>{strings.settings.transfer.import(chosen.length)}</button></div>
       {/if}
     </div>
   {/if}

@@ -1,10 +1,11 @@
 <script lang="ts">
+  import { strings } from "../lib/strings";
   let { title }: { title: string } = $props();
 </script>
 
 <section>
   <h1>{title}</h1>
-  <p>This screen is not built yet. Its design is in the canvas.</p>
+  <p>{strings.screens.comingSoon}</p>
 </section>
 
 <style>

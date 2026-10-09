@@ -1,19 +1,19 @@
 <script lang="ts">
+  import { strings } from "../lib/strings";
   let {
     autoResume,
     countInOnMarker,
     onAutoResume,
     onCountIn,
   }: { autoResume: boolean; countInOnMarker: boolean; onAutoResume: () => void; onCountIn: () => void } = $props();
-  const word = (on: boolean) => (on ? "ON" : "OFF");
 </script>
 
 <div class="toggles">
   <button class="item" class:on={autoResume} aria-pressed={autoResume} onclick={onAutoResume}>
-    Auto-resume: {word(autoResume)}
+    {strings.performer.autoResume(autoResume)}
   </button>
   <button class="item" class:on={countInOnMarker} aria-pressed={countInOnMarker} onclick={onCountIn}>
-    Count-in when pressing marker: {word(countInOnMarker)}
+    {strings.performer.countInOnMarker(countInOnMarker)}
   </button>
 </div>
 

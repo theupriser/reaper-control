@@ -1,0 +1,108 @@
+/**
+ * Every word the interface shows, in one place, so a translation can replace this module
+ * in v2.1. Components and view logic import from here and hold no copy of their own
+ * (`strings.test.ts` checks the components). Wording follows v1 where v1 had it.
+ */
+
+const plural = (count: number, one: string, many: string): string => `${count} ${count === 1 ? one : many}`;
+
+export const strings = {
+  app: { name: "Reaper Control" },
+
+  screens: {
+    player: "Player",
+    setlists: "Setlists",
+    checklist: "Pre-show check",
+    settings: "Settings",
+    help: "Help",
+    performerMode: "Performer mode",
+    mainNavigation: "Main",
+    comingSoon: "This screen is not built yet. Its design is in the canvas.",
+  },
+
+  connection: {
+    notRunning: "REAPER not running",
+    waitingForExtension: "waiting for the extension",
+    seeMessage: "see the message at the bottom",
+    connected: "Connected",
+    disconnected: "Disconnected",
+    extensionVersion: (version: string) => `extension ${version}`,
+  },
+
+  performer: {
+    noSong: "No Song Selected",
+    setlist: (name: string) => `Setlist: ${name}`,
+    songTime: "Song:",
+    totalTime: "Total:",
+    countIn: "Count-in",
+    next: (name: string) => `Next: ${name}`,
+    endOfSetlist: "End of setlist",
+    duration: (time: string) => `Duration: ${time}`,
+    pressPlay: "Press play to continue",
+    exit: "Exit Performer Mode",
+    autoResume: (on: boolean) => `Auto-resume: ${on ? "ON" : "OFF"}`,
+    countInOnMarker: (on: boolean) => `Count-in when pressing marker: ${on ? "ON" : "OFF"}`,
+    previous: "Previous song",
+    rewind: "Rewind to start of song",
+    play: "Play",
+    pause: "Pause",
+    nextSong: "Next song",
+    toggleRecording: "Toggle recording",
+    hardStopPoint: "Hard stop point",
+    systemStatus: "System status",
+    midiActivity: "MIDI activity",
+    cpu: (percent: number) => `CPU ${percent}%`,
+  },
+
+  notices: { dismiss: "Dismiss" },
+
+  settings: {
+    title: "Settings",
+    save: "Save",
+    discard: "Discard changes",
+    saved: "Saved. Queue limits apply now; MIDI and log level changes apply after a restart.",
+    mustBeWhole: (label: string) => `${label} must be a whole number`,
+    milliseconds: (label: string) => `${label} (ms)`,
+    fields: { repeatWindow: "Repeat window", timeout: "Timeout", queueSize: "Queue size", debounce: "Debounce" },
+    midi: {
+      title: "MIDI control",
+      hint: "Trigger actions from a foot controller or keyboard. Changes apply after a restart.",
+      enabled: "Enabled",
+      device: "Device",
+      allDevices: "All devices",
+      channel: "Channel",
+      allChannels: "All channels",
+      note: "Note",
+      action: "Action",
+    },
+    queue: {
+      title: "Command queue",
+      hint: "How the app guards the commands it sends to REAPER. Applies at once.",
+    },
+    diagnostics: {
+      title: "Diagnostics",
+      hint: "The log has the app's lines and the hand-over journal from REAPER. Export one zip to send when something went wrong. The log level applies after a restart.",
+      logLevel: "Log level",
+      export: "Export diagnostics",
+      savedTo: (path: string) => `Saved to ${path}`,
+    },
+    transfer: {
+      title: "Setlists backup and v1 import",
+      hint: "The app keeps a copy of this project's setlists. Bring back a lost setlist, or take over the ones you made in v1.",
+      refresh: "Refresh",
+      backup: "Backup copy",
+      nothingToRestore: "Nothing to restore: the project has every setlist the copy has.",
+      missing: (names: string) => `Missing from the project: ${names}`,
+      restore: (count: number) => `Restore ${count}`,
+      fromV1: "From v1",
+      nothingToImport: "No v1 setlists to import for this project.",
+      import: (count: number) => `Import ${count}`,
+      songs: (count: number) => plural(count, "song", "songs"),
+      notInProject: (found: string, names: string) => `${found}; not in this project: ${names}`,
+      nothingTo: (what: string) => `Nothing to ${what}.`,
+      done: (count: number, past: string) => `${plural(count, "setlist", "setlists")} ${past}.`,
+      restored: "restored",
+      imported: "imported",
+    },
+  },
+} as const;

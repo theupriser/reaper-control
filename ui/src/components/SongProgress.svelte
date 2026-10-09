@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { strings } from "../lib/strings";
   import { onDestroy } from "svelte";
   import { formatTime, popoverX, progressPercent, seekTarget, type SeekTarget, type SongView } from "../lib/performer";
 
@@ -41,7 +42,7 @@
     <div class="mark" style="left: {progressPercent(cue.position, song.duration)}%" title={cue.name}></div>
   {/each}
   {#if song.hardStop}
-    <div class="mark stop" style="left: 100%" title="Hard stop point"></div>
+    <div class="mark stop" style="left: 100%" title={strings.performer.hardStopPoint}></div>
   {/if}
   {#if popover}<div class="popover" style="left: {popover.x}px">{formatTime(popover.time)}</div>{/if}
 </div>
