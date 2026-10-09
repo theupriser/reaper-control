@@ -126,7 +126,7 @@ export const strings = {
     title: "Settings",
     save: "Save",
     discard: "Discard changes",
-    saved: "Saved. Queue limits apply now; MIDI and log level changes apply after a restart.",
+    saved: "Saved. Everything applies now except the log level, which applies after a restart.",
     mustBeWhole: (label: string) => `${label} must be a whole number`,
     milliseconds: (label: string) => `${label} (ms)`,
     fields: { repeatWindow: "Repeat window", timeout: "Timeout", queueSize: "Queue size", debounce: "Debounce" },
@@ -149,6 +149,16 @@ export const strings = {
     queue: {
       title: "Command queue",
       hint: "How the app guards the commands it sends to REAPER. Applies at once.",
+    },
+    appearance: {
+      title: "Appearance",
+      hint: "How the screens look. Applies at once when you save.",
+      theme: "Theme",
+      density: "Density",
+      touch: "Touch targets",
+      themes: { dark: "Dark", "stage-dark": "Stage dark", light: "Light" } as Record<string, string>,
+      densities: { comfortable: "Comfortable", compact: "Compact" } as Record<string, string>,
+      touchSizes: { normal: "Normal", large: "Large" } as Record<string, string>,
     },
     diagnostics: {
       title: "Diagnostics",

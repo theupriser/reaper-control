@@ -35,3 +35,20 @@ test("a note used twice is refused with its number and nothing is saved", async 
   await page.getByRole("button", { name: "Save" }).click();
   await expect.poll(() => page.evaluate(() => (window as any).__saved?.length ?? 0)).toBe(1);
 });
+
+test("a person picks a light theme and large touch targets and they apply at once", async ({ page }) => {
+  await page.addInitScript(tauriStandIn, view);
+  await page.goto("/");
+  await page.getByRole("navigation").getByRole("button", { name: "Settings" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+  await page.getByLabel("Theme").selectOption({ label: "Light" });
+  await page.getByLabel("Touch targets").selectOption({ label: "Large" });
+  await page.getByRole("button", { name: "Save" }).click();
+
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(page.locator("html")).toHaveAttribute("data-touch", "large");
+  const saved = await page.evaluate(() => (window as any).__saved);
+  expect(saved[0].appearance).toEqual({ theme: "light", density: "comfortable", touch: "large" });
+  await page.screenshot({ path: "perf-results/appearance.png" });
+});

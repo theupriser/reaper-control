@@ -4,10 +4,12 @@
   import Panel from "../kit/Panel.svelte";
   import { onMount } from "svelte";
   import NoteTable from "./NoteTable.svelte";
+  import AppearanceCard from "./AppearanceCard.svelte";
   import DiagnosticsCard from "./DiagnosticsCard.svelte";
   import SetlistTransferCard from "./SetlistTransferCard.svelte";
   import { currentSettings, saveSettings } from "../lib/ipc";
   import type { SettingsView } from "../lib/generated/protocol";
+  import { applyAppearance, appearanceOf } from "../lib/appearance";
   import { ALL_CHANNELS, LOG_LEVELS, isChanged, toDraft, toSettings, type SettingsDraft } from "../lib/settings-form";
 
   let view = $state<SettingsView | null>(null);
@@ -25,6 +27,7 @@
     try {
       view = await currentSettings();
       draft = toDraft(view.settings);
+      applyAppearance(document.documentElement, appearanceOf(view.settings.appearance));
     } catch (e) {
       message = { tone: "error", text: String(e) };
     }
@@ -79,6 +82,8 @@
         <label class="grow">{strings.settings.fields.queueSize}<input inputmode="numeric" bind:value={draft.capacity} /></label>
       </div>
     </Panel>
+
+    <AppearanceCard bind:theme={draft.theme} bind:density={draft.density} bind:touch={draft.touch} />
 
     <SetlistTransferCard />
 

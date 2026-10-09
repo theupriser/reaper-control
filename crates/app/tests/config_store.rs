@@ -116,3 +116,21 @@ fn the_log_level_is_saved_and_an_unknown_one_is_refused() -> TestResult {
     std::fs::remove_dir_all(directory)?;
     Ok(())
 }
+
+#[test]
+fn the_appearance_is_saved_and_an_unknown_choice_is_refused() -> TestResult {
+    let (store, directory) = store("config-appearance")?;
+    assert_eq!(AppConfig::default().appearance.theme, "dark");
+    let mut config = AppConfig::default();
+    config.appearance.theme = "light".into();
+    config.appearance.touch = "large".into();
+    store.save(&config)?;
+    assert_eq!(store.load()?.appearance.touch, "large");
+    let applied = AppConfig::default().with_settings(&config.settings())?;
+    assert_eq!(applied.appearance.theme, "light");
+
+    config.appearance.density = "tiny".into();
+    assert!(matches!(store.save(&config), Err(ConfigError::Invalid(_))));
+    std::fs::remove_dir_all(directory)?;
+    Ok(())
+}

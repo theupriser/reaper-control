@@ -3,6 +3,7 @@
 mod app_config;
 mod app_event;
 mod app_fault;
+mod appearance_config;
 mod apply_event;
 mod binary_architecture;
 mod chaos_proxy;
@@ -116,6 +117,7 @@ mod system_stats_service;
 pub use app_config::{AppConfig, SCHEMA_VERSION};
 pub use app_event::AppEvent;
 pub use app_fault::AppFault;
+pub use appearance_config::{AppearanceConfig, DENSITIES, THEMES, TOUCH_SIZES};
 pub use apply_event::apply_event;
 pub use binary_architecture::BinaryArchitecture;
 pub use chaos_proxy::ChaosProxy;

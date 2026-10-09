@@ -2,6 +2,7 @@
 //! The types here are the single source for the UI's TypeScript types (WP 0.4).
 
 mod action_choice;
+mod appearance_choice;
 mod catalog;
 mod command;
 mod cue_info;
@@ -31,6 +32,7 @@ mod wire_event;
 mod generated;
 
 pub use action_choice::ActionChoice;
+pub use appearance_choice::AppearanceChoice;
 pub use catalog::Catalog;
 pub use command::Command;
 pub use cue_info::CueInfo;
