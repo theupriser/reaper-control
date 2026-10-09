@@ -98,7 +98,7 @@ jobs:
         shell: bash
         run: scripts/package_extension.sh
       - name: Build the app (release, no installer yet)
-        run: cargo build --release -p app
+        run: cargo build --release -p app --features custom-protocol
       - uses: actions/upload-artifact@v4
         with:
           name: extension-${{ matrix.os }}

@@ -27,5 +27,10 @@ tracing-appender.workspace = true
 zip = { version = "8.6.0", default-features = false, features = ["deflate", "time"] }
 time = { version = "0.3", default-features = false, features = ["std"] }
 
+[features]
+# Set by `tauri build`, and by hand for a plain `cargo build --release`: embeds `ui/dist` instead of
+# loading the dev server at `devUrl` (without it the window shows "localhost refused to connect").
+custom-protocol = ["tauri/custom-protocol"]
+
 [lints]
 workspace = true
