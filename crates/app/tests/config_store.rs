@@ -2,6 +2,7 @@
 
 use app::app_config::AppConfig;
 use app::config_error::ConfigError;
+use app::config_repository::ConfigRepository;
 use app::config_store::ConfigStore;
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;

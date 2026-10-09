@@ -1,22 +1,22 @@
 //! Keeps the restore-only copy of the project's setlists up to date.
 
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 use protocol::{LinkView, SetlistInfo};
 
-use crate::setlist_mirror::SetlistMirror;
+use crate::mirror_repository::MirrorRepository;
 
 /// Writes the project's setlists to the mirror whenever they change. An empty list is never
 /// written: a project that lost its setlists is exactly when the copy is needed.
 pub struct MirrorKeeper {
-    mirror: SetlistMirror,
+    mirror: Arc<dyn MirrorRepository>,
     written: Mutex<Option<(String, Vec<SetlistInfo>)>>,
 }
 
 impl MirrorKeeper {
     /// A keeper that writes to `mirror`.
     #[must_use]
-    pub fn new(mirror: SetlistMirror) -> Self {
+    pub fn new(mirror: Arc<dyn MirrorRepository>) -> Self {
         Self {
             mirror,
             written: Mutex::new(None),
@@ -42,3 +42,6 @@ impl MirrorKeeper {
         }
     }
 }
+
+#[cfg(test)]
+mod tests;

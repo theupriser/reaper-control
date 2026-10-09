@@ -3,14 +3,14 @@
 use std::path::Path;
 
 use crate::app_config::AppConfig;
-use crate::config_store::ConfigStore;
+use crate::config_repository::ConfigRepository;
 use crate::legacy_config_file::LegacyConfigFile;
 
 /// When the app has no config file yet and v1 left one, the MIDI settings of v1 become the first
 /// config, saved at once so this happens once. Returns that config; `None` when there was nothing
 /// to take over. What v1 stored without a v2 counterpart is logged, never dropped silently.
 #[must_use]
-pub fn import_legacy_config(store: &ConfigStore, legacy_file: &Path) -> Option<AppConfig> {
+pub fn import_legacy_config(store: &dyn ConfigRepository, legacy_file: &Path) -> Option<AppConfig> {
     if store.exists() || !legacy_file.is_file() {
         return None;
     }

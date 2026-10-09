@@ -6,6 +6,7 @@ use protocol::SetlistInfo;
 
 use crate::mirror_error::MirrorError;
 use crate::mirror_file::MirrorFile;
+use crate::mirror_repository::MirrorRepository;
 
 const SCHEMA_VERSION: u32 = 1;
 
@@ -32,12 +33,10 @@ impl SetlistMirror {
         }
         Ok(self.directory.join(format!("{project_id}.json")))
     }
+}
 
-    /// Replaces the copy of this project's setlists, through a temporary file and a rename.
-    ///
-    /// # Errors
-    /// [`MirrorError`] for an unusable project id or a failed write.
-    pub fn save(&self, project_id: &str, setlists: &[SetlistInfo]) -> Result<(), MirrorError> {
+impl MirrorRepository for SetlistMirror {
+    fn save(&self, project_id: &str, setlists: &[SetlistInfo]) -> Result<(), MirrorError> {
         let file = self.file(project_id)?;
         std::fs::create_dir_all(&self.directory)?;
         let content = MirrorFile {
@@ -50,11 +49,7 @@ impl SetlistMirror {
         Ok(())
     }
 
-    /// The copy of this project's setlists; empty when there is none.
-    ///
-    /// # Errors
-    /// [`MirrorError`] for an unusable project id or a damaged file.
-    pub fn restore(&self, project_id: &str) -> Result<Vec<SetlistInfo>, MirrorError> {
+    fn restore(&self, project_id: &str) -> Result<Vec<SetlistInfo>, MirrorError> {
         let text = match std::fs::read_to_string(self.file(project_id)?) {
             Ok(text) => text,
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
