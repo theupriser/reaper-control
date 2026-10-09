@@ -29,7 +29,7 @@
     gap: 8px;
     color: var(--muted);
   }
-  .midi svg { fill: var(--muted); transition: fill 0.1s ease, filter 0.1s ease; }
+  .midi svg { fill: var(--muted); transition: fill var(--motion-fast), filter var(--motion-fast); }
   .midi.active svg { fill: var(--amber); filter: drop-shadow(0 0 2px var(--amber)); }
   .dot {
     width: 10px;
@@ -47,7 +47,7 @@
     border-radius: 4px;
     overflow: hidden;
   }
-  .bar { display: block; height: 100%; transition: width 0.5s ease; }
+  .bar { display: block; height: 100%; transition: width var(--motion-normal); }
   .low { background: var(--green); }
   .medium { background: var(--amber); }
   .high { background: var(--danger); }
