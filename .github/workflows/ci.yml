@@ -66,3 +66,40 @@ jobs:
       - name: Fuzz messages
         run: cargo +nightly fuzz run messages -- -max_total_time=30
         working-directory: crates/protocol
+
+  package:
+    name: Package (${{ matrix.os }})
+    needs: rust
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain (from rust-toolchain.toml)
+        run: rustup show
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ui/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: ui/pnpm-lock.yaml
+      - name: UI install and build
+        run: |
+          pnpm --dir ui install --frozen-lockfile
+          pnpm --dir ui build
+      - uses: Swatinem/rust-cache@v2
+      - name: Build the extension (release)
+        run: cargo build --release -p reaper-extension
+      - name: Package the extension with its checksum
+        shell: bash
+        run: scripts/package_extension.sh
+      - name: Build the app (release, no installer yet)
+        run: cargo build --release -p app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extension-${{ matrix.os }}
+          path: dist/
