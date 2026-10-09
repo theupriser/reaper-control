@@ -3,6 +3,7 @@
 use app::legacy_file::LegacyFile;
 use app::legacy_resolver::resolve;
 use app::mirror_error::MirrorError;
+use app::mirror_repository::MirrorRepository;
 use app::setlist_mirror::SetlistMirror;
 use protocol::SongInfo;
 
