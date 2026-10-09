@@ -106,7 +106,17 @@ dependencies = [
 name = "architecture-tests"
 version = "0.0.0"
 dependencies = [
+ "app",
  "cargo_metadata 0.20.0",
+ "catalogue",
+ "link",
+ "performance",
+ "projections",
+ "protocol",
+ "reaper-port",
+ "setlists",
+ "shared-kernel",
+ "timer-loop",
 ]
 
 [[package]]

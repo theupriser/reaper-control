@@ -5,7 +5,7 @@ Companion to `SPEC.md` (what/how). This file is the *plan*: phases, work package
 Decisions in force: D1 public release (macOS + Windows; D6) · D2 setlists in REAPER project · D3 companion component required, no Basic mode · D4 remote control = nice-to-have (stretch) · ~~D5 Lua-once~~ superseded by **D7: native Rust REAPER extension** (targets macOS Apple Silicon and Windows x64 only, D8; Lua + web interface kept only as fallback, SPEC §2.5) · D6 v2.0 = macOS + Windows only; Linux, updater, website, NL, MIDI learn, hold-to-confirm → v2.1 (§12b).
 
 ---
-**Progress legend (keep current in every PR that touches a work package):** ✅ done and merged · 🟡 partly done (the row says what is missing) · ⬜ not started. Last checked 2026-10-08.
+**Progress legend (keep current in every PR that touches a work package):** ✅ done and merged · 🟡 partly done (the row says what is missing) · ⬜ not started. Last checked 2026-10-09.
 
 ## 1. Guiding principles
 1. Parity first, no new features (except D4 stretch, after parity).
@@ -53,7 +53,7 @@ reaper-control-app-v2/
 | ✅ 1.1 | **S1** Extension hello-world with `reaper-rs` on macOS arm64 (native Apple Silicon REAPER) and Windows x64: loads from `UserPlugins`, timer callback, reads position/regions/markers/tempo, runs actions, ExtState. Minimum REAPER version. Confirm what happens with an Intel REAPER under Rosetta (expected: cannot load) **Windows half done on a VM 2026-10-09.** | 3.5 | ADR-001 confirmed or fallback (SPEC §2.5) |
 | 🟡 1.2 | **S2** Transport/timing: seek-while-playing vs native region playlist vs stop/seek/play; timer-driven vs audio-hook-triggered hand-over; click-track measurement of audible gaps and trigger jitter; behaviour while REAPER shows menus/modal dialogs/renders **Missing: sound card output path not measured.** | 3 | ADR-005 hand-over strategy and `lead` |
 | 🟡 1.3 | **S3** Local link: loopback TCP vs named pipe/Unix socket, latency/throughput, endpoint file + token, reconnect with replay, firewall/AV prompts **Windows: link works on loopback (VM). Missing: Windows latency numbers, firewall prompt, menus/modals.** | 2 | ADR-003 final |
-| ⬜ 1.4 | **S4 (priority)** Installer feasibility: `UserPlugins` copy by the app, REAPER architecture detection, macOS signing/quarantine/Gatekeeper/library validation (ad-hoc vs Developer ID, Apple Silicon), Windows SmartScreen/AV and DLL file locking, staged update, portable installs | 3.5 | ADR-006 installer strategy + list of "manual with guidance" cases |
+| 🟡 1.4 | **S4 (priority)** Installer feasibility: `UserPlugins` copy by the app, REAPER architecture detection, macOS signing/quarantine/Gatekeeper/library validation (ad-hoc vs Developer ID, Apple Silicon), Windows SmartScreen/AV and DLL file locking, staged update, portable installs **Decisions recorded 2026-10-09 in ADR-006 (ad-hoc macOS, unsigned Windows, ask which folder and `--reaper-folder`, close REAPER first, no staged update). Missing: nothing measured yet (quarantined dylib in REAPER, SmartScreen, macOS launcher).** | 3.5 | ADR-006 installer strategy + list of "manual with guidance" cases |
 | 🟡 1.5 | **S5** Tauri webview differences (WKWebView macOS, WebView2 Windows): timers, CSS, fullscreen, wake-lock, MIDI access **Windows/WebView2 shows the Svelte UI and runs (VM, 2026-10-09). Missing: fullscreen, wake-lock, MIDI access, hidden window, touch, scaling to small screens.** | 1 | Compat notes |
 | ✅ 1.6 | **S6** Stable identity: region ids (index numbers vs GUID) surviving renumbering/edits; deriving a stable ProjectId; v1 setlist import mapping | 1.5 | ADR-008 SongId/ProjectId |
 | 🟡 1.7 | **S7** Crash containment: `catch_unwind` at every FFI entry, panic hook → Faulted state, safe-mode marker, behaviour when REAPER crashes; `reaper-rs` API coverage vs REAPER versions **Windows done on a VM 2026-10-09 (panic contained, slow-tick watchdog, hard kill gives safe mode, clean quit bug found and fixed in #76). Missing: audio-hook panic on Windows, safe-mode policy for false positives, long fuzz campaign (7.7).** | 2 | ADR-009 (S-9 design) |
@@ -88,7 +88,7 @@ reaper-control-app-v2/
 | ✅ 3.7 | Setlist persistence in project ExtState (versioned schema, `expectedRev`, corruption recovery, re-validation on load) | 2.5 |
 | ✅ 3.8 | Hand-over execution per ADR-005, hard stops, count-in (audio-hook trigger only if S2 shows it is needed and safe) **Windows live run on a VM 2026-10-09 (hand-over, hard stop, count-in).** | 3.5 |
 | ✅ 3.9 | Project change/tab handling, cheap change detection, stable ids per ADR-008 | 2 |
-| 🟡 3.10 | Build and packaging: CI cross-builds for the 2 targets, signing, version constant, checksum, in-REAPER smoke test **Windows smoke run done on the VM (2026-10-09). Missing: signing (S4), app installer, in-REAPER click-track scenarios.** | 3 |
+| 🟡 3.10 | Build and packaging: CI cross-builds for the 2 targets, signing, version constant, checksum, in-REAPER smoke test **Windows smoke run done on the VM (2026-10-09). Missing: signing (decided: ad-hoc macOS, unsigned Windows, ADR-006), app installer, in-REAPER click-track scenarios.** | 3 |
 
 **Gate 3:** scenarios pass on `FakeReaper` **and** in real REAPER on both targets; 30 min unattended run, 40 hand-overs, zero misses; kill-the-app test keeps playing; panic injection leaves REAPER alive and reports `ExtensionFaulted`; journal matches events.
 
@@ -110,7 +110,7 @@ reaper-control-app-v2/
 | ✅ 4.11 | FakeDriver + simulator (the same `performance` crate over `FakeReaper`, deterministic clock). The simulator is the real `TimerLoop` (now crate `timer-loop`, ADR-012) over `FakeReaper`; `RC2_SIMULATOR=1` starts the app on it. | 1.5 |
 | ✅ 4.12 | In-process fake extension server (the real server code over `FakeReaper`) for conformance and chaos tests (drops, latency, reordering, garbage). `FakeExtension` runs the real `LinkServer` and `TimerLoop` over `FakeReaper`; `ChaosProxy` sits between it and the app's real `LinkConnection` and delays, swaps, cuts and corrupts frames. The extension's push logic (`StatePublisher`, `QueuedCommands`) moved into `timer-loop` so both run the same code. The app now ignores a Live state older than the one it shows. | 2.5 |
 | 🟡 4.18 | System stats (`sysinfo`: CPU/memory) for F14. Missing: the `current_system_stats` command was not seen called from the window (the popover is WP 6.4) | 1 |
-| ⬜ 4.14 | **Installer module** (`ExtensionInstaller` port + OS adapters): locate REAPER, detect its architecture, `InstallReport`, copy to `UserPlugins`, signature/quarantine handling, rollback copy, staged update, verify-by-handshake, repair, uninstall, dry-run | 5 |
+| ⬜ 4.14 | **Installer module** (`ExtensionInstaller` port + OS adapters): locate REAPER, detect its architecture, `InstallReport`, copy to `UserPlugins`, signature/quarantine handling, rollback copy, ask which folder (`--reaper-folder`), update only on request with REAPER closed (ADR-006, no staged update), verify-by-handshake, repair, uninstall, dry-run | 5 |
 | ⬜ 4.15 | Installer test suite: temp fake REAPER resource dirs (clean / existing extension / read-only / wrong architecture / portable / running-REAPER lock), golden-file tests | 2.5 |
 | 🟡 4.13 | Composition root, graceful shutdown, panic hook → log + safe UI state. Missing: the panic message in the window was not seen live (tested up to the hook and the stored fault) | 1.5 |
 
@@ -121,7 +121,7 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 
 | WP | Task | d |
 |----|------|---|
-| ⬜ 4b.1 | Size audit: a test prints `size_of` for every public type of every crate; list everything over 64 bytes and everything over 128. Turn on `clippy::large_enum_variant`, `large_types_passed_by_value`, `large_stack_arrays` and `trivially_copy_pass_by_ref` workspace-wide | 0.5 |
+| 🟡 4b.1 | Size audit: a test prints `size_of` for every public type of every crate; list everything over 64 bytes and everything over 128. Turn on `clippy::large_enum_variant`, `large_types_passed_by_value`, `large_stack_arrays` and `trivially_copy_pass_by_ref` workspace-wide **Done: `size_audit` test and the four lints (default thresholds) are in; the strict thresholds (variants 64 bytes) come with 4b.2.** | 0.5 |
 | ⬜ 4b.2 | Fix the findings: box heavy variants, pass big values by reference, add the comment; a size-budget test per hot type (messages, `Command`, `AppEvent`, `Input`, `Effect`) fails when one grows past 128 bytes | 1 |
 | ⬜ 4b.3 | Layout audit: `app` declares about 100 `pub mod`; make the modules private and re-export the real API from the crate root (and per context), update the tests' paths; check the other crates; names singular and snake_case | 1.5 |
 | ⬜ 4b.4 | Architecture tests: no `mod.rs` anywhere, file and directory names are `lower_snake_case`, a module with submodules is `x.rs` plus `x/`, the allowed `pub mod` list is explicit | 0.5 |
@@ -173,7 +173,7 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 ## 11. Phase 8 — Public release
 | WP | Task | d |
 |----|------|---|
-| ⬜ 8.1 | Code signing + notarisation (Apple Developer ID for the app **and** the extension binary, Windows code-signing cert), macOS dmg (Apple Silicon) + Windows installer, bundling both extension builds | 3.5 |
+| ⬜ 8.1 | Code signing + notarisation (until the owner has accounts the release is ad-hoc and unsigned, ADR-006; then Apple Developer ID for the app **and** the extension binary, Windows code-signing cert), macOS dmg (Apple Silicon) + Windows installer, bundling both extension builds | 3.5 |
 | ⬜ 8.2 | Release pipeline (tags → signed artefacts → draft GitHub release; manual publish) | 2 |
 
 | ⬜ 8.9 | Installer QA matrix: clean/existing REAPER setups × (macOS arm64 REAPER, Intel REAPER under Rosetta → guidance only, Windows x64) × running/closed REAPER × admin/standard user; manual-install guide verified by a non-developer | 2.5 |

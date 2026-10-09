@@ -7,6 +7,16 @@ publish.workspace = true
 
 [dev-dependencies]
 cargo_metadata = "0.20"
+app = { path = "../app" }
+catalogue = { path = "../catalogue" }
+link = { path = "../link" }
+performance = { path = "../performance" }
+projections = { path = "../projections" }
+protocol = { path = "../protocol" }
+reaper-port = { path = "../reaper-port" }
+setlists = { path = "../setlists" }
+shared-kernel = { path = "../shared-kernel" }
+timer-loop = { path = "../timer-loop" }
 
 [lints]
 workspace = true

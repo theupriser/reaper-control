@@ -2,9 +2,11 @@
 
 Single source for "where are we". `/start` and `/next` read this file first. Update it in the same PR whenever a feature, spike or bug completes (keep it short and true).
 
-Last updated: 2026-10-09, after PR #82; the Phase 4b plan is on `feature/rust-refactor-phase` (this PR).
+Last updated: 2026-10-09, after PR #83; WP 4b.1 and the S4 decisions are on `feature/size-audit` (this PR).
 
 ## Done (merged to main)
+
+- WP 4b.1 size audit and the S4 decisions (this PR, a feature, waits for review): the four clippy lints (`large_enum_variant`, `large_types_passed_by_value`, `large_stack_arrays`, `trivially_copy_pass_by_ref`) are on workspace-wide and clippy `-D warnings` is clean at the default thresholds. New `crates/architecture-tests/tests/size_audit.rs` prints `size_of` for 170 public non-generic types (`cargo test -p architecture-tests --test size_audit -- --nocapture`) and a second test fails when a public type is missing from the table. Result: 49 types over 64 bytes, 12 over 128: `Simulator` 864, `ScenarioRunner` 312, `protocol::LinkView` 272, `SysinfoStatsSource` 248, `CommandQueue` 176, `MidiRouter` 176, `FakeReaper` 168, `SettingsService` 160, `LinkEvent` 160, `protocol::Catalog` 160, `ServerMessage` 160, `FakeConfigRepository` 152. Hot types: `Command` 80, `AppEvent` 96, `Input` 24, `Effect` 16, `Live` 88, `ClientMessage` 88. With the variant threshold at 64 bytes clippy finds `ServerMessage::Catalog` (160) and `Step::Expect` (120) first (more may show once those compile); those and the 12 big types are WP 4b.2. Generic types (`TimerLoop`) and the extension's own types are not in the table. The owner also answered the four S4 questions; recorded in `docs/adr/ADR-006-installer-strategy.md` (ad-hoc macOS, unsigned Windows, ask which folder plus a `--reaper-folder` argument, update only on request with REAPER closed, no staged update). fmt, clippy `-D warnings` and `cargo test --workspace` green (full output shown; 304 test lines `ok`, none failed).
 
 - WP 0.9 banned-synonym lint (this PR, a feature, waits for review): `crates/architecture-tests/tests/vocabulary.rs` fails the build when "transition" (say hand-over) or "playlist" (say setlist) appears in a Rust file under `crates/*/src` or `crates/*/tests`, or in UI `.ts`/`.svelte` outside `<style>` blocks and `generated/`. Today only CSS `transition:` properties use the word, so nothing is excluded by name. Checked by planting `// a transition` in `shared-kernel`: the test failed with the file and line, then reverted. "session" and "item" are not linted: `LinkSession` and iterator names use them in other meanings.
 
@@ -85,9 +87,9 @@ Last updated: 2026-10-09, after PR #82; the Phase 4b plan is on `feature/rust-re
 - Owner to-do: the hosted canvas still needs the two placement sentences from SPEC §4. Owner decision open: how aggressive safe mode is.
 
 ## Next (proposed, confirm with the owner)
-- Next: finish Phase 4 (app core). Owner's target (2026-10-08): every work package of phases 1 to 4 green; what needs Windows, S4 decisions or a live run stays 🟡 with the reason. Order (4.5, 4.4, 4.2, 4.6, 4.16, 4.7, 4.8, 4.10, 4.11 and 4.12 done, 4.13 done, 4.18, 3.5 and 3.6 done): 3.8, 3.9, 3.10, then 4.14/4.15 (after S4 questions). Then Phase 5 (UI foundation, state bridge WP 5.3 needs 4.4/4.5) and the Setlists screen. The Player screen (WP 6.1) follows. S4 installer/signing needs questions first; Windows runs of S1/S2/S3/S6/S7 need a Windows machine.
+- Next: finish Phase 4 (app core). Owner's target (2026-10-08): every work package of phases 1 to 4 green; what needs Windows, S4 decisions or a live run stays 🟡 with the reason. Order (4.5, 4.4, 4.2, 4.6, 4.16, 4.7, 4.8, 4.10, 4.11 and 4.12 done, 4.13 done, 4.18, 3.5 and 3.6 done): 3.8, 3.9, 3.10, then Phase 4b, then 4.14/4.15 (S4 answered, ADR-006). Then Phase 5 (UI foundation, state bridge WP 5.3 needs 4.4/4.5) and the Setlists screen. The Player screen (WP 6.1) follows. S4 installer/signing needs questions first; Windows runs of S1/S2/S3/S6/S7 need a Windows machine.
 - `!hardstop` is accepted as an alias of `!1008` (bugfix/hardstop-marker, owner's request). SWS interplay for `!1008` still to verify.
-- Spike S4 (installer/signing).
+- Spike S4: decisions made (ADR-006); the feasibility checks are still to run.
 - Remaining Phase 0: licence decision (0.6), more sample projects (0.7), domain discovery (0.8).
 - Update the designs for D7 (SPEC §10e): wizard, settings connection card, connection states, pre-show check.
 
