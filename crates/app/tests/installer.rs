@@ -110,7 +110,9 @@ fn check_golden(name: &str, fixture: &Fixture) -> TestResult {
         fs::create_dir_all(golden.parent().ok_or("no parent")?)?;
         fs::write(&golden, &actual)?;
     }
-    assert_eq!(actual, fs::read_to_string(&golden)?, "golden file {name}");
+    // Git may check the file out with Windows line endings.
+    let expected = fs::read_to_string(&golden)?.replace("\r\n", "\n");
+    assert_eq!(actual, expected, "golden file {name}");
     Ok(())
 }
 
