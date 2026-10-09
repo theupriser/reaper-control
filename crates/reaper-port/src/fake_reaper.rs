@@ -27,6 +27,7 @@ pub struct FakeReaper {
     ext_state: BTreeMap<(String, String), String>,
     change_count: u64,
     project_token: u64,
+    project_path: Option<String>,
 }
 
 impl FakeReaper {
@@ -44,6 +45,7 @@ impl FakeReaper {
             ext_state: BTreeMap::new(),
             change_count: 0,
             project_token: 1,
+            project_path: None,
         }
     }
 
@@ -60,10 +62,17 @@ impl FakeReaper {
         self.regions = regions;
         self.markers = markers;
         self.ext_state.clear();
+        self.project_path = None;
         self.transport = Transport::Stopped;
         self.position = Seconds::ZERO;
         self.count_in_left = 0.0;
         self.project_token += 1;
+    }
+
+    /// Saves the project under a path, or moves or copies the file there: the ExtState stays with
+    /// the file, so a copy carries the original's values.
+    pub fn set_project_path(&mut self, path: Option<&str>) {
+        self.project_path = path.map(str::to_string);
     }
 
     /// Lets time pass. The clock always moves forward; the playhead moves with
@@ -106,6 +115,10 @@ impl ReaperPort for FakeReaper {
 
     fn project_token(&self) -> u64 {
         self.project_token
+    }
+
+    fn project_path(&self) -> Option<String> {
+        self.project_path.clone()
     }
 
     fn regions(&self) -> Vec<Region> {

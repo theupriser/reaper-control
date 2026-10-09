@@ -114,3 +114,44 @@ fn an_edit_in_the_same_project_is_not_a_switch() {
             .contains(&WireEvent::ProjectChanged)
     );
 }
+
+#[test]
+fn a_copied_project_file_gets_its_own_id_and_a_moved_one_is_treated_the_same() {
+    let mut fake = fake(two_songs(), Vec::new());
+    fake.set_project_path(Some("/shows/a.RPP"));
+    let mut timer_loop = TimerLoop::new(fake);
+    let original = timer_loop.port_mut().ext_state("RC2", "project_id");
+    assert!(original.is_some());
+    assert_eq!(
+        timer_loop
+            .port_mut()
+            .ext_state("RC2", "project_path")
+            .as_deref(),
+        Some("/shows/a.RPP")
+    );
+    timer_loop
+        .port_mut()
+        .set_project_path(Some("/shows/copy.RPP"));
+    timer_loop.port_mut().replace_regions(two_songs());
+    run(&mut timer_loop, 1);
+    let copy = timer_loop.port_mut().ext_state("RC2", "project_id");
+    assert!(copy.is_some());
+    assert_ne!(copy, original);
+    assert_eq!(
+        timer_loop
+            .port_mut()
+            .ext_state("RC2", "project_path")
+            .as_deref(),
+        Some("/shows/copy.RPP")
+    );
+}
+
+#[test]
+fn an_unsaved_project_keeps_its_id_and_records_no_path() {
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    let id = timer_loop.port_mut().ext_state("RC2", "project_id");
+    timer_loop.port_mut().replace_regions(two_songs());
+    run(&mut timer_loop, 1);
+    assert_eq!(timer_loop.port_mut().ext_state("RC2", "project_id"), id);
+    assert_eq!(timer_loop.port_mut().ext_state("RC2", "project_path"), None);
+}
