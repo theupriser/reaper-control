@@ -1,4 +1,4 @@
-use protocol::{Command, NoticeLevel};
+use protocol::{Command, EventRecord, NoticeLevel, WireEvent};
 
 use super::{link_problem, notice_for_event};
 use crate::app_event::AppEvent;
@@ -82,4 +82,12 @@ fn the_sidebar_names_the_problem_only_while_the_link_is_down() {
         })),
         Some("The extension turned itself off".to_owned())
     );
+}
+
+#[test]
+fn a_switch_of_project_is_a_warning_and_other_performance_events_are_not() {
+    let record = |event| AppEvent::PerformanceEvent(EventRecord { id: 1, event });
+    let switched = notice_for_event(&record(WireEvent::ProjectChanged));
+    assert_eq!(switched.map(|n| n.level), Some(NoticeLevel::Warning));
+    assert!(notice_for_event(&record(WireEvent::PerformanceStarted)).is_none());
 }

@@ -196,6 +196,7 @@ fn every_event() -> Vec<WireEvent> {
             enabled: true,
         },
         WireEvent::SeekPerformed { to: 12.5 },
+        WireEvent::ProjectChanged,
         WireEvent::CommandRejected {
             reason: "no next song".into(),
         },

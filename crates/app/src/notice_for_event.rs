@@ -1,6 +1,6 @@
 //! Decides which app events a person on stage needs to see, and in which words.
 
-use protocol::{Notice, NoticeLevel};
+use protocol::{Notice, NoticeLevel, WireEvent};
 
 use crate::app_event::AppEvent;
 use crate::link_cause::LinkCause;
@@ -52,6 +52,14 @@ pub fn notice_for_event(event: &AppEvent) -> Option<Notice> {
             "Events missed",
             "Some performance events were missed while the link was down.",
         )),
+        AppEvent::PerformanceEvent(record) if record.event == WireEvent::ProjectChanged => {
+            Some(notice(
+                "project",
+                NoticeLevel::Warning,
+                "Another project in REAPER",
+                "The performance started over on the project in the current tab.",
+            ))
+        }
         _ => None,
     }
 }

@@ -4,11 +4,11 @@ use shared_kernel::{Seconds, SongId};
 
 use super::TimerLoop;
 
-fn seconds(value: f64) -> Seconds {
+pub(super) fn seconds(value: f64) -> Seconds {
     Seconds::new(value).unwrap_or(Seconds::ZERO)
 }
 
-fn region(id: &str, start: f64, end: f64) -> Region {
+pub(super) fn region(id: &str, start: f64, end: f64) -> Region {
     Region {
         id: SongId::new(id),
         name: id.to_string(),
@@ -24,7 +24,7 @@ fn marker(name: &str, position: f64) -> Marker {
     }
 }
 
-fn fake(regions: Vec<Region>, markers: Vec<Marker>) -> FakeReaper {
+pub(super) fn fake(regions: Vec<Region>, markers: Vec<Marker>) -> FakeReaper {
     FakeReaper::new(
         regions,
         markers,
@@ -35,12 +35,12 @@ fn fake(regions: Vec<Region>, markers: Vec<Marker>) -> FakeReaper {
     )
 }
 
-fn two_songs() -> Vec<Region> {
+pub(super) fn two_songs() -> Vec<Region> {
     vec![region("A", 0.0, 10.0), region("B", 10.0, 20.0)]
 }
 
 /// Lets 50 ms pass and ticks, for `count` ticks.
-fn run(timer_loop: &mut TimerLoop<FakeReaper>, count: usize) {
+pub(super) fn run(timer_loop: &mut TimerLoop<FakeReaper>, count: usize) {
     for _ in 0..count {
         timer_loop.port_mut().advance(seconds(0.05));
         timer_loop.tick();
