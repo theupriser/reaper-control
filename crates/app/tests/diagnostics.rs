@@ -2,8 +2,8 @@
 
 use std::io::Read;
 
-use app::diagnostics_bundle::DiagnosticsBundle;
-use app::journal_import::JournalImport;
+use app::DiagnosticsBundle;
+use app::JournalImport;
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
 

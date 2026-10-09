@@ -2,10 +2,10 @@
 
 use std::time::{Duration, Instant};
 
-use app::fake_stats_source::FakeStatsSource;
-use app::periodic_thread::PeriodicThread;
-use app::sysinfo_stats_source::SysinfoStatsSource;
-use app::system_stats_service::SystemStatsService;
+use app::FakeStatsSource;
+use app::PeriodicThread;
+use app::SysinfoStatsSource;
+use app::SystemStatsService;
 use protocol::SystemStats;
 use std::sync::Arc;
 

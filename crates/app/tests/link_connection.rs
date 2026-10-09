@@ -4,17 +4,17 @@ use std::sync::mpsc::{Sender, channel};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use app::app_event::AppEvent;
-use app::command_bus::CommandBus;
-use app::event_bus::EventBus;
-use app::fake_process_check::FakeProcessCheck;
-use app::health_monitor::HealthMonitor;
-use app::link_cause::LinkCause;
-use app::link_connection::LinkConnection;
-use app::link_health::LinkHealth;
-use app::link_view_source::LinkViewSource;
-use app::queue_settings::QueueSettings;
-use app::system_clock::SystemClock;
+use app::AppEvent;
+use app::CommandBus;
+use app::EventBus;
+use app::FakeProcessCheck;
+use app::HealthMonitor;
+use app::LinkCause;
+use app::LinkConnection;
+use app::LinkHealth;
+use app::LinkViewSource;
+use app::QueueSettings;
+use app::SystemClock;
 use link::{CommandHandler, LinkServer, SendError};
 use protocol::message::Outcome;
 use protocol::{Command, LinkStatus, LinkView, Live, Phase};
@@ -49,7 +49,7 @@ fn monitor(events: &Arc<EventBus>) -> Arc<HealthMonitor> {
         Arc::clone(events),
         Arc::new(SystemClock::new()),
         Arc::new(FakeProcessCheck::default()),
-        Arc::new(app::fake_fault_check::FakeFaultCheck::default()),
+        Arc::new(app::FakeFaultCheck::default()),
     ))
 }
 

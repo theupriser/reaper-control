@@ -3,17 +3,17 @@
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use app::app_event::AppEvent;
-use app::command_bus::CommandBus;
-use app::driver::Driver;
-use app::event_bus::EventBus;
-use app::fake_clock::FakeClock;
-use app::fake_fault_check::FakeFaultCheck;
-use app::fake_process_check::FakeProcessCheck;
-use app::health_monitor::HealthMonitor;
-use app::link_view_source::LinkViewSource;
-use app::queue_settings::QueueSettings;
-use app::simulator::{Simulator, sample_project};
+use app::AppEvent;
+use app::CommandBus;
+use app::Driver;
+use app::EventBus;
+use app::FakeClock;
+use app::FakeFaultCheck;
+use app::FakeProcessCheck;
+use app::HealthMonitor;
+use app::LinkViewSource;
+use app::QueueSettings;
+use app::{Simulator, sample_project};
 use protocol::{Command, LinkStatus, Phase, WireEvent};
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;

@@ -1,8 +1,8 @@
 //! The log reaches a file in the folder, and an unusable folder does not stop the app.
 
-use app::app_event::AppEvent;
-use app::event_logger::log_event;
-use app::logging::Logging;
+use app::AppEvent;
+use app::Logging;
+use app::log_event;
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
 
