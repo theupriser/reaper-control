@@ -16,6 +16,7 @@ const PLURAL_ALLOWED: &[&str] = &[
     "flags",
     "freshness",
     "incoming_commands",
+    "install_status",
     "latency_stats",
     "link_status",
     "missing_functions",

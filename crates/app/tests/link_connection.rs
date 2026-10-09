@@ -7,6 +7,7 @@ use std::time::{Duration, Instant};
 use app::AppEvent;
 use app::CommandBus;
 use app::EventBus;
+use app::FakeClock;
 use app::FakeProcessCheck;
 use app::HealthMonitor;
 use app::LinkCause;
@@ -203,10 +204,11 @@ fn the_bus_sends_in_order_drops_a_rapid_repeat_and_hears_the_answers() -> TestRe
     wait_for(&connection, "connected", |view| {
         matches!(view.status, LinkStatus::Connected { .. })
     });
+    // A clock that stands still: the repeat window never runs out on a slow machine.
     let bus = CommandBus::new(
         connection,
         events,
-        Arc::new(SystemClock::new()),
+        Arc::new(FakeClock::default()),
         QueueSettings::default(),
     );
 
