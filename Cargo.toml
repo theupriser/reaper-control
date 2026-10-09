@@ -53,6 +53,10 @@ panic = "deny"
 indexing_slicing = "deny"
 todo = "deny"
 dbg_macro = "deny"
+large_enum_variant = "deny"
+large_types_passed_by_value = "deny"
+large_stack_arrays = "deny"
+trivially_copy_pass_by_ref = "deny"
 
 [profile.release]
 panic = "unwind"

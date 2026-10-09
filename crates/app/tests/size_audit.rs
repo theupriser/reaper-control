@@ -1,0 +1,274 @@
+//! Size audit (PLAN WP 4b.1): the size of every public type, so growth is seen and the rule
+//! "under 128 bytes, ideally 64 or less" (AGENTS.md "Memory and layout") can be checked.
+//!
+//! `cargo test -p app --test size_audit -- --nocapture` prints the table.
+//! Generic types and the extension's types are not listed.
+
+use std::mem::size_of;
+use std::path::Path;
+
+type TestResult = Result<(), Box<dyn std::error::Error>>;
+
+macro_rules! sizes {
+    ($($path:path),* $(,)?) => {
+        vec![$((stringify!($path).replace(" ", ""), size_of::<$path>())),*]
+    };
+}
+
+fn all_sizes() -> Vec<(String, usize)> {
+    let mut sizes = sizes![
+        app::app_config::AppConfig,
+        app::app_event::AppEvent,
+        app::app_fault::AppFault,
+        app::chaos_proxy::ChaosProxy,
+        app::chaos_settings::ChaosSettings,
+        app::command_bus::CommandBus,
+        app::command_queue::CommandQueue,
+        app::command_refusal::CommandRefusal,
+        app::config_error::ConfigError,
+        app::config_store::ConfigStore,
+        app::diagnostics_bundle::DiagnosticsBundle,
+        app::diagnostics_error::DiagnosticsError,
+        app::dispatch_error::DispatchError,
+        app::driver_error::DriverError,
+        app::event_bus::EventBus,
+        app::fake_clock::FakeClock,
+        app::fake_config_repository::FakeConfigRepository,
+        app::fake_driver::FakeDriver,
+        app::fake_extension::FakeExtension,
+        app::fake_fault_check::FakeFaultCheck,
+        app::fake_midi_source::FakeMidiSource,
+        app::fake_mirror_repository::FakeMirrorRepository,
+        app::fake_process_check::FakeProcessCheck,
+        app::fake_stats_source::FakeStatsSource,
+        app::fault_file_check::FaultFileCheck,
+        app::health_monitor::HealthMonitor,
+        app::import_error::ImportError,
+        app::intent_dispatcher::IntentDispatcher,
+        app::intent_error::IntentError,
+        app::intent_refusal::IntentRefusal,
+        app::intent_translator::IntentTranslator,
+        app::intent::Intent,
+        app::journal_import::JournalImport,
+        app::latency_stats::LatencyStats,
+        app::legacy_config_file::LegacyConfigFile,
+        app::legacy_file::LegacyFile,
+        app::legacy_item::LegacyItem,
+        app::legacy_midi::LegacyMidi,
+        app::legacy_setlist::LegacySetlist,
+        app::link_cause::LinkCause,
+        app::link_connection::LinkConnection,
+        app::link_health::LinkHealth,
+        app::link_pipeline::LinkPipeline,
+        app::link_session::LinkSession,
+        app::log_config::LogConfig,
+        app::logging::Logging,
+        app::message_translator::MessageTranslator,
+        app::metered_driver::MeteredDriver,
+        app::midi_config::MidiConfig,
+        app::midi_debounce::MidiDebounce,
+        app::midi_device_follower::MidiDeviceFollower,
+        app::midi_listener::MidiListener,
+        app::midi_message::MidiMessage,
+        app::midi_router::MidiRouter,
+        app::midir_source::MidirSource,
+        app::mirror_error::MirrorError,
+        app::mirror_file::MirrorFile,
+        app::mirror_keeper::MirrorKeeper,
+        app::pending_command::PendingCommand,
+        app::periodic_thread::PeriodicThread,
+        app::queue_config::QueueConfig,
+        app::queue_rejection::QueueRejection,
+        app::queue_settings::QueueSettings,
+        app::resolved_setlist::ResolvedSetlist,
+        app::setlist_mirror::SetlistMirror,
+        app::setlist_transfer::SetlistTransfer,
+        app::settings_service::SettingsService,
+        app::shutdown_sequence::ShutdownSequence,
+        app::simulator::Simulator,
+        app::sysinfo_stats_source::SysinfoStatsSource,
+        app::system_clock::SystemClock,
+        app::system_process_check::SystemProcessCheck,
+        app::system_stats_service::SystemStatsService,
+        catalogue::Cue,
+        catalogue::Directive,
+        catalogue::Directives,
+        catalogue::InvalidSong,
+        catalogue::MarkerName,
+        catalogue::Song,
+        link::LinkClient,
+        link::ClientConfig,
+        link::LinkEvent,
+        link::SendError,
+        link::Endpoint,
+        link::EndpointError,
+        link::EventLog,
+        link::Replay,
+        link::LinkServer,
+        link::ServerError,
+        performance::Effect,
+        performance::Event,
+        performance::Flag,
+        performance::Flags,
+        performance::HandOverPolicy,
+        performance::Input,
+        performance::InvalidTempoMap,
+        performance::Output,
+        performance::Performance,
+        performance::Phase,
+        performance::PlannedSong,
+        performance::Rejection,
+        performance::SongWindow,
+        performance::TempoMap,
+        performance::TempoSegment,
+        performance::TimeSignature,
+        projections::Applied,
+        projections::EntryView,
+        projections::Freshness,
+        projections::LiveFeed,
+        projections::PerformanceView,
+        projections::Plan,
+        projections::PlayerView,
+        projections::SetlistView,
+        protocol::Catalog,
+        protocol::Command,
+        protocol::CueInfo,
+        protocol::EntryInfo,
+        protocol::EventRecord,
+        protocol::frame::FrameDecoder,
+        protocol::frame::FrameError,
+        protocol::ImportOffer,
+        protocol::LinkStatus,
+        protocol::LinkView,
+        protocol::Live,
+        protocol::message::ClientMessage,
+        protocol::message::CodecError,
+        protocol::message::HandshakeError,
+        protocol::message::Outcome,
+        protocol::message::ServerMessage,
+        protocol::NoteMapping,
+        protocol::NoticeLevel,
+        protocol::Notice,
+        protocol::Phase,
+        protocol::SetlistInfo,
+        protocol::SetlistTransferView,
+        protocol::Setting,
+        protocol::SettingsView,
+        protocol::Settings,
+        protocol::SongInfo,
+        protocol::SystemStats,
+        protocol::Transport,
+        protocol::WireEvent,
+        reaper_port::FakeReaper,
+        reaper_port::Marker,
+        reaper_port::Region,
+        reaper_port::Scenario,
+        reaper_port::ScenarioError,
+        reaper_port::Expectation,
+        reaper_port::ScenarioRunner,
+        reaper_port::ScenarioSong,
+        reaper_port::Step,
+        reaper_port::Trace,
+        reaper_port::Transport,
+        setlists::Edit,
+        setlists::EntryId,
+        setlists::Entry,
+        setlists::InMemorySetlistRepository,
+        setlists::InvalidSetlist,
+        setlists::Rejection,
+        setlists::Revision,
+        setlists::SaveError,
+        setlists::SetlistEvent,
+        setlists::SetlistId,
+        setlists::Setlist,
+        shared_kernel::Bpm,
+        shared_kernel::InvalidValue,
+        shared_kernel::Seconds,
+        shared_kernel::SongId,
+        timer_loop::QueuedCommands,
+        timer_loop::StatePublisher,
+    ];
+    sizes.sort_by(|left, right| right.1.cmp(&left.1).then(left.0.cmp(&right.0)));
+    sizes
+}
+
+#[test]
+fn print_the_size_of_every_public_type() {
+    let sizes = all_sizes();
+    println!("{:>6}  type", "bytes");
+    for (name, size) in &sizes {
+        println!("{size:>6}  {name}");
+    }
+    let over_64 = sizes.iter().filter(|(_, size)| *size > 64).count();
+    let over_128 = sizes.iter().filter(|(_, size)| *size > 128).count();
+    println!(
+        "{} types, {over_64} over 64 bytes, {over_128} over 128 bytes",
+        sizes.len()
+    );
+}
+
+/// The names of the non-generic public structs and enums declared in `directory`.
+fn declared_types(directory: &Path, found: &mut Vec<String>) -> TestResult {
+    for entry in std::fs::read_dir(directory)? {
+        let path = entry?.path();
+        if path.is_dir() {
+            declared_types(&path, found)?;
+        } else if path.extension().is_some_and(|extension| extension == "rs")
+            && path.file_name().is_some_and(|name| name != "tests.rs")
+        {
+            for line in std::fs::read_to_string(&path)?.lines() {
+                let declaration = line
+                    .strip_prefix("pub struct ")
+                    .or_else(|| line.strip_prefix("pub enum "));
+                let name: String = declaration
+                    .map(|rest| {
+                        rest.chars()
+                            .take_while(|c| c.is_alphanumeric() || *c == '_')
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                let generic = declaration.is_some_and(|rest| rest[name.len()..].starts_with('<'));
+                if !name.is_empty() && !generic {
+                    found.push(name);
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn every_public_type_is_in_the_table() -> TestResult {
+    let listed: Vec<String> = all_sizes()
+        .into_iter()
+        .map(|(path, _)| path.rsplit("::").next().unwrap_or_default().to_string())
+        .collect();
+    let crates = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+    let mut missing = Vec::new();
+    for entry in std::fs::read_dir(crates)? {
+        let crate_directory = entry?.path();
+        let name = crate_directory
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("");
+        if matches!(name, "architecture-tests" | "reaper-extension")
+            || !crate_directory.join("src").is_dir()
+        {
+            continue;
+        }
+        let mut found = Vec::new();
+        declared_types(&crate_directory.join("src"), &mut found)?;
+        missing.extend(
+            found
+                .into_iter()
+                .filter(|type_name| !listed.contains(type_name))
+                .map(|type_name| format!("{name}: {type_name}")),
+        );
+    }
+    assert!(
+        missing.is_empty(),
+        "add these to the size table:\n{}",
+        missing.join("\n")
+    );
+    Ok(())
+}
