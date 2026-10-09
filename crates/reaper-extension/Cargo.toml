@@ -19,7 +19,6 @@ reaper-port.workspace = true
 timer-loop.workspace = true
 reaper-low = { git = "https://github.com/helgoboss/reaper-rs", rev = "659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23" }
 reaper-medium = { git = "https://github.com/helgoboss/reaper-rs", rev = "659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23" }
-reaper-macros = { git = "https://github.com/helgoboss/reaper-rs", rev = "659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23" }
 serde_json.workspace = true
 thiserror.workspace = true
 
