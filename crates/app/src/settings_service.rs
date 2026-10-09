@@ -12,7 +12,8 @@ use crate::config_repository::ConfigRepository;
 /// Keeps the saved config and applies what can change while the app runs.
 pub struct SettingsService {
     store: Arc<dyn ConfigRepository>,
-    config: Mutex<AppConfig>,
+    // Boxed: a config is 120 bytes.
+    config: Mutex<Box<AppConfig>>,
     bus: Arc<CommandBus>,
 }
 
@@ -22,7 +23,7 @@ impl SettingsService {
     pub fn new(store: Arc<dyn ConfigRepository>, config: AppConfig, bus: Arc<CommandBus>) -> Self {
         Self {
             store,
-            config: Mutex::new(config),
+            config: Mutex::new(Box::new(config)),
             bus,
         }
     }
@@ -49,7 +50,7 @@ impl SettingsService {
         let changed = config.with_settings(settings);
         self.store.save(&changed)?;
         self.bus.apply(changed.queue.settings());
-        *config = changed;
+        **config = changed;
         Ok(())
     }
 }

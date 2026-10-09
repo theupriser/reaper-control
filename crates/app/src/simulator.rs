@@ -27,7 +27,8 @@ use crate::link_view_source::LinkViewSource;
 /// last call; nothing else does. `send` only queues, so a caller that holds a lock (the command
 /// bus does) is never called back while it holds it.
 pub struct Simulator {
-    state: Mutex<SimulatorState>,
+    // Boxed: the state holds the whole fake project and timer loop (hundreds of bytes).
+    state: Mutex<Box<SimulatorState>>,
     incoming: IncomingCommands,
     view: Arc<Mutex<LinkView>>,
 }
@@ -45,7 +46,7 @@ impl Simulator {
         let view = Arc::new(Mutex::new(LinkView::default()));
         let pipeline = LinkPipeline::new(Arc::clone(&view), events, health, on_change);
         Self {
-            state: Mutex::new(SimulatorState::start(reaper, pipeline)),
+            state: Mutex::new(Box::new(SimulatorState::start(reaper, pipeline))),
             incoming: IncomingCommands::default(),
             view,
         }

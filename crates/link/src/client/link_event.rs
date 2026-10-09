@@ -12,7 +12,8 @@ pub enum LinkEvent {
     /// The extension pushed the live state.
     Live(Live),
     /// The extension pushed the project contents.
-    Catalog(Catalog),
+    // Boxed: a catalog is 160 bytes and the other events are under 90.
+    Catalog(Box<Catalog>),
     /// Something happened in the performance, live or replayed after a reconnect.
     Event(EventRecord),
     /// The app was away too long to be caught up. The catalog is asked for again; treat the

@@ -91,7 +91,7 @@ impl LinkServer {
 
     /// Remember `catalog` for clients that connect later and push it to everyone now.
     pub fn publish_catalog(&self, catalog: Catalog) {
-        let Ok(frame) = encode_message(&ServerMessage::Catalog(catalog.clone())) else {
+        let Ok(frame) = encode_message(&ServerMessage::Catalog(Box::new(catalog.clone()))) else {
             return;
         };
         self.shared

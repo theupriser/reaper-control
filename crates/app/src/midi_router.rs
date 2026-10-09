@@ -18,7 +18,8 @@ pub struct MidiRouter {
     intents: Arc<IntentDispatcher>,
     events: Arc<EventBus>,
     clock: Arc<dyn Clock>,
-    debounce: Mutex<MidiDebounce>,
+    // Boxed: the debounce table is 64 bytes.
+    debounce: Mutex<Box<MidiDebounce>>,
 }
 
 impl MidiRouter {
@@ -36,7 +37,7 @@ impl MidiRouter {
             intents,
             events,
             clock,
-            debounce: Mutex::new(debounce),
+            debounce: Mutex::new(Box::new(debounce)),
         }
     }
 

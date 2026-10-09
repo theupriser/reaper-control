@@ -15,7 +15,8 @@ pub struct CommandQueue {
     clock: Arc<dyn Clock>,
     settings: QueueSettings,
     pending: Vec<PendingCommand>,
-    last: Option<(Command, Duration)>,
+    // Boxed: a command is 80 bytes and the queue is cloned around often.
+    last: Option<Box<(Command, Duration)>>,
 }
 
 impl CommandQueue {
@@ -38,7 +39,7 @@ impl CommandQueue {
     /// Whether `command` may go out now.
     pub fn admit(&self, command: &Command) -> Result<(), QueueRejection> {
         let now = self.clock.now();
-        if let Some((previous, at)) = &self.last
+        if let Some((previous, at)) = self.last.as_deref()
             && previous == command
             && now.saturating_sub(*at) < self.settings.repeat_window
         {
@@ -53,7 +54,7 @@ impl CommandQueue {
     /// Records that `command` went out under the link's `id`.
     pub fn track(&mut self, id: u64, command: Command) {
         let now = self.clock.now();
-        self.last = Some((command.clone(), now));
+        self.last = Some(Box::new((command.clone(), now)));
         self.pending.push(PendingCommand {
             id,
             command,

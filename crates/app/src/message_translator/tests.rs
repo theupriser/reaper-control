@@ -1,5 +1,5 @@
 use protocol::message::Outcome;
-use protocol::{Catalog, EventRecord, Live, WireEvent};
+use protocol::{EventRecord, Live, WireEvent};
 
 use super::*;
 
@@ -76,7 +76,7 @@ fn state_pushes_are_left_to_the_view() {
         None
     );
     assert_eq!(
-        MessageTranslator::translate(&LinkEvent::Catalog(Catalog::default())),
+        MessageTranslator::translate(&LinkEvent::Catalog(Box::default())),
         None
     );
 }

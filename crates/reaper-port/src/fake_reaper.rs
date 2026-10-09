@@ -1,8 +1,7 @@
-use std::collections::BTreeMap;
-
 use performance::TempoMap;
 use shared_kernel::Seconds;
 
+use crate::fake_project_state::FakeProjectState;
 use crate::{Marker, ReaperPort, Region, Transport};
 
 /// How long REAPER 7.82 holds the playhead for two bars of 4/4 at 120 bpm (measured: the playhead
@@ -23,11 +22,9 @@ pub struct FakeReaper {
     count_in_left: f64,
     regions: Vec<Region>,
     markers: Vec<Marker>,
-    tempo_map: TempoMap,
-    ext_state: BTreeMap<(String, String), String>,
-    change_count: u64,
-    project_token: u64,
-    project_path: Option<String>,
+    // Boxed to keep the struct under 128 bytes.
+    tempo_map: Box<TempoMap>,
+    project: Box<FakeProjectState>,
 }
 
 impl FakeReaper {
@@ -41,18 +38,15 @@ impl FakeReaper {
             count_in_left: 0.0,
             regions,
             markers,
-            tempo_map,
-            ext_state: BTreeMap::new(),
-            change_count: 0,
-            project_token: 1,
-            project_path: None,
+            tempo_map: Box::new(tempo_map),
+            project: Box::default(),
         }
     }
 
     /// Edits the project the way a user does: the regions are replaced and the change count moves.
     pub fn replace_regions(&mut self, regions: Vec<Region>) {
         self.regions = regions;
-        self.change_count += 1;
+        self.project.change_count += 1;
     }
 
     /// The user switches to another project tab: its regions and markers replace the current ones,
@@ -61,18 +55,18 @@ impl FakeReaper {
     pub fn switch_project(&mut self, regions: Vec<Region>, markers: Vec<Marker>) {
         self.regions = regions;
         self.markers = markers;
-        self.ext_state.clear();
-        self.project_path = None;
+        self.project.ext_state.clear();
+        self.project.project_path = None;
         self.transport = Transport::Stopped;
         self.position = Seconds::ZERO;
         self.count_in_left = 0.0;
-        self.project_token += 1;
+        self.project.project_token += 1;
     }
 
     /// Saves the project under a path, or moves or copies the file there: the ExtState stays with
     /// the file, so a copy carries the original's values.
     pub fn set_project_path(&mut self, path: Option<&str>) {
-        self.project_path = path.map(str::to_string);
+        self.project.project_path = path.map(str::to_string);
     }
 
     /// Lets time pass. The clock always moves forward; the playhead moves with
@@ -110,15 +104,15 @@ impl ReaperPort for FakeReaper {
     }
 
     fn change_count(&self) -> u64 {
-        self.change_count
+        self.project.change_count
     }
 
     fn project_token(&self) -> u64 {
-        self.project_token
+        self.project.project_token
     }
 
     fn project_path(&self) -> Option<String> {
-        self.project_path.clone()
+        self.project.project_path.clone()
     }
 
     fn regions(&self) -> Vec<Region> {
@@ -130,11 +124,12 @@ impl ReaperPort for FakeReaper {
     }
 
     fn tempo_map(&self) -> TempoMap {
-        self.tempo_map.clone()
+        (*self.tempo_map).clone()
     }
 
     fn ext_state(&self, section: &str, key: &str) -> Option<String> {
-        self.ext_state
+        self.project
+            .ext_state
             .get(&(section.to_string(), key.to_string()))
             .cloned()
     }
@@ -162,7 +157,8 @@ impl ReaperPort for FakeReaper {
     }
 
     fn set_ext_state(&mut self, section: &str, key: &str, value: &str) {
-        self.ext_state
+        self.project
+            .ext_state
             .insert((section.to_string(), key.to_string()), value.to_string());
     }
 }

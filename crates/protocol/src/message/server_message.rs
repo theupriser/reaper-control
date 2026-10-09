@@ -23,7 +23,8 @@ pub enum ServerMessage {
     /// Pushed on change and as heartbeat; see [`Live`].
     Live(Live),
     /// The project contents; see [`Catalog`].
-    Catalog(Catalog),
+    // Boxed: a catalog is 160 bytes and every other message is under 90.
+    Catalog(Box<Catalog>),
     /// An event, live or replayed after a reconnect.
     Event(EventRecord),
     /// The app asked to resume from an event the extension no longer holds.

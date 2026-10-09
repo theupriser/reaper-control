@@ -2,6 +2,7 @@
 //! Everything REAPER-specific hides behind the trait; scenarios replay the same
 //! way in the extension tests, the app's simulator and the dry-run.
 
+mod fake_project_state;
 mod fake_reaper;
 mod marker;
 mod reaper_port;

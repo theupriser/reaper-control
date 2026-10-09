@@ -55,12 +55,12 @@ fn setlist(id: &str, name: &str, songs: &[&str]) -> SetlistInfo {
 
 fn view(project_id: &str, setlists: Vec<SetlistInfo>) -> LinkView {
     LinkView {
-        catalog: Catalog {
+        catalog: Box::new(Catalog {
             project_id: project_id.into(),
             project_songs: vec![song("{A}", "Opener"), song("{B}", "Ballad")],
             setlists,
             ..Catalog::default()
-        },
+        }),
         ..LinkView::default()
     }
 }

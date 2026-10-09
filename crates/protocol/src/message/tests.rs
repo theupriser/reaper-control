@@ -207,7 +207,7 @@ fn every_event() -> Vec<WireEvent> {
 fn live_catalog_and_events_survive_a_round_trip() -> Result<(), Box<dyn std::error::Error>> {
     let mut messages = vec![
         ServerMessage::Live(live()),
-        ServerMessage::Catalog(catalog()),
+        ServerMessage::Catalog(Box::new(catalog())),
         ServerMessage::EventsLost {
             oldest_available: 17,
         },
