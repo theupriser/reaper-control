@@ -35,7 +35,7 @@
   .row { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; }
   label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); width: 180px; }
   select { height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); padding: 0 14px; font-size: 15px; font-family: inherit; }
-  button { height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--line); background: #1e2125; color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; }
+  button { height: var(--control-height); padding: 0 var(--control-padding); border-radius: var(--radius); border: 1px solid var(--line); background: var(--raised); color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; }
   .message { margin: 0; font-size: 14px; word-break: break-all; }
   .message.ok { color: var(--green); }
   .message.error { color: var(--red); }

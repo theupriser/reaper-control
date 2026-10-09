@@ -5,5 +5,5 @@ export default defineConfig({
   plugins: [svelte()],
   clearScreen: false,
   server: { port: 1420, strictPort: true },
-  test: { environment: "node" },
+  test: { environment: "node", css: { include: [/tokens\.css/] } },
 });

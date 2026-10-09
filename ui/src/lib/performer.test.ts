@@ -13,6 +13,7 @@ import {
   isWaitingAtHardStop,
 } from "./performer";
 import screenSource from "../components/PerformerScreen.svelte?raw";
+import tokens from "../tokens.css?raw";
 
 describe("performer formatting", () => {
   it("formats song and setlist times", () => {
@@ -97,8 +98,10 @@ describe("system stats", () => {
 describe("hard-stop flash (v1: 2 s ease-in-out, #121212 to #2a0000, off for reduced motion)", () => {
   it("keeps v1's timing and colours", () => {
     expect(screenSource).toMatch(/animation:\s*flash 2s ease-in-out infinite/);
-    expect(screenSource).toMatch(/background:\s*#121212/);
-    expect(screenSource).toMatch(/50%\s*\{\s*background:\s*#2a0000/);
+    expect(screenSource).toMatch(/background:\s*var\(--stage\)/);
+    expect(screenSource).toMatch(/50%\s*\{\s*background:\s*var\(--alarm\)/);
+    expect(tokens).toMatch(/--stage:\s*#121212/);
+    expect(tokens).toMatch(/--alarm:\s*#2a0000/);
     expect(screenSource).toMatch(/prefers-reduced-motion: reduce\)\s*\{\s*\.flash\s*\{\s*animation:\s*none/);
   });
 

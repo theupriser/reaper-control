@@ -105,14 +105,14 @@
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    background: #121212;
-    color: white;
+    background: var(--stage);
+    color: var(--text);
   }
   .flash {
     animation: flash 2s ease-in-out infinite;
   }
   @keyframes flash {
-    50% { background: #2a0000; }
+    50% { background: var(--alarm); }
   }
   @media (prefers-reduced-motion: reduce) {
     .flash { animation: none; }
@@ -157,7 +157,7 @@
   }
   .label { opacity: 0.7; margin-right: 0.5rem; }
   .sep { opacity: 0.5; }
-  .remaining { margin-left: 0.5rem; opacity: 0.6; color: #aaa; font-size: 0.9em; }
+  .remaining { margin-left: 0.5rem; opacity: 0.6; color: var(--muted); font-size: 0.9em; }
   .count-in {
     margin: 0;
     text-align: center;
@@ -177,10 +177,10 @@
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 4px;
-    background: #333;
-    color: white;
+    background: var(--track);
+    color: var(--text);
     font-size: 1rem;
     cursor: pointer;
   }
-  .exit button:hover { background: #444; }
+  .exit button:hover { background: var(--track-hover); }
 </style>

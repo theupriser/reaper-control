@@ -1,0 +1,108 @@
+/* Design tokens: the only place raw values live. Components use var(--token). */
+:root,
+:root[data-theme="dark"] {
+  --bg: #0e0f11;
+  --panel: #17191c;
+  --raised: #1e2125;
+  --sidebar: #121417;
+  --line: #2a2e34;
+  --line-soft: #22262b;
+  --text: #f2f3f4;
+  --text-soft: #c5cad0;
+  --muted: #9aa1a9;
+  --green: #4caf50;
+  --amber: #ffc107;
+  --red: #ff5252;
+  --danger: #f44336;
+  --info: #5aa9f0;
+  --on-accent: #0a1a0b;
+  --on-strong: #fff;
+  --track: #333;
+  --track-hover: #444;
+  --stage: #121212;
+  --alarm: #2a0000;
+  --tint-danger: rgba(244, 67, 54, 0.2);
+  --tint-ok: rgba(76, 175, 80, 0.2);
+  --tint-hover: rgba(255, 255, 255, 0.1);
+  --shadow-soft: 0 2px 5px rgba(0, 0, 0, 0.3);
+  --shadow-raised: 0 6px 18px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+:root[data-theme="stage-dark"] {
+  --bg: #000;
+  --panel: #0a0a0a;
+  --raised: #141414;
+  --sidebar: #000;
+  --line: #3a3f46;
+  --line-soft: #26292e;
+  --text: #fff;
+  --text-soft: #e0e3e6;
+  --muted: #b4bac1;
+  --stage: #000;
+  --track: #3a3a3a;
+  --track-hover: #505050;
+}
+:root[data-theme="light"] {
+  --bg: #f3f4f6;
+  --panel: #fff;
+  --raised: #eceef1;
+  --sidebar: #e6e8ec;
+  --line: #cfd3d9;
+  --line-soft: #e1e4e8;
+  --text: #15171a;
+  --text-soft: #2f353c;
+  --muted: #5b636c;
+  --green: #2e7d32;
+  --amber: #b26a00;
+  --red: #c62828;
+  --danger: #c62828;
+  --info: #1565c0;
+  --on-accent: #fff;
+  --track: #c9ced4;
+  --track-hover: #b6bcc3;
+  --stage: #f3f4f6;
+  --alarm: #ffd9d6;
+  --tint-hover: rgba(0, 0, 0, 0.08);
+  --shadow-soft: 0 2px 5px rgba(0, 0, 0, 0.15);
+  --shadow-raised: 0 6px 18px rgba(0, 0, 0, 0.18);
+  color-scheme: light;
+}
+
+/* Type, space, shape and motion (same in every theme). */
+:root {
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --text-small: 12px;
+  --text-body: 15px;
+  --text-title: 20px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --radius: 10px;
+  --control-height: 44px;
+  --control-padding: 18px;
+  --motion-fast: 0.1s ease;
+  --motion-normal: 0.2s ease;
+}
+/* Density: tighter spacing for small windows. */
+:root[data-density="compact"] {
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --control-height: 36px;
+  --control-padding: 14px;
+}
+/* Large touch targets for a tablet on stage. */
+:root[data-touch="large"] {
+  --control-height: 56px;
+  --control-padding: 24px;
+  --text-body: 17px;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0s;
+    --motion-normal: 0s;
+  }
+}

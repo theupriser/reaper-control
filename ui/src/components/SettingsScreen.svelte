@@ -121,12 +121,12 @@
   input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--green); }
   select, input:not([type="checkbox"]) { height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); padding: 0 14px; font-size: 15px; font-family: inherit; }
   table { border: 1px solid var(--line); border-radius: 12px; border-collapse: collapse; overflow: hidden; }
-  th { text-align: left; padding: 10px 16px; background: #1e2125; font-size: 12px; letter-spacing: 0.6px; color: var(--muted); }
-  td { padding: 0 16px; height: 42px; border-top: 1px solid #22262b; font-size: 15px; }
+  th { text-align: left; padding: 10px 16px; background: var(--raised); font-size: 12px; letter-spacing: 0.6px; color: var(--muted); }
+  td { padding: 0 16px; height: 42px; border-top: 1px solid var(--line-soft); font-size: 15px; }
   .note { width: 110px; font-family: ui-monospace, Menlo, monospace; color: var(--amber); font-weight: 700; }
   .actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  button { height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--line); background: #1e2125; color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; }
-  button.primary { background: var(--green); color: #0a1a0b; border-color: var(--green); }
+  button { height: var(--control-height); padding: 0 var(--control-padding); border-radius: var(--radius); border: 1px solid var(--line); background: var(--raised); color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; }
+  button.primary { background: var(--green); color: var(--on-accent); border-color: var(--green); }
   button:disabled { opacity: 0.4; cursor: default; }
   .message { font-size: 14px; }
   .message.ok { color: var(--green); }

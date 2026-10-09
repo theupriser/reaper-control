@@ -27,28 +27,28 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #aaa;
+    color: var(--muted);
   }
-  .midi svg { fill: #aaa; transition: fill 0.1s ease, filter 0.1s ease; }
-  .midi.active svg { fill: #ffc107; filter: drop-shadow(0 0 2px #ffc107); }
+  .midi svg { fill: var(--muted); transition: fill 0.1s ease, filter 0.1s ease; }
+  .midi.active svg { fill: var(--amber); filter: drop-shadow(0 0 2px var(--amber)); }
   .dot {
     width: 10px;
     height: 10px;
     margin-left: 4px;
     border-radius: 50%;
-    background: #f44336;
-    box-shadow: 0 0 5px #f44336;
+    background: var(--danger);
+    box-shadow: 0 0 5px var(--danger);
   }
-  .dot.connected { background: #4caf50; box-shadow: 0 0 5px #4caf50; }
+  .dot.connected { background: var(--green); box-shadow: 0 0 5px var(--green); }
   .usage {
     width: 40px;
     height: 10px;
-    background: #333;
+    background: var(--track);
     border-radius: 4px;
     overflow: hidden;
   }
   .bar { display: block; height: 100%; transition: width 0.5s ease; }
-  .low { background: #4caf50; }
-  .medium { background: #ffc107; }
-  .high { background: #f44336; }
+  .low { background: var(--green); }
+  .medium { background: var(--amber); }
+  .high { background: var(--danger); }
 </style>

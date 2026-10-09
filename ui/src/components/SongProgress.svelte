@@ -52,7 +52,7 @@
     position: relative;
     width: 100%;
     height: 12px;
-    background: #333;
+    background: var(--track);
     border-radius: 6px;
   }
   .seekable { cursor: pointer; }
@@ -79,11 +79,11 @@
     top: 0;
     padding: 4px 8px;
     border-radius: 4px;
-    background: #333;
-    color: white;
+    background: var(--track);
+    color: var(--text);
     font: 0.8rem monospace;
     transform: translate(-50%, -100%);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-soft);
     pointer-events: none;
   }
 </style>
