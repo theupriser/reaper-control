@@ -1,9 +1,9 @@
 <script lang="ts">
   import { strings } from "../lib/strings";
-  let { armed, onToggle }: { armed: boolean; onToggle: () => void } = $props();
+  let { armed, onToggle, disabled = false }: { armed: boolean; onToggle: () => void; disabled?: boolean } = $props();
 </script>
 
-<button class="record" class:armed aria-label={strings.performer.toggleRecording} aria-pressed={armed} onclick={onToggle}>
+<button class="record" class:armed aria-label={strings.performer.toggleRecording} aria-pressed={armed} {disabled} onclick={onToggle}>
   <span class="dot"></span>
 </button>
 
@@ -17,6 +17,7 @@
     background: none;
     cursor: pointer;
   }
+  .record:disabled { cursor: default; opacity: 0.5; }
   .dot {
     width: 12px;
     height: 12px;
