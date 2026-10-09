@@ -154,7 +154,7 @@
       {:else if screen === "checklist"}
         <ChecklistScreen onSetup={() => (wizardOpen = true)} />
       {:else if screen === "settings"}
-        <SettingsScreen onSetup={() => (wizardOpen = true)} />
+        <SettingsScreen {connection} onSetup={() => (wizardOpen = true)} />
       {:else}
         <HelpScreen />
       {/if}

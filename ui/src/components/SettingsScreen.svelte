@@ -2,6 +2,8 @@
   import { strings } from "../lib/strings";
   import Button from "../kit/Button.svelte";
   import Panel from "../kit/Panel.svelte";
+  import Switch from "../kit/Switch.svelte";
+  import type { ConnectionBadge } from "../lib/connection";
   import { onMount } from "svelte";
   import NoteTable from "./NoteTable.svelte";
   import AppearanceCard from "./AppearanceCard.svelte";
@@ -13,7 +15,7 @@
   import { applyAppearance, appearanceOf } from "../lib/appearance";
   import { ALL_CHANNELS, LOG_LEVELS, isChanged, toDraft, toSettings, type SettingsDraft } from "../lib/settings-form";
 
-  let { onSetup }: { onSetup: () => void } = $props();
+  let { connection, onSetup }: { connection: ConnectionBadge; onSetup: () => void } = $props();
 
   let view = $state<SettingsView | null>(null);
   let draft = $state<SettingsDraft | null>(null);
@@ -58,8 +60,10 @@
 <section class="screen">
   <h1>{strings.settings.title}</h1>
   {#if view && draft}
+    <ConnectionCard {connection} {onSetup} />
+
     <Panel title={strings.settings.midi.title} hint={strings.settings.midi.hint}>
-      <label class="toggle"><input type="checkbox" bind:checked={draft.midiEnabled} />{strings.settings.midi.enabled}</label>
+      <Switch on={draft.midiEnabled} label={strings.settings.midi.enabled} onchange={() => draft && (draft.midiEnabled = !draft.midiEnabled)} />
       <div class="row">
         <label class="grow">{strings.settings.midi.device}
           <select bind:value={draft.device}>
@@ -86,8 +90,6 @@
       </div>
     </Panel>
 
-    <ConnectionCard {onSetup} />
-
     <AppearanceCard bind:theme={draft.theme} bind:density={draft.density} bind:touch={draft.touch} />
 
     <SetlistTransferCard />
@@ -111,8 +113,6 @@
   .grow { flex: 1; min-width: 160px; }
   .channel { width: 180px; }
   label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
-  .toggle { flex-direction: row; align-items: center; gap: 10px; font-size: 14px; color: var(--text); min-height: 44px; }
-  input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--green); }
   select, input:not([type="checkbox"]) { height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); padding: 0 14px; font-size: 15px; font-family: inherit; }
   .actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .message { font-size: 14px; }
