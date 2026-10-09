@@ -5,41 +5,27 @@
   import PerformerScreen from "./components/PerformerScreen.svelte";
   import SettingsScreen from "./components/SettingsScreen.svelte";
   import Sidebar from "./components/Sidebar.svelte";
+  import { createAppStore } from "./lib/app-store";
   import { connectionBadge } from "./lib/connection";
-  import { currentProblem, currentView, dispatch, onLinkProblem, onNotice, onViewChange } from "./lib/ipc";
-  import { addNotice, dismissNotice, expireNotices, type ShownNotice } from "./lib/notices";
+  import { backend } from "./lib/ipc";
   import { screenLabel, type ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
   import { keyIntent, seekCommand, type PerformerPhase, type SeekTarget } from "./lib/performer";
   import { performerView } from "./lib/performer-view";
-  import type { Command, LinkView } from "./lib/generated/protocol";
+  import { strings } from "./lib/strings";
 
-  let link = $state<LinkView>({
-    status: "NotRunning",
-    live: null,
-    catalog: { revision: 0, setlist_revision: 0, project_id: "", songs: [], project_songs: [], cues: [], setlists: [], active_setlist: null },
-  });
-  let notices = $state<ShownNotice[]>([]);
-  let problem = $state<string | null>(null);
-  let error = $state<string | null>(null);
+  const appState = createAppStore(backend);
   let screen = $state<ScreenId>("player");
   let performerMode = $state(false);
 
   const phases: PerformerPhase[] = ["Idle", "Playing", "Paused", "CountingIn", "HardStopped"];
   const forced = new URLSearchParams(location.search).get("phase") as PerformerPhase | null;
-  const live = $derived(link.live);
-  const view = $derived(forced && phases.includes(forced) ? fixtureFor(forced) : performerView(link, problem));
+  const live = $derived($appState.link.live);
+  const view = $derived(forced && phases.includes(forced) ? fixtureFor(forced) : performerView($appState.link, $appState.problem));
 
-  const connection = $derived(connectionBadge(link.status, problem));
+  const connection = $derived(connectionBadge($appState.link.status, $appState.problem));
 
-  const send = async (command: Command) => {
-    try {
-      await dispatch(command);
-      error = null;
-    } catch (e) {
-      error = String(e);
-    }
-  };
+  const send = appState.send;
 
   const playPause = () => send(live?.phase === "Playing" ? "Pause" : "Play");
   const previous = () => send("Previous");
@@ -59,26 +45,12 @@
     else toggleAutoResume();
   }
 
-  onMount(() => {
-    const show = (next: LinkView) => (link = next);
-    const unlisten = onViewChange(show);
-    currentView().then(show, (e) => (error = String(e)));
-    const unlistenNotice = onNotice((notice) => (notices = addNotice(notices, notice, Date.now())));
-    currentProblem().then((now) => (problem = now), (e) => (error = String(e)));
-    const unlistenProblem = onLinkProblem((next) => (problem = next));
-    const sweep = setInterval(() => (notices = expireNotices(notices, Date.now())), 500);
-    return () => {
-      unlisten.then((stop) => stop());
-      unlistenNotice.then((stop) => stop());
-      unlistenProblem.then((stop) => stop());
-      clearInterval(sweep);
-    };
-  });
+  onMount(() => appState.start());
 </script>
 
 <svelte:window onkeydown={onKeydown} />
 
-<Notices {notices} onDismiss={(key) => (notices = dismissNotice(notices, key))} />
+<Notices notices={$appState.notices} onDismiss={appState.dismissNotice} />
 
 {#if performerMode}
   <PerformerScreen
@@ -109,7 +81,8 @@
           onToggleCountIn={() => send("ToggleCountInOnMarker")}
           onToggleRecord={() => send("ToggleRecordArm")}
         />
-        {#if error}<p class="error">{error}</p>{/if}
+        {#if $appState.error}<p class="error">{$appState.error}</p>{/if}
+        {#if $appState.pending.length > 0}<p class="pending" role="status">{strings.pending.sending}</p>{/if}
       {:else if screen === "settings"}
         <SettingsScreen />
       {:else}
@@ -122,6 +95,10 @@
 <style>
   .layout {
     display: flex;
+  }
+  .pending {
+    color: var(--text-dim, inherit);
+    padding: 0 2rem;
   }
   .error {
     color: var(--red);

@@ -30,3 +30,5 @@ export const restoreSetlists = (): Promise<number> => invoke<number>("restore_se
 export const importSetlists = (ids: string[]): Promise<number> => invoke<number>("import_setlists", { ids });
 
 export const exportDiagnostics = (): Promise<string> => invoke<string>("export_diagnostics");
+
+export const backend = { dispatch, currentView, currentProblem, onViewChange, onNotice, onLinkProblem };
