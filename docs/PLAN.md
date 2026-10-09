@@ -164,7 +164,7 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 | ⬜ 7.2 | Chaos tests: REAPER paused/unfocused, project switch mid-song, regions edited live, huge projects (1000 regions) | 3 |
 | ⬜ 7.3 | Real-rig rehearsals ×3 (mac + windows) with audio interface and MIDI foot controller | 3 |
 | ⬜ 7.4 | Security review: localhost-only, input validation, Tauri capability allow-list, CSP | 1.5 |
-| ⬜ 7.5 | Resource audit: idle CPU/RAM budget (target < 1% CPU, < 120 MB) | 1 |
+| 🟡 7.5 | Resource audit: idle CPU/RAM budget (target < 1% CPU, < 120 MB) **macOS idle measured: app 0.30% CPU, 114 MB after the stats thread fix; Windows and a long run open.** | 1 |
 | ⬜ 7.7 | **Crash-containment campaign (S-9)**: panic/fault injection, fuzzing the protocol parser, safe-mode flows, 8 h soak inside real REAPER on both targets, REAPER-crash recovery | 3 |
 | ⬜ 7.6 | Beta programme: 5–10 musicians, feedback form, crash/diagnostic export | calendar 3 wks |
 
