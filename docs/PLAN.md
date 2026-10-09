@@ -43,7 +43,7 @@ reaper-control-app-v2/
 | ⬜ 0.6 | Licence decision (v1 is proprietary source-available; v2 public → choose) | 0.5 |
 | ⬜ 0.8 | **Domain discovery**: event storming per context (timeline of events, commands, aggregates, invariants), glossary `docs/language.md`, context map ADR-007, invariant tables `docs/domain/*.md` | 4 |
 | ✅ 0.9 | Crate-per-context workspace skeleton + CI dependency rules (§14.5), banned-synonym lint (`crates/architecture-tests/tests/vocabulary.rs`: "transition" and "playlist" in Rust sources and UI script/markup, CSS skipped) | 1.5 |
-| 🟡 0.7 | Dev REAPER portable install + sample project with regions/markers/special markers for testing **Missing: more sample projects.** | 0.5 |
+| ✅ 0.7 | Dev REAPER portable install + sample project with regions/markers/special markers for testing | 0.5 |
 
 **Gate 0:** green CI on macOS + Windows, empty Tauri app launches, codegen works, glossary + context map + invariant tables approved.
 
