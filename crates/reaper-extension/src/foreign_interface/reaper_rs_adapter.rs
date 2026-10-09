@@ -92,6 +92,24 @@ impl ReaperPort for ReaperRsAdapter {
         project as usize as u64
     }
 
+    fn project_path(&self) -> Option<String> {
+        let mut buffer = vec![0u8; 4096];
+        // SAFETY: a negative index asks for the current project; REAPER writes at most
+        // `buffer.len()` bytes, NUL-terminated, into the buffer.
+        unsafe {
+            self.reaper.low().EnumProjects(
+                -1,
+                buffer.as_mut_ptr().cast::<std::os::raw::c_char>(),
+                buffer.len() as std::os::raw::c_int,
+            );
+        }
+        let length = buffer.iter().position(|&byte| byte == 0)?;
+        buffer.truncate(length);
+        String::from_utf8(buffer)
+            .ok()
+            .filter(|path| !path.is_empty())
+    }
+
     fn count_in(&self) -> bool {
         count_in::read(&self.reaper, self.saved_metronome)
     }

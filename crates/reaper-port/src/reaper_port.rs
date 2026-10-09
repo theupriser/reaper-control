@@ -22,6 +22,8 @@ pub trait ReaperPort {
     /// as long as it is open. Two projects can have the same change count, so this is how a switch
     /// between them is noticed.
     fn project_token(&self) -> u64;
+    /// Where the current project is saved, or `None` while it has never been saved.
+    fn project_path(&self) -> Option<String>;
     /// The regions of the project, in timeline order.
     fn regions(&self) -> Vec<Region>;
     /// The markers of the project, in timeline order.

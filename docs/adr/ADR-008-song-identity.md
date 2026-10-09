@@ -46,7 +46,7 @@ v1 reference (read-only): v1 setlist items hold `regionId` (the region number) a
 7. v1 import: for every v1 item find the region whose number equals `regionId` among **regions only** (numbers collide with markers), check that its name equals the v1 name, store the GUID; on a mismatch fall back to name, then show the entry as broken for repair. v1's own `ProjectId` from the project ExtState is matched to the v1 setlist's `projectId`. Not run against a real v1 setlist file yet.
 
 ## Seen in WP 3.9 (REAPER 7.82, macOS)
-Two project tabs each keep their own `project_id` when the user switches between them (the id is read from the current tab's ExtState), and the extension notices a switch by the tab pointer, because two projects can have the same change count. Path recording for copies (step 6) is not built.
+Two project tabs each keep their own `project_id` when the user switches between them (the id is read from the current tab's ExtState), and the extension notices a switch by the tab pointer, because two projects can have the same change count. Copies (step 6): the extension stores the saved project path in ExtState `RC2`/`project_path` next to the id; when it differs from the current path the project gets a new id (measured live 2026-10-09: a copied file opened in REAPER 7.82 got its own id and path, the original kept its own). A file that was only moved or renamed looks the same and also gets a new id, which orphans its mirror (acceptable: the mirror is restore-only). An unsaved project has no path and keeps its id.
 
 ## Not tested
 - Region/Marker Manager, copy and paste of regions and ripple edit in the UI (only the API and one action were run).
