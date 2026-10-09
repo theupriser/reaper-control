@@ -62,6 +62,7 @@ fn song_info(region: &Region, cues: &[Cue]) -> Option<SongInfo> {
     let directives = song.directives(cues);
     Some(SongInfo {
         id: region.id.as_str().to_string(),
+        number: region.number,
         name: region.name.clone(),
         start: region.start.get(),
         end: region.end.get(),

@@ -19,6 +19,7 @@ fn a_command_over_the_link_moves_the_performance_and_the_state_comes_back() -> T
     let log = Log::new(directory.join("extension.log"));
     let song = Region {
         id: SongId::new("A"),
+        number: 0,
         name: "A".into(),
         start: Seconds::new(0.0)?,
         end: Seconds::new(10.0)?,
@@ -65,6 +66,7 @@ fn a_saved_setlist_comes_back_in_the_catalog_and_a_stale_save_is_reported() -> T
     let log = Log::new(directory.join("extension.log"));
     let song = Region {
         id: SongId::new("A"),
+        number: 0,
         name: "A".into(),
         start: Seconds::new(0.0)?,
         end: Seconds::new(10.0)?,
@@ -128,6 +130,7 @@ fn every_event_a_client_receives_is_also_in_the_journal() -> TestResult {
     for (name, start) in [("A", 0.0), ("B", 10.0)] {
         songs.push(Region {
             id: SongId::new(name),
+            number: 0,
             name: name.into(),
             start: Seconds::new(start)?,
             end: Seconds::new(start + 10.0)?,

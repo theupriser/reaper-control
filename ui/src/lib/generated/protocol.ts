@@ -107,6 +107,10 @@ export type SongInfo = {
  */
 id: string, 
 /**
+ * The region number REAPER shows.
+ */
+number: number, 
+/**
  * Display name.
  */
 name: string, 
