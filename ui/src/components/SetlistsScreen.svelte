@@ -6,6 +6,7 @@
   import * as edit from "../lib/setlist-edit";
   import { strings } from "../lib/strings";
   import SetlistEditor from "./SetlistEditor.svelte";
+  import DeleteSetlistDialog from "./DeleteSetlistDialog.svelte";
 
   let { catalog, send }: { catalog: Catalog; send: (command: Command) => Promise<void> } = $props();
 
@@ -29,6 +30,13 @@
     if (draft) draft = next(draft);
   };
   const save = () => draft && send(edit.saveCommand(draft));
+  let deleting = $state(false);
+  const remove = () => {
+    deleting = false;
+    if (!draft) return;
+    send(edit.deleteCommand(draft));
+    draft = null;
+  };
   const discard = () => (draft = saved ? edit.draftOf(saved) : null);
 </script>
 
@@ -72,6 +80,13 @@
           <Button
             disabled={catalog.active_setlist === saved.id}
             onclick={() => send({ SetActiveSetlist: { id: saved.id } })}>{strings.setlists.play}</Button>
+          <Button kind="danger" onclick={() => (deleting = true)}>{strings.setlists.delete}</Button>
+          <DeleteSetlistDialog
+            open={deleting}
+            name={saved.name}
+            playing={catalog.active_setlist === saved.id}
+            onConfirm={remove}
+            onCancel={() => (deleting = false)} />
         {/if}
       </div>
     {/if}

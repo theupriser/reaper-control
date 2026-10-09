@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SetlistInfo, SongInfo } from "./generated/protocol";
-import { addSong, draftOf, emptyDraft, idFromName, isChanged, missingEntries, moveEntry, removeEntry, rename, saveCommand, saveProblem } from "./setlist-edit";
+import { addSong, deleteCommand, draftOf, emptyDraft, idFromName, isChanged, missingEntries, moveEntry, removeEntry, rename, saveCommand, saveProblem } from "./setlist-edit";
 
 const saved: SetlistInfo = {
   id: "sat",
@@ -61,4 +61,9 @@ describe("setlist edit", () => {
       SaveSetlist: { id: "new-one", name: "New one", entries: [], expected_revision: 0 },
     });
   });
+});
+
+it("deleting names the revision the setlist was opened at", () => {
+  const draft = draftOf({ id: "sat", name: "Saturday", revision: 3, entries: [] });
+  expect(deleteCommand(draft)).toEqual({ DeleteSetlist: { id: "sat", expected_revision: 3 } });
 });

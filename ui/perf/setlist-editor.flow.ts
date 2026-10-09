@@ -55,3 +55,22 @@ test("an empty name cannot be saved", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Save setlist" })).toBeDisabled();
   await expect(page.getByText("Give the setlist a name.")).toBeVisible();
 });
+
+test("deleting a setlist asks first and then sends the revision that was shown", async ({ page }) => {
+  await page.addInitScript(tauriStandIn, view);
+  await page.goto("/");
+  await page.getByRole("navigation").getByRole("button", { name: "Setlists" }).click();
+  await page.getByRole("button", { name: /Sunday/ }).click();
+
+  await page.getByRole("button", { name: "Delete setlist" }).click();
+  await expect(page.getByRole("dialog", { name: "Delete Sunday?" })).toBeVisible();
+  await expect(page.getByText("timeline order again")).toBeVisible();
+  await page.screenshot({ path: "perf-results/setlist-delete.png" });
+
+  await page.getByRole("button", { name: "Keep it" }).click();
+  expect(await dispatched(page)).toEqual([]);
+
+  await page.getByRole("button", { name: "Delete setlist" }).click();
+  await page.getByRole("button", { name: "Delete", exact: true }).click();
+  expect(await dispatched(page)).toEqual([{ DeleteSetlist: { id: "sun", expected_revision: 1 } }]);
+});

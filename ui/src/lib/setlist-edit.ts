@@ -79,3 +79,7 @@ export function saveProblem(draft: SetlistDraft): "name" | null {
 export const saveCommand = (draft: SetlistDraft): Command => ({
   SaveSetlist: { id: draft.id, name: draft.name.trim(), entries: draft.entries, expected_revision: draft.revision },
 });
+
+export const deleteCommand = (draft: SetlistDraft): Command => ({
+  DeleteSetlist: { id: draft.id, expected_revision: draft.revision },
+});

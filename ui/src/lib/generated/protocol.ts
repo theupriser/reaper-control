@@ -32,6 +32,14 @@ entries: Array<EntryInfo>,
 /**
  * The revision of the setlist the edit was made on.
  */
+expected_revision: number, } } | { "DeleteSetlist": { 
+/**
+ * Identity of the setlist.
+ */
+id: string, 
+/**
+ * The revision of the setlist when it was shown.
+ */
 expected_revision: number, } } | { "SetActiveSetlist": { 
 /**
  * Identity of the setlist, if any.

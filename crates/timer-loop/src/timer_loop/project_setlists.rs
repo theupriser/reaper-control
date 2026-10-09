@@ -122,6 +122,32 @@ impl ProjectSetlists {
         Ok(())
     }
 
+    /// Removes a setlist from the project. It must still be on `expected_revision`. Deleting the
+    /// played setlist also clears the choice, so the songs play in timeline order.
+    pub(super) fn delete(
+        &mut self,
+        port: &mut impl ReaperPort,
+        id: &str,
+        expected_revision: u64,
+    ) -> Result<(), &'static str> {
+        let position = self
+            .setlists
+            .iter()
+            .position(|setlist| setlist.id == id)
+            .ok_or("that setlist does not exist")?;
+        if self.setlists.get(position).map(|s| s.revision) != Some(expected_revision) {
+            return Err("the setlist changed since it was opened");
+        }
+        self.setlists.remove(position);
+        let text =
+            serde_json::to_string(&self.setlists).map_err(|_| "that setlist cannot be deleted")?;
+        port.set_ext_state(SECTION, SETLISTS_KEY, &text);
+        if self.active.as_deref() == Some(id) {
+            port.set_ext_state(SECTION, ACTIVE_KEY, "");
+        }
+        Ok(())
+    }
+
     /// Chooses the played setlist (none: timeline order) and stores the choice in the project; the next refresh reads it back.
     pub(super) fn set_active(
         &mut self,

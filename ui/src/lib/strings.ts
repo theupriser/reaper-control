@@ -46,6 +46,12 @@ export const strings = {
     changedInReaper: "This setlist was changed in REAPER while you were editing.",
     reload: "Load the REAPER version",
     unsaved: "Unsaved changes",
+    delete: "Delete setlist",
+    deleteTitle: (name: string) => `Delete ${name}?`,
+    deleteWarning: "The setlist is removed from the project. The songs themselves stay.",
+    deleteWasPlaying: "It is the setlist that is playing; the songs will play in timeline order again.",
+    deleteConfirm: "Delete",
+    deleteCancel: "Keep it",
   },
 
   connection: {

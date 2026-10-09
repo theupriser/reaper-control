@@ -44,6 +44,16 @@ pub enum Command {
         #[ts(type = "number")]
         expected_revision: u64,
     },
+    /// Remove a setlist from the project. Refused when the stored revision is not
+    /// `expected_revision`, so a newer edit is never deleted unseen. When it is the played setlist,
+    /// the songs play in timeline order again.
+    DeleteSetlist {
+        /// Identity of the setlist.
+        id: String,
+        /// The revision of the setlist when it was shown.
+        #[ts(type = "number")]
+        expected_revision: u64,
+    },
     /// Choose the setlist that is played; `None` plays the songs in timeline order. Refused for an
     /// id the project does not have.
     SetActiveSetlist {
