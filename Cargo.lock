@@ -2931,7 +2931,6 @@ dependencies = [
  "performance",
  "protocol",
  "reaper-low",
- "reaper-macros",
  "reaper-medium",
  "reaper-port",
  "serde_json",
@@ -2955,16 +2954,6 @@ dependencies = [
  "tracing",
  "vst",
  "winapi",
-]
-
-[[package]]
-name = "reaper-macros"
-version = "0.1.0"
-source = "git+https://github.com/helgoboss/reaper-rs?rev=659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23#659b22bfbc34bf4a5a40902e6fdf60ccfd34ca23"
-dependencies = [
- "darling",
- "quote",
- "syn 3.0.6",
 ]
 
 [[package]]

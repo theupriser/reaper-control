@@ -1,5 +1,7 @@
 //! The one module that talks to REAPER and the C runtime. Everything else in the crate is safe.
 
+#[cfg(windows)]
+mod dll_main;
 mod exit_file;
 mod missing_functions;
 #[cfg(feature = "probe")]
@@ -13,7 +15,6 @@ use std::path::PathBuf;
 use std::sync::OnceLock;
 
 use reaper_low::PluginContext;
-use reaper_macros::reaper_extension_plugin;
 use reaper_medium::ReaperSession;
 
 use crate::fault::Fault;
@@ -43,7 +44,20 @@ extern "C" fn on_exit() {
     }
 }
 
-#[reaper_extension_plugin]
+reaper_low::swell_dll_main!();
+
+/// The entry point REAPER calls at startup; what `#[reaper_extension_plugin]` would generate,
+/// without its `DllMain` (see `dll_main`).
+#[unsafe(no_mangle)]
+unsafe extern "C" fn ReaperPluginEntry(
+    h_instance: reaper_low::raw::HINSTANCE,
+    rec: *mut reaper_low::raw::reaper_plugin_info_t,
+) -> std::os::raw::c_int {
+    let static_context = reaper_low::static_plugin_context();
+    // SAFETY: REAPER passes the handle and the plugin info record it owns, as the macro assumes.
+    unsafe { reaper_low::bootstrap_extension_plugin(h_instance, rec, static_context, plugin_main) }
+}
+
 fn plugin_main(context: PluginContext) -> Result<(), Box<dyn Error>> {
     match FAULT.guard(|| start(context)) {
         Some(result) => result,
