@@ -49,7 +49,7 @@ impl Fault {
     pub fn install_panic_hook(&'static self, log: &'static Log, faults: &'static FaultFile) {
         std::panic::set_hook(Box::new(move |info| {
             self.trip();
-            log.line(&format!("PANIC, extension faulted: {info}"));
+            log.line(&format!("PANIC, extension faulted: {info}\n{}", std::backtrace::Backtrace::force_capture()));
             let _ = faults.report("the extension crashed and switched itself off");
         }));
     }
