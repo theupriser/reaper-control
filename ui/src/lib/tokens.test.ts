@@ -41,7 +41,7 @@ describe("tokens", () => {
 
   it("keeps raw colours out of components", () => {
     for (const [file, source] of Object.entries(sources)) {
-      expect(source, file).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(|\b(white|black)\b/);
+      expect(source, file).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(|(?<![-\w])(white|black)(?![-\w])/);
     }
   });
 

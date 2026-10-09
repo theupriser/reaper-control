@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import KitClock from "../kit/Clock.svelte";
 
   let now = $state(new Date());
   onMount(() => {
@@ -8,4 +9,4 @@
   });
 </script>
 
-<span data-testid="clock">{now.toLocaleTimeString()}</span>
+<span data-testid="clock"><KitClock text={now.toLocaleTimeString()} /></span>

@@ -18,3 +18,7 @@ export const expireNotices = (shown: ShownNotice[], now: number): ShownNotice[] 
 /** Removes the notice a person dismissed. */
 export const dismissNotice = (shown: ShownNotice[], key: string): ShownNotice[] =>
   shown.filter((notice) => notice.key !== key);
+
+/** The toast tone for a notice level. */
+export const noticeTone = (level: Notice["level"]): "info" | "warn" | "error" =>
+  level === "Info" ? "info" : level === "Warning" ? "warn" : "error";

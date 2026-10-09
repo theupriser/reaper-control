@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addNotice, dismissNotice, expireNotices } from "./notices";
+import { addNotice, dismissNotice, expireNotices, noticeTone } from "./notices";
 
 const warning = { key: "command", level: "Warning", title: "Command not sent", text: "Nope" } as const;
 
@@ -26,5 +26,11 @@ describe("notices", () => {
     const shown = addNotice([], warning, 0);
     expect(expireNotices(shown, 9999)).toHaveLength(1);
     expect(expireNotices(shown, 10000)).toEqual([]);
+  });
+});
+
+describe("noticeTone", () => {
+  it("maps each level to a toast tone", () => {
+    expect(["Info", "Warning", "Error"].map((level) => noticeTone(level as "Info"))).toEqual(["info", "warn", "error"]);
   });
 });

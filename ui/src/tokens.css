@@ -26,6 +26,7 @@
   --tint-hover: rgba(255, 255, 255, 0.1);
   --shadow-soft: 0 2px 5px rgba(0, 0, 0, 0.3);
   --shadow-raised: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --backdrop: rgba(0, 0, 0, 0.6);
   color-scheme: dark;
 }
 :root[data-theme="stage-dark"] {
@@ -65,6 +66,7 @@
   --tint-hover: rgba(0, 0, 0, 0.08);
   --shadow-soft: 0 2px 5px rgba(0, 0, 0, 0.15);
   --shadow-raised: 0 6px 18px rgba(0, 0, 0, 0.18);
+  --backdrop: rgba(0, 0, 0, 0.4);
   color-scheme: light;
 }
 
