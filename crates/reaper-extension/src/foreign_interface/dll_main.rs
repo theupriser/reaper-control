@@ -12,10 +12,10 @@ extern "system" fn DllMain(
 ) -> u32 {
     if reason == reaper_low::raw::DLL_PROCESS_ATTACH {
         let _ = reaper_low::register_hinstance(hinstance);
-    } else if reason == reaper_low::raw::DLL_PROCESS_DETACH {
-        if let Some(file) = super::EXIT_FILE.get() {
-            file.remove();
-        }
+    } else if reason == reaper_low::raw::DLL_PROCESS_DETACH
+        && let Some(file) = super::EXIT_FILE.get()
+    {
+        file.remove();
     }
     1
 }
