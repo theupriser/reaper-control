@@ -82,13 +82,16 @@ checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 name = "app"
 version = "0.0.0"
 dependencies = [
+ "catalogue",
  "link",
  "midir",
  "performance",
+ "projections",
  "protocol",
  "reaper-port",
  "serde",
  "serde_json",
+ "setlists",
  "shared-kernel",
  "sysinfo",
  "tauri",
@@ -106,17 +109,7 @@ dependencies = [
 name = "architecture-tests"
 version = "0.0.0"
 dependencies = [
- "app",
  "cargo_metadata 0.20.0",
- "catalogue",
- "link",
- "performance",
- "projections",
- "protocol",
- "reaper-port",
- "setlists",
- "shared-kernel",
- "timer-loop",
 ]
 
 [[package]]

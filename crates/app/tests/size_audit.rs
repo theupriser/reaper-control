@@ -1,7 +1,7 @@
 //! Size audit (PLAN WP 4b.1): the size of every public type, so growth is seen and the rule
 //! "under 128 bytes, ideally 64 or less" (AGENTS.md "Memory and layout") can be checked.
 //!
-//! `cargo test -p architecture-tests --test size_audit -- --nocapture` prints the table.
+//! `cargo test -p app --test size_audit -- --nocapture` prints the table.
 //! The budget (AGENTS.md): at most 128 bytes, ideally 64. `Catalog` is the one exception, a bag of
 //! lists that is only ever held behind a `Box`; the hot types are named in `HOT_TYPES`.
 //! Generic types and the extension's types are not listed.
