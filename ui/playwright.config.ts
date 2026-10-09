@@ -2,7 +2,7 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "perf",
-  testMatch: "*.perf.ts",
+  testMatch: "*.{perf,flow}.ts",
   workers: 1,
   reporter: [["list"]],
   outputDir: "perf-results",
