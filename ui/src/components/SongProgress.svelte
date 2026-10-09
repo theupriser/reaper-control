@@ -56,7 +56,6 @@
     border-radius: 6px;
   }
   .seekable { cursor: pointer; }
-  .track:focus { outline: none; }
   .fill {
     height: 100%;
     background: var(--green);
