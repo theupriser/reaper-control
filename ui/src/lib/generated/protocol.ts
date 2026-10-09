@@ -79,7 +79,7 @@ enabled: boolean, } | { "kind": "SeekPerformed",
 /**
  * Where it went, in seconds.
  */
-to: number, } | { "kind": "CommandRejected", 
+to: number, } | { "kind": "ProjectChanged" } | { "kind": "CommandRejected", 
 /**
  * Why, for the log and the UI.
  */

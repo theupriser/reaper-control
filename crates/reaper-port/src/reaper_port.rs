@@ -18,6 +18,10 @@ pub trait ReaperPort {
     /// changed, so readers can skip re-reading while it stays the same. ExtState is not covered
     /// (REAPER does not count it); compare what `ext_state` returns.
     fn change_count(&self) -> u64;
+    /// Names the project tab that is current; it differs between tabs and stays the same for a tab
+    /// as long as it is open. Two projects can have the same change count, so this is how a switch
+    /// between them is noticed.
+    fn project_token(&self) -> u64;
     /// The regions of the project, in timeline order.
     fn regions(&self) -> Vec<Region>;
     /// The markers of the project, in timeline order.

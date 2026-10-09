@@ -139,6 +139,15 @@ impl Probe {
                 let value = rest.first().and_then(|text| text.parse::<i32>().ok());
                 Self::project_config(adapter, name, value, log);
             }
+            ["open-project", path] => {
+                if let Ok(path) = std::ffi::CString::new(format!("noprompt:{path}")) {
+                    // SAFETY: the string outlives the call; REAPER opens the file in the current tab.
+                    unsafe { adapter.reaper().low().Main_openProject(path.as_ptr()) };
+                }
+            }
+            ["project-token"] => {
+                log.line(&format!("probe: project token {}", adapter.project_token()))
+            }
             ["audio"] => log.line(&format!(
                 "probe: audio running {}",
                 adapter.reaper().audio_is_running()

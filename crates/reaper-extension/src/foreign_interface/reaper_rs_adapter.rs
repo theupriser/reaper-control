@@ -86,6 +86,12 @@ impl ReaperPort for ReaperRsAdapter {
         u64::from(self.reaper.get_project_state_change_count(Self::project()))
     }
 
+    fn project_token(&self) -> u64 {
+        // SAFETY: a negative index asks for the current project; no name buffer is wanted.
+        let project = unsafe { self.reaper.low().EnumProjects(-1, std::ptr::null_mut(), 0) };
+        project as usize as u64
+    }
+
     fn count_in(&self) -> bool {
         count_in::read(&self.reaper, self.saved_metronome)
     }

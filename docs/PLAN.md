@@ -86,7 +86,7 @@ reaper-control-app-v2/
 | ✅ 3.6 | Command intake/ack (ids, idempotency, unknown commands, version mismatch) | 2 |
 | ✅ 3.7 | Setlist persistence in project ExtState (versioned schema, `expectedRev`, corruption recovery, re-validation on load) | 2.5 |
 | 🟡 3.8 | Hand-over execution per ADR-005, hard stops, count-in (audio-hook trigger only if S2 shows it is needed and safe) **Missing: Windows runs.** | 3.5 |
-| 🟡 3.9 | Project change/tab handling, cheap change detection, stable ids per ADR-008 **Missing: project switch and tab handling, stable ids not verified live.** | 2 |
+| 🟡 3.9 | Project change/tab handling, cheap change detection, stable ids per ADR-008 **Missing: copy detection (project path next to the id, ADR-008 step 6), a closed tab seen through, Windows.** | 2 |
 | ⬜ 3.10 | Build and packaging: CI cross-builds for the 2 targets, signing, version constant, checksum, in-REAPER smoke test | 3 |
 
 **Gate 3:** scenarios pass on `FakeReaper` **and** in real REAPER on both targets; 30 min unattended run, 40 hand-overs, zero misses; kill-the-app test keeps playing; panic injection leaves REAPER alive and reports `ExtensionFaulted`; journal matches events.

@@ -31,6 +31,8 @@ pub struct TimerLoop<Port: ReaperPort> {
     songs: Vec<PlannedSong>,
     project_setlists: ProjectSetlists,
     seen_change_count: u64,
+    seen_project: u64,
+    seen_project_id: Option<String>,
     rebuilds: u64,
     catalog: Catalog,
     pending_events: Vec<WireEvent>,
@@ -43,6 +45,8 @@ impl<Port: ReaperPort> TimerLoop<Port> {
         let project_setlists = ProjectSetlists::read(&port);
         let songs = plan_songs(&port.regions(), &port.markers(), &project_setlists);
         let seen_change_count = port.change_count();
+        let seen_project = port.project_token();
+        let seen_project_id = project_identity::read(&port);
         let performance = Self::fresh(&port, songs.clone());
         let catalog = build_catalog(
             1,
@@ -58,6 +62,8 @@ impl<Port: ReaperPort> TimerLoop<Port> {
             songs,
             project_setlists,
             seen_change_count,
+            seen_project,
+            seen_project_id,
             rebuilds: 0,
             catalog,
             pending_events: Vec::new(),
@@ -179,7 +185,7 @@ impl<Port: ReaperPort> TimerLoop<Port> {
         self.performance.phase()
     }
 
-    /// How many times an edit in the project made the performance start over.
+    /// How many times an edit or a switch of project made the performance start over.
     pub fn rebuilds(&self) -> u64 {
         self.rebuilds
     }
@@ -207,18 +213,30 @@ impl<Port: ReaperPort> TimerLoop<Port> {
     /// songs themselves changed, so a note or an unrelated edit mid-song does not stop the show.
     fn refresh_if_changed(&mut self) {
         let change_count = self.port.change_count();
-        if change_count == self.seen_change_count && self.project_setlists.is_current(&self.port) {
+        let project = self.port.project_token();
+        let switched = project != self.seen_project;
+        if !switched
+            && change_count == self.seen_change_count
+            && self.project_setlists.is_current(&self.port)
+        {
             return;
         }
         self.seen_change_count = change_count;
+        self.seen_project = project;
         project_identity::ensure(&mut self.port);
+        let project_id = project_identity::read(&self.port);
+        let switched = switched || project_id != self.seen_project_id;
+        self.seen_project_id = project_id;
         let regions = self.port.regions();
         let markers = self.port.markers();
         let project_setlists = ProjectSetlists::read(&self.port);
         let songs = plan_songs(&regions, &markers, &project_setlists);
         self.refresh_catalog(&project_setlists, &songs, &regions, &markers);
         self.project_setlists = project_setlists;
-        if songs != self.songs {
+        if switched {
+            self.record(WireEvent::ProjectChanged);
+        }
+        if switched || songs != self.songs {
             self.performance = Self::fresh(&self.port, songs.clone());
             self.songs = songs;
             self.rebuilds += 1;
@@ -288,5 +306,7 @@ fn map_phase(phase: Phase) -> protocol::Phase {
     }
 }
 
+#[cfg(test)]
+mod project_switch_tests;
 #[cfg(test)]
 mod tests;

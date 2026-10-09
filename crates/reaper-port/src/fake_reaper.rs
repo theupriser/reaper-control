@@ -26,6 +26,7 @@ pub struct FakeReaper {
     tempo_map: TempoMap,
     ext_state: BTreeMap<(String, String), String>,
     change_count: u64,
+    project_token: u64,
 }
 
 impl FakeReaper {
@@ -42,6 +43,7 @@ impl FakeReaper {
             tempo_map,
             ext_state: BTreeMap::new(),
             change_count: 0,
+            project_token: 1,
         }
     }
 
@@ -49,6 +51,19 @@ impl FakeReaper {
     pub fn replace_regions(&mut self, regions: Vec<Region>) {
         self.regions = regions;
         self.change_count += 1;
+    }
+
+    /// The user switches to another project tab: its regions and markers replace the current ones,
+    /// it has its own (empty) ExtState, the transport of that tab is stopped, and the change count
+    /// is left alone, because two projects can have the same one.
+    pub fn switch_project(&mut self, regions: Vec<Region>, markers: Vec<Marker>) {
+        self.regions = regions;
+        self.markers = markers;
+        self.ext_state.clear();
+        self.transport = Transport::Stopped;
+        self.position = Seconds::ZERO;
+        self.count_in_left = 0.0;
+        self.project_token += 1;
     }
 
     /// Lets time pass. The clock always moves forward; the playhead moves with
@@ -87,6 +102,10 @@ impl ReaperPort for FakeReaper {
 
     fn change_count(&self) -> u64 {
         self.change_count
+    }
+
+    fn project_token(&self) -> u64 {
+        self.project_token
     }
 
     fn regions(&self) -> Vec<Region> {

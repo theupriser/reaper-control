@@ -40,6 +40,9 @@ pub enum WireEvent {
         /// Where it went, in seconds.
         to: f64,
     },
+    /// The user switched to another project (tab) or opened one; the performance started over on
+    /// its songs.
+    ProjectChanged,
     /// A command was refused.
     CommandRejected {
         /// Why, for the log and the UI.
