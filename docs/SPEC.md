@@ -229,14 +229,14 @@ No plugin system, no generic event sourcing, no DI container framework (plain co
 **Bounded contexts** (each is a Rust crate with its own model; no shared "god" types):
 | Context | Responsibility | Owns |
 |---|---|---|
-| **Performance** (core) | Plays a setlist: transitions, hard stops, count-in, finish | `Performance` aggregate, state machine |
+| **Performance** (core) | Plays a setlist: hand-overs, hard stops, count-in, finish | `Performance` aggregate, state machine |
 | **Setlists** | Create/edit/validate setlists | `Setlist` aggregate |
 | **Catalogue** | Songs as seen in the REAPER project: regions, markers, special-marker meaning | `Song`, `Marker`, `SpecialMarkers` |
 | **Control** | Turning intent from any device into commands | `ControlBinding`, `Controller`, device registry |
 | **Reaper Link** | Talking to the extension; connection health | `LinkSession` aggregate |
 | **Installation** | Getting the extension into REAPER and keeping it healthy | `Installation` aggregate |
 | **Settings** | User preferences | `Preferences` aggregate |
-| **Diagnostics** | Logs, transition journal, support bundle | `Journal` |
+| **Diagnostics** | Logs, hand-over journal, support bundle | `Journal` |
 
 **Context map**
 - Performance ⟵ **Customer/Supplier** ⟵ Catalogue (Performance consumes songs) and Setlists (supplies ordered entries).
@@ -288,7 +288,7 @@ Glossary is a living doc (`docs/language.md`) and CI-linted for banned synonyms 
 - **Application services** orchestrate one use case each. Where the app is authoritative (Setlists, Installation, Link, Settings): load aggregate → behaviour → publish events. For **Performance** the service only validates the intent against the projection and sends the command to the extension; the resulting events come back over the event stream. They contain no business rules.
 - **Domain events** are the *only* cross-context signal (in-process event bus); handlers in other contexts translate to their own models (no cross-context method calls).
 - **CQRS-lite:** commands mutate aggregates (in the extension for Performance, in the app elsewhere); the UI reads **read models/projections** (`PlayerView`, `PerformerView`, `SetlistView`) built from events. This is also what makes the UI fast and keeps Svelte free of business logic.
-- **Event sourcing is NOT used** (anti-goal). Aggregates persist as state; the transition journal is an append-only *log*, not the source of truth.
+- **Event sourcing is NOT used** (anti-goal). Aggregates persist as state; the hand-over journal is an append-only *log*, not the source of truth.
 - **Transactions/consistency:** one aggregate per command; cross-aggregate effects via events (eventual consistency inside one process, in-order).
 - **One implementation of the performance rules** (decision D7): the Rust `performance` crate. The extension runs it in production; the app embeds the very same crate for the simulator, dry-run and tests, so nothing is copied or ported.
 
