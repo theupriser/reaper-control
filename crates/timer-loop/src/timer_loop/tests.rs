@@ -478,3 +478,43 @@ fn an_id_that_cannot_name_a_file_is_replaced() {
     let timer_loop = TimerLoop::new(port);
     assert!(timer_loop.catalog().project_id.starts_with("project-"));
 }
+
+fn delete(id: &str, expected_revision: u64) -> protocol::Command {
+    protocol::Command::DeleteSetlist {
+        id: id.into(),
+        expected_revision,
+    }
+}
+
+#[test]
+fn a_deleted_setlist_leaves_the_project_and_needs_the_revision_that_was_seen() {
+    use protocol::message::Outcome;
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    timer_loop.link_command(save("sat", &["A"], 0));
+    assert!(matches!(
+        timer_loop.link_command(delete("sat", 0)),
+        Outcome::Rejected { .. }
+    ));
+    assert_eq!(timer_loop.catalog().setlists.len(), 1);
+    assert_eq!(timer_loop.link_command(delete("sat", 1)), Outcome::Done);
+    assert!(timer_loop.catalog().setlists.is_empty());
+    assert!(matches!(
+        timer_loop.link_command(delete("sat", 1)),
+        Outcome::Rejected { .. }
+    ));
+}
+
+#[test]
+fn deleting_the_played_setlist_plays_the_songs_in_timeline_order_again() {
+    use protocol::Command::SetActiveSetlist;
+    use protocol::message::Outcome;
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    timer_loop.link_command(save("sat", &["B"], 0));
+    timer_loop.link_command(SetActiveSetlist {
+        id: Some("sat".into()),
+    });
+    assert_eq!(timer_loop.catalog().songs.len(), 1);
+    assert_eq!(timer_loop.link_command(delete("sat", 1)), Outcome::Done);
+    assert_eq!(timer_loop.catalog().active_setlist, None);
+    assert_eq!(timer_loop.catalog().songs.len(), 2);
+}

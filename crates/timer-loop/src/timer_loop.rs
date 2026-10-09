@@ -105,6 +105,17 @@ impl<Port: ReaperPort> TimerLoop<Port> {
             self.refresh_if_changed();
             return self.outcome(saved);
         }
+        if let Command::DeleteSetlist {
+            id,
+            expected_revision,
+        } = &command
+        {
+            let deleted = self
+                .project_setlists
+                .delete(&mut self.port, id, *expected_revision);
+            self.refresh_if_changed();
+            return self.outcome(deleted);
+        }
         if let Command::SetActiveSetlist { id } = &command {
             let chosen = self
                 .project_setlists
