@@ -48,7 +48,8 @@
     width: 240px;
     flex-shrink: 0;
     box-sizing: border-box;
-    min-height: 100vh;
+    height: 100%;
+    overflow-y: auto;
     background: var(--sidebar);
     border-right: 1px solid var(--line);
     padding: 24px 16px;

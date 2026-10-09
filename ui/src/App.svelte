@@ -95,6 +95,7 @@
 <style>
   .layout {
     display: flex;
+    height: 100vh;
   }
   .pending {
     color: var(--text-dim, inherit);
@@ -107,5 +108,6 @@
   .content {
     flex: 1;
     min-width: 0;
+    overflow-y: auto;
   }
 </style>
