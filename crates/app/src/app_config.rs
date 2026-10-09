@@ -1,10 +1,13 @@
 //! The app's settings file.
 
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 
-use protocol::{NoteMapping, Settings, SettingsView};
+use protocol::{ActionChoice, NoteMapping, Settings, SettingsView};
 
 use crate::config_error::ConfigError;
+use crate::intent::Intent;
 use crate::log_config::LogConfig;
 use crate::midi_config::MidiConfig;
 use crate::queue_config::QueueConfig;
@@ -67,6 +70,15 @@ impl AppConfig {
             midi_device_name: self.midi.device_name.clone(),
             midi_channel: self.midi.channel,
             midi_debounce_milliseconds: clamp(self.midi.debounce_milliseconds),
+            midi_notes: self
+                .midi
+                .notes
+                .iter()
+                .map(|(note, intent)| NoteMapping {
+                    note: *note,
+                    action: intent.id(),
+                })
+                .collect(),
             log_level: self.log.level.clone(),
         }
     }
@@ -75,23 +87,23 @@ impl AppConfig {
     #[must_use]
     pub fn view(&self, devices: Vec<String>) -> SettingsView {
         SettingsView {
-            settings: self.settings(),
+            settings: Box::new(self.settings()),
             devices,
-            notes: self
-                .midi
-                .notes
-                .iter()
-                .map(|(note, intent)| NoteMapping {
-                    note: *note,
-                    action: intent.label().to_owned(),
+            actions: Intent::ALL
+                .into_iter()
+                .map(|intent| ActionChoice {
+                    id: intent.id(),
+                    label: intent.label().to_owned(),
                 })
                 .collect(),
         }
     }
 
-    /// This config with the edited values in place; the note table stays as it is.
-    #[must_use]
-    pub fn with_settings(&self, settings: &Settings) -> Self {
+    /// This config with the edited values in place.
+    ///
+    /// # Errors
+    /// [`ConfigError::Invalid`] for an unknown action or a note given twice.
+    pub fn with_settings(&self, settings: &Settings) -> Result<Self, ConfigError> {
         let mut config = self.clone();
         config.queue.repeat_window_milliseconds = settings.queue_repeat_window_milliseconds.into();
         config.queue.timeout_milliseconds = settings.queue_timeout_milliseconds.into();
@@ -103,9 +115,26 @@ impl AppConfig {
             .filter(|name| !name.is_empty());
         config.midi.channel = settings.midi_channel;
         config.midi.debounce_milliseconds = settings.midi_debounce_milliseconds.into();
+        config.midi.notes = notes_of(&settings.midi_notes)?;
         config.log.level.clone_from(&settings.log_level);
-        config
+        Ok(config)
     }
+}
+
+fn notes_of(mappings: &[NoteMapping]) -> Result<BTreeMap<u8, Intent>, ConfigError> {
+    let mut notes = BTreeMap::new();
+    for mapping in mappings {
+        let intent = Intent::from_id(&mapping.action).ok_or_else(|| {
+            ConfigError::Invalid(format!("midi.notes: unknown action {}", mapping.action))
+        })?;
+        if notes.insert(mapping.note, intent).is_some() {
+            return Err(ConfigError::Invalid(format!(
+                "midi.notes: note {} is used twice",
+                mapping.note
+            )));
+        }
+    }
+    Ok(notes)
 }
 
 fn clamp<T: TryInto<u32>>(value: T) -> u32 {

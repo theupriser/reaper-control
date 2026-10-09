@@ -9,9 +9,9 @@ export function tauriStandIn(initial: unknown): void {
     current_problem: null,
     current_system_stats: { machine_cpu_percent: 12, memory_used_megabytes: 4000, memory_total_megabytes: 16000, app_memory_megabytes: 90, reaper_memory_megabytes: 600 },
     current_settings: {
-      settings: { queue_repeat_window_milliseconds: 250, queue_timeout_milliseconds: 2000, queue_capacity: 32, midi_enabled: false, midi_device_name: null, midi_channel: null, midi_debounce_milliseconds: 50, log_level: "info" },
+      settings: { queue_repeat_window_milliseconds: 250, queue_timeout_milliseconds: 2000, queue_capacity: 32, midi_enabled: false, midi_device_name: null, midi_channel: null, midi_debounce_milliseconds: 50, midi_notes: [{ note: 60, action: "TogglePlay" }], log_level: "info" },
       devices: [],
-      notes: [{ note: 60, action: "Play" }],
+      actions: [{ id: "TogglePlay", label: "Play / pause" }, { id: "Next", label: "Next song" }, { id: "Previous", label: "Previous song" }],
     },
     current_transfer: { restorable: 0, offers: [] },
   };
@@ -26,6 +26,7 @@ export function tauriStandIn(initial: unknown): void {
         listeners.set(args.event, [...(listeners.get(args.event) ?? []), args.handler]);
         return args.handler;
       }
+      if (command === "save_settings") (w.__saved ??= []).push(args.settings);
       if (command === "dispatch") (w.__dispatched ??= []).push(args.command);
       return command in answers ? answers[command] : null;
     },

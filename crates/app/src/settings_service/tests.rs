@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use protocol::Command;
+use protocol::{Command, NoteMapping};
 
 use super::*;
 use crate::config_store::ConfigStore;
@@ -45,22 +45,94 @@ fn rig(name: &str) -> Rig {
 }
 
 #[test]
-fn the_view_shows_the_defaults_the_devices_and_the_note_table() {
+fn the_view_shows_the_defaults_the_devices_the_notes_and_the_actions() {
     let rig = rig("view");
     let view = rig.service.view(vec!["FootCtrl Mini".into()]);
-    assert_eq!(view.settings, AppConfig::default().settings());
+    assert_eq!(*view.settings, AppConfig::default().settings());
     assert_eq!(view.devices, vec!["FootCtrl Mini".to_owned()]);
-    assert_eq!(view.notes.len(), 8);
+    assert_eq!(view.settings.midi_notes.len(), 8);
     assert_eq!(
-        view.notes.first().map(|n| (n.note, n.action.as_str())),
-        Some((44, "Restart song"))
+        view.settings
+            .midi_notes
+            .first()
+            .map(|n| (n.note, n.action.as_str())),
+        Some((44, "RestartSong"))
     );
+    assert_eq!(view.actions.len(), 8);
+    assert!(
+        view.actions
+            .iter()
+            .any(|action| action.id == "RestartSong" && action.label == "Restart song")
+    );
+}
+
+#[test]
+fn a_changed_note_table_is_saved_and_applies() -> Result<(), ConfigError> {
+    let rig = rig("notes");
+    let mut settings = *rig.service.view(Vec::new()).settings;
+    settings.midi_notes = vec![
+        NoteMapping {
+            note: 60,
+            action: "Next".into(),
+        },
+        NoteMapping {
+            note: 61,
+            action: "Previous".into(),
+        },
+    ];
+    rig.service.save(&settings)?;
+    let loaded = ConfigStore::new(rig.directory.join("config.json")).load()?;
+    assert_eq!(
+        loaded.midi.notes.get(&60),
+        Some(&crate::intent::Intent::Next)
+    );
+    assert_eq!(loaded.midi.notes.len(), 2);
+    assert_eq!(*rig.service.view(Vec::new()).settings, settings);
+    let _ = std::fs::remove_dir_all(&rig.directory);
+    Ok(())
+}
+
+#[test]
+fn an_unknown_action_a_repeated_note_and_a_note_above_127_are_refused() {
+    let rig = rig("bad-notes");
+    for notes in [
+        vec![NoteMapping {
+            note: 60,
+            action: "Explode".into(),
+        }],
+        vec![
+            NoteMapping {
+                note: 60,
+                action: "Next".into(),
+            },
+            NoteMapping {
+                note: 60,
+                action: "Pause".into(),
+            },
+        ],
+        vec![NoteMapping {
+            note: 128,
+            action: "Next".into(),
+        }],
+    ] {
+        let mut settings = *rig.service.view(Vec::new()).settings;
+        settings.midi_notes = notes;
+        assert!(matches!(
+            rig.service.save(&settings),
+            Err(ConfigError::Invalid(_))
+        ));
+    }
+    assert_eq!(
+        *rig.service.view(Vec::new()).settings,
+        AppConfig::default().settings()
+    );
+    assert!(!rig.directory.join("config.json").exists());
 }
 
 #[test]
 fn a_saved_value_is_on_disk_and_loads_back() -> Result<(), ConfigError> {
     let rig = rig("save");
-    let mut settings = rig.service.view(Vec::new()).settings;
+    let mut settings = *rig.service.view(Vec::new()).settings;
     settings.midi_channel = Some(3);
     settings.midi_device_name = Some("FootCtrl Mini".into());
     settings.queue_capacity = 10;
@@ -68,7 +140,7 @@ fn a_saved_value_is_on_disk_and_loads_back() -> Result<(), ConfigError> {
 
     let loaded = ConfigStore::new(rig.directory.join("config.json")).load()?;
     assert_eq!(loaded.settings(), settings);
-    assert_eq!(rig.service.view(Vec::new()).settings, settings);
+    assert_eq!(*rig.service.view(Vec::new()).settings, settings);
     assert_eq!(loaded.midi.notes.len(), 8);
     let _ = std::fs::remove_dir_all(&rig.directory);
     Ok(())
@@ -77,14 +149,14 @@ fn a_saved_value_is_on_disk_and_loads_back() -> Result<(), ConfigError> {
 #[test]
 fn a_value_out_of_range_is_refused_and_nothing_changes() {
     let rig = rig("invalid");
-    let mut settings = rig.service.view(Vec::new()).settings;
+    let mut settings = *rig.service.view(Vec::new()).settings;
     settings.midi_channel = Some(16);
     let refused = rig.service.save(&settings);
     assert!(
         matches!(refused, Err(ConfigError::Invalid(ref text)) if text.contains("midi.channel"))
     );
     assert_eq!(
-        rig.service.view(Vec::new()).settings,
+        *rig.service.view(Vec::new()).settings,
         AppConfig::default().settings()
     );
     assert!(!rig.directory.join("config.json").exists());
@@ -93,7 +165,7 @@ fn a_value_out_of_range_is_refused_and_nothing_changes() {
 #[test]
 fn an_empty_device_name_means_all_devices() -> Result<(), ConfigError> {
     let rig = rig("empty");
-    let mut settings = rig.service.view(Vec::new()).settings;
+    let mut settings = *rig.service.view(Vec::new()).settings;
     settings.midi_device_name = Some(String::new());
     rig.service.save(&settings)?;
     assert_eq!(rig.service.view(Vec::new()).settings.midi_device_name, None);
@@ -113,7 +185,7 @@ fn the_queue_limits_apply_without_a_restart() -> Result<(), ConfigError> {
         "repeat inside the default window"
     );
 
-    let mut settings = rig.service.view(Vec::new()).settings;
+    let mut settings = *rig.service.view(Vec::new()).settings;
     settings.queue_repeat_window_milliseconds = 0;
     rig.service.save(&settings)?;
     assert_eq!(rig.bus.dispatch(Command::Next), Ok(()));
@@ -143,7 +215,7 @@ fn a_refused_write_changes_neither_the_values_nor_the_queue() {
     repository.refuse_writes();
     assert!(matches!(service.save(&settings), Err(ConfigError::Io(_))));
     assert_eq!(
-        service.view(Vec::new()).settings,
+        *service.view(Vec::new()).settings,
         AppConfig::default().settings()
     );
     assert!(!repository.exists());

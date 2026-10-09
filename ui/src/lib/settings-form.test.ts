@@ -10,6 +10,7 @@ const saved: Settings = {
   midi_device_name: null,
   midi_channel: null,
   midi_debounce_milliseconds: 200,
+  midi_notes: [{ note: 50, action: "TogglePlay" }],
   log_level: "info",
 };
 
@@ -27,6 +28,18 @@ describe("settings form", () => {
     expect(toSettings({ ...toDraft(saved), timeout: "fast" })).toBe("Timeout must be a whole number");
     expect(toSettings({ ...toDraft(saved), capacity: "-1" })).toBe("Queue size must be a whole number");
     expect(toSettings({ ...toDraft(saved), debounce: "" })).toBe("Debounce must be a whole number");
+  });
+
+  it("refuses a note that is not a number, above 127 or used twice", () => {
+    const rows = (...notes: [string, string][]) => ({ ...toDraft(saved), notes: notes.map(([note, action]) => ({ note, action })) });
+    expect(toSettings(rows(["x", "Next"]))).toBe("Note must be a whole number");
+    expect(toSettings(rows(["128", "Next"]))).toBe("Note must be between 0 and 127");
+    expect(toSettings(rows(["60", "Next"], ["60", "Pause"]))).toBe("Note 60 is used twice");
+  });
+
+  it("saves an edited note table", () => {
+    const draft = { ...toDraft(saved), notes: [{ note: " 61 ", action: "Next" }] };
+    expect(toSettings(draft)).toMatchObject({ midi_notes: [{ note: 61, action: "Next" }] });
   });
 
   it("sees whether the form differs from what is saved", () => {
