@@ -63,6 +63,21 @@ export const strings = {
     extensionVersion: (version: string) => `extension ${version}`,
   },
 
+  health: {
+    title: "Connection and health",
+    openReaper: "Open REAPER. We keep trying.",
+    keepTrying: "We keep trying.",
+    close: "Close",
+    open: "Connection details",
+    machineCpu: "Machine CPU",
+    machineMemory: "Machine memory",
+    appMemory: "This app",
+    reaperMemory: "REAPER",
+    notFound: "not found",
+    megabytes: (value: number) => `${value} MB`,
+    loadFailed: "The numbers could not be read.",
+  },
+
   performer: {
     noSong: "No Song Selected",
     setlist: (name: string) => `Setlist: ${name}`,

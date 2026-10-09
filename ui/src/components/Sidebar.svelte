@@ -6,11 +6,13 @@
     active,
     onSelect,
     onPerformer,
+    onConnection,
     connection,
   }: {
     active: ScreenId;
     onSelect: (id: ScreenId) => void;
     onPerformer: () => void;
+    onConnection: () => void;
     connection: { label: string; detail: string; tone: "ok" | "error" };
   } = $props();
 </script>
@@ -37,10 +39,10 @@
     {strings.screens.performerMode}
   </button>
 
-  <div class="connection">
+  <button class="connection" aria-label={strings.health.open} onclick={onConnection}>
     <div class="state"><span class="dot {connection.tone}"></span>{connection.label}</div>
     <div class="detail">{connection.detail}</div>
-  </div>
+  </button>
 </nav>
 
 <style>
@@ -125,6 +127,11 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    min-height: 44px;
   }
   .state {
     display: flex;
