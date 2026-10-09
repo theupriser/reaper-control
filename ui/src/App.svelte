@@ -76,27 +76,27 @@
 {:else}
   <div class="layout">
     <Sidebar active={screen} onSelect={select} onPerformer={() => (performerMode = true)} {connection} />
-    <div class="content" tabindex="-1" bind:this={content}>
+    <main class="content" tabindex="-1" bind:this={content}>
       {#if screen === "player"}
         <PerformerScreen
           {view}
           onPlayPause={playPause}
-    onPrevious={previous}
-    onRewind={rewind}
-    onNext={next}
+          onPrevious={previous}
+          onRewind={rewind}
+          onNext={next}
           onSeek={seek}
           onToggleAutoResume={toggleAutoResume}
           onToggleCountIn={() => send("ToggleCountInOnMarker")}
           onToggleRecord={() => send("ToggleRecordArm")}
         />
-        {#if $appState.error}<p class="error">{$appState.error}</p>{/if}
+        {#if $appState.error}<p class="error" role="alert">{$appState.error}</p>{/if}
         {#if $appState.pending.length > 0}<p class="pending" role="status">{strings.pending.sending}</p>{/if}
       {:else if screen === "settings"}
         <SettingsScreen />
       {:else}
         <ComingSoon title={screenLabel(screen)} />
       {/if}
-    </div>
+    </main>
   </div>
 {/if}
 

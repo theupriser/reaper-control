@@ -51,3 +51,13 @@ describe("tokens", () => {
     expect(root.dataset).toMatchObject({ theme: "stage-dark", density: "comfortable", touch: "large" });
   });
 });
+
+describe("motion", () => {
+  it("takes every animated duration from a motion token, so reduced motion switches them off", () => {
+    for (const [file, source] of Object.entries(sources)) {
+      for (const [, value] of source.matchAll(/\btrans[i]tion:\s*([^;]+);/g)) {
+        expect(value, file).not.toMatch(/\d(ms|s)\b/);
+      }
+    }
+  });
+});

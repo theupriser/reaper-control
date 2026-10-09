@@ -60,7 +60,7 @@
     height: 100%;
     background: var(--green);
     border-radius: 6px;
-    transition: width 0.2s ease-out;
+    transition: width var(--motion-normal);
   }
   .mark {
     position: absolute;
