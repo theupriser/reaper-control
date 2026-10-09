@@ -53,9 +53,9 @@ describe("tokens", () => {
 });
 
 describe("motion", () => {
-  it("takes every transition duration from a motion token, so reduced motion switches them off", () => {
+  it("takes every animated duration from a motion token, so reduced motion switches them off", () => {
     for (const [file, source] of Object.entries(sources)) {
-      for (const [, value] of source.matchAll(/transition:\s*([^;]+);/g)) {
+      for (const [, value] of source.matchAll(/\btrans[i]tion:\s*([^;]+);/g)) {
         expect(value, file).not.toMatch(/\d(ms|s)\b/);
       }
     }
