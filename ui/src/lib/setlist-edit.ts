@@ -1,4 +1,4 @@
-import type { Command, EntryInfo, SetlistInfo, SongInfo } from "./generated/protocol";
+import type { Command, EntryInfo, SetlistInfo } from "./generated/protocol";
 
 /** A setlist being edited; `revision` is the one it was opened at (0 = not saved yet). */
 export interface SetlistDraft {
@@ -56,12 +56,6 @@ export function moveEntry(draft: SetlistDraft, entryId: number, direction: -1 | 
   const entries = [...draft.entries];
   [entries[from], entries[to]] = [entries[to], entries[from]];
   return { ...draft, entries };
-}
-
-/** Entry ids whose song the project no longer has. */
-export function missingEntries(draft: SetlistDraft, projectSongs: SongInfo[]): Set<number> {
-  const known = new Set(projectSongs.map((song) => song.id));
-  return new Set(draft.entries.filter((entry) => !known.has(entry.song_id)).map((entry) => entry.id));
 }
 
 export function isChanged(draft: SetlistDraft, saved: SetlistInfo | undefined): boolean {

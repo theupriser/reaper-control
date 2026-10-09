@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SetlistInfo, SongInfo } from "./generated/protocol";
-import { addSong, deleteCommand, draftOf, emptyDraft, idFromName, isChanged, missingEntries, moveEntry, removeEntry, rename, saveCommand, saveProblem } from "./setlist-edit";
+import { addSong, deleteCommand, draftOf, emptyDraft, idFromName, isChanged, moveEntry, removeEntry, rename, saveCommand, saveProblem } from "./setlist-edit";
 
 const saved: SetlistInfo = {
   id: "sat",
@@ -28,10 +28,6 @@ describe("setlist edit", () => {
     expect(moveEntry(draft, 1, -1)).toBe(draft);
     expect(moveEntry(draft, 5, 1)).toBe(draft);
     expect(moveEntry(draft, 99, 1)).toBe(draft);
-  });
-
-  it("finds entries whose song is gone", () => {
-    expect(missingEntries(draftOf(saved), [song("a"), song("c")])).toEqual(new Set([4]));
   });
 
   it("knows what changed", () => {

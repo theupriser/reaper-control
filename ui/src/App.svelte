@@ -123,18 +123,21 @@
     onLock={() => (stageLock = lock())}
     onUnlock={() => (stageLock = tapUnlock(stageLock, Date.now()))}
   />
+{:else if wizardOpen}
+  <WizardScreen onclose={() => (wizardOpen = false)} />
 {:else}
   <div class="layout">
     <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} onConnection={openHealth} />
     <main class="content" tabindex="-1" bind:this={content}>
       {#if banner}<ConnectionBanner {banner} />{/if}
-      {#if wizardOpen}
-        <WizardScreen onclose={() => (wizardOpen = false)} />
-      {:else if screen === "player"}
+      {#if screen === "player"}
         <PlayerScreen
           {view}
           rows={playerRows($appState.link.catalog, live)}
+          setlists={$appState.link.catalog.setlists}
+          active={$appState.link.catalog.active_setlist}
           tempo={currentTempo}
+          onChooseSetlist={(id) => send({ SetActiveSetlist: { id } })}
           onPlayPause={playPause}
           onPrevious={previous}
           onRewind={rewind}
@@ -149,9 +152,9 @@
       {:else if screen === "setlists"}
         <SetlistsScreen catalog={$appState.link.catalog} {send} />
       {:else if screen === "checklist"}
-        <ChecklistScreen onSetup={() => (wizardOpen = true)} />
+        <ChecklistScreen onSetup={() => (wizardOpen = true)} onSetlists={() => select("setlists")} onPerform={enterPerformer} />
       {:else if screen === "settings"}
-        <SettingsScreen onSetup={() => (wizardOpen = true)} />
+        <SettingsScreen {connection} onSetup={() => (wizardOpen = true)} />
       {:else}
         <HelpScreen />
       {/if}

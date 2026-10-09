@@ -32,8 +32,7 @@ test("edit a setlist, save it and play it", async ({ page }) => {
 
   await page.getByRole("button", { name: "Move Ballad up" }).click();
   await page.getByRole("button", { name: "Remove gone" }).click();
-  await page.getByLabel("Add a song").selectOption("s3");
-  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByRole("button", { name: "Add Closer" }).click();
   await page.getByLabel("Name").fill("Saturday late");
   await page.screenshot({ path: "perf-results/setlist-editor.png" });
 

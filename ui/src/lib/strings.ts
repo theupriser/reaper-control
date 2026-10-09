@@ -31,9 +31,16 @@ export const strings = {
     songs: (count: number) => (count === 1 ? "1 song" : `${count} songs`),
     entriesLabel: "Songs in this setlist",
     empty: "No songs yet. Add one below.",
-    addLabel: "Add a song",
-    addPlaceholder: "Choose a song…",
-    add: "Add",
+    projectSongs: "Songs in project",
+    search: "Search songs",
+    addSong: (name: string) => `Add ${name}`,
+    noSongsFound: "No song matches.",
+    meta: (count: number, time: string) => `${count === 1 ? "1 song" : `${count} songs`} · ${time}`,
+    missingBanner: (count: number) => `${count === 1 ? "1 song is" : `${count} songs are`} missing in the REAPER project. Fix it before you perform.`,
+    editorLabel: "Setlist entries",
+    savedHint: "Saved in the REAPER project",
+    noTime: "--:--",
+    listMeta: (count: number, playing: boolean) => `${count === 1 ? "1 song" : `${count} songs`}${playing ? " · Playing" : ""}`,
     remove: (name: string) => `Remove ${name}`,
     moveUp: (name: string) => `Move ${name} up`,
     moveDown: (name: string) => `Move ${name} down`,
@@ -81,6 +88,8 @@ export const strings = {
     done: "Connected. You are ready.",
     finish: "Continue",
     skip: "Skip for now",
+    stepOf: (step: number, count: number) => `STEP ${step} OF ${count}`,
+    stepsLabel: "Steps",
     connection: { title: "Connection", hint: "The extension lets this app control REAPER. Run the setup again to repair it.", open: "Open the setup" },
   },
 
@@ -99,13 +108,23 @@ export const strings = {
     notReady: "Not ready: fix the rows marked \"Fix this\".",
     checkAgain: "Check again",
     openSetup: "Open the setup",
+    readyTitle: "Ready",
+    attentionTitle: "Not ready yet",
+    counts: (passed: number, failed: number) =>
+      `${passed === 1 ? "1 check passed" : `${passed} checks passed`}, ${failed === 0 ? "none needs" : failed === 1 ? "1 needs" : `${failed} need`} your attention.`,
+    performAnyway: "Perform anyway",
+    perform: "Open Performer mode",
+    fixInSetlists: "Fix in Setlists",
+    checksLabel: "Checks",
   },
 
   help: {
     title: "Help",
     intro: "How to set up REAPER for this app, and how to mark your songs.",
+    topics: "Help topics",
     sections: [
       {
+        id: "connect",
         title: "Connect the app",
         steps: [
           "Open Settings and run the setup. It finds REAPER, installs the extension and asks you to restart REAPER.",
@@ -114,6 +133,7 @@ export const strings = {
         ],
       },
       {
+        id: "songs",
         title: "Songs and cues",
         steps: [
           "Every region in your project is a song. Name the regions as you want them on stage.",
@@ -122,16 +142,18 @@ export const strings = {
         ],
       },
       {
+        id: "markers",
         title: "Special markers",
         intro: "Put a token in the name of a marker or region. Tokens can be combined, in any order, separated by spaces. A marker that holds only tokens is not shown on the timeline.",
-        steps: [
-          "!1008 (or !hardstop): the show stops at the end of the song until you press play again. The marker may lie anywhere inside the song.",
-          "!length:45: the song counts as 45 seconds, for the hard stop and the setlist time. Use it with !1008.",
-          "!bpm:120: the tempo shown for the song. Put it at the very start of the song. It does not change REAPER's tempo.",
+        cards: [
+          { code: "!1008", name: "Hard stop", text: "The show stops at the end of the song until you press play again. Also written !hardstop. The marker may lie anywhere inside the song.", tone: "stop" },
+          { code: "!length:45", name: "Custom length", text: "The song counts as 45 seconds, for the hard stop and the setlist time. Use it with a hard stop.", tone: "length" },
+          { code: "!bpm:120", name: "Starting tempo", text: "The tempo shown for the song. Put it at the very start of the song. It does not change REAPER's tempo.", tone: "tempo" },
         ],
         example: "!length:45 !bpm:140 !1008",
       },
       {
+        id: "count-in",
         title: "Count-in",
         steps: [
           "Switch on Count-in when pressing marker, then press a cue: the app jumps there and REAPER counts in.",
@@ -139,6 +161,7 @@ export const strings = {
         ],
       },
       {
+        id: "midi",
         title: "MIDI control",
         steps: [
           "Open Settings and switch on MIDI. Choose your device or leave it on all devices.",
@@ -147,6 +170,7 @@ export const strings = {
       },
     ],
   },
+
 
   health: {
     title: "Connection and health",
@@ -202,6 +226,22 @@ export const strings = {
     hardStop: "Hard stop",
     controls: "Transport",
     settings: "Behaviour",
+    setlist: "Setlist",
+    chooseSetlist: "Choose the setlist to play",
+    noSetlistChosen: "No setlist",
+    nowPlaying: (position: number, count: number) => `NOW PLAYING · ${position} OF ${count}`,
+    ready: (count: number) => `READY · ${count} SONGS`,
+    tempo: "TEMPO",
+    bpmUnit: "BPM",
+    time: "TIME",
+    options: "OPTIONS",
+    optionsLabel: "Options",
+    armRecording: "Arm recording",
+    autoResume: "Auto-resume playback",
+    countInOnMarker: "Count-in when pressing marker",
+    songsTitle: "Songs",
+    inSetlist: (count: number) => `· ${count} in setlist`,
+    hardStopTag: "HARD STOP",
   },
 
   pending: { sending: "Sending…" },

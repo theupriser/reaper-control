@@ -20,20 +20,25 @@ test("the Player screen shows the setlist and sends the transport commands", asy
   await page.addInitScript(tauriStandIn, view);
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { name: "Friday gig" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Player" })).toBeVisible();
+  await expect(page.getByLabel("Choose the setlist to play")).toHaveValue("set");
+  await expect(page.getByText("NOW PLAYING · 2 OF 3")).toBeVisible();
   const list = page.getByRole("list", { name: "Songs in the setlist" });
   await expect(list.getByRole("listitem")).toHaveCount(3);
-  await expect(list.getByRole("listitem").nth(1)).toContainText("Playing now");
+  await expect(list.getByRole("listitem").nth(1)).toContainText("Song 2");
   await expect(list.getByRole("listitem").nth(2)).toContainText("Next");
-  await expect(list.getByRole("listitem").nth(2)).toContainText("Hard stop");
+  await expect(list.getByRole("listitem").nth(2)).toContainText("HARD STOP");
   await expect(page.getByText("96 BPM").first()).toBeVisible();
 
   await page.getByRole("button", { name: "Pause" }).click();
   await page.getByRole("button", { name: "Next song" }).click();
-  await page.getByRole("button", { name: "Toggle recording" }).click();
-  await page.getByRole("button", { name: /Auto-resume/ }).click();
+  await page.getByRole("switch", { name: "Arm recording" }).click();
+  await page.getByRole("switch", { name: "Auto-resume playback" }).click();
   const names = (await dispatched(page)).map((entry: unknown) => JSON.stringify(entry));
   expect(names.join(" ")).toMatch(/Pause.*Next.*ToggleRecordArm.*ToggleAutoResume/);
+
+  await page.getByLabel("Choose the setlist to play").selectOption("");
+  expect(JSON.stringify((await dispatched(page)).at(-1))).toContain("SetActiveSetlist");
 });
 
 test("the Player layout fits wide and narrow windows without sideways scrolling", async ({ page }) => {
@@ -41,7 +46,7 @@ test("the Player layout fits wide and narrow windows without sideways scrolling"
   for (const [width, height] of [[1280, 800], [720, 560]]) {
     await page.setViewportSize({ width, height });
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Friday gig" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Player" })).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(0);
     await page.screenshot({ path: `perf-results/player-${width}.png` });
