@@ -153,7 +153,7 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 | ✅ 6.6 | First-run wizard + Repair screen driven by `InstallReport`: find REAPER → install extension → restart REAPER → connect; per-step status (Ok/Fixed/Manual), instruction cards with copy/reveal buttons, "Check again", REAPER-running handling, safe-mode re-enable, success only on live handshake **The four steps, install, polling until connected and "Open the setup" in Settings are done; reveal in Finder/Explorer, the safe-mode re-enable card and choosing a REAPER folder in the wizard are not.** | new (D3, R-INST) | 5 |
 | ✅ 6.7 | Pre-show checklist **Five rows (extension, connection, songs, setlist, MIDI) with a detail and a ready line; not yet run against a connected REAPER.** | S-7 | 2 |
 | 🟡 6.8 | Help + marker guide **Help screen with setup, songs, special markers, count-in and MIDI; the optional marker helper is left out.** | F15, F8 | 3 |
-| ⬜ 6.9 | Perf pass: virtualised lists, batch updates, no layout thrash; verify budgets | goal 5 | 3 |
+| 🟡 6.9 | Perf pass: virtualised lists, batch updates, no layout thrash; verify budgets **Measured with 300 and 2000 songs; fixed a quadratic editor and a list that rebuilt on every push; full virtualisation not needed; real hardware still open.** | goal 5 | 3 |
 
 **Gate 6 (feature complete):** parity checklist F1–F18 all ticked with evidence (test or manual script).
 

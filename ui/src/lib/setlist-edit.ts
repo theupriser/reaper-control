@@ -59,8 +59,10 @@ export function moveEntry(draft: SetlistDraft, entryId: number, direction: -1 | 
 }
 
 /** Entry ids whose song the project no longer has. */
-export const missingEntries = (draft: SetlistDraft, projectSongs: SongInfo[]): number[] =>
-  draft.entries.filter((entry) => !projectSongs.some((song) => song.id === entry.song_id)).map((entry) => entry.id);
+export function missingEntries(draft: SetlistDraft, projectSongs: SongInfo[]): Set<number> {
+  const known = new Set(projectSongs.map((song) => song.id));
+  return new Set(draft.entries.filter((entry) => !known.has(entry.song_id)).map((entry) => entry.id));
+}
 
 export function isChanged(draft: SetlistDraft, saved: SetlistInfo | undefined): boolean {
   if (!saved) return true;
