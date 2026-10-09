@@ -1,5 +1,7 @@
 <script lang="ts">
   import { strings } from "../lib/strings";
+  import Button from "../kit/Button.svelte";
+  import Panel from "../kit/Panel.svelte";
   import { exportDiagnostics } from "../lib/ipc";
 
   let { level = $bindable(), levels }: { level: string; levels: string[] } = $props();
@@ -14,28 +16,22 @@
   };
 </script>
 
-<div class="card">
-  <h2>{strings.settings.diagnostics.title}</h2>
-  <p class="hint">{strings.settings.diagnostics.hint}</p>
+<Panel title={strings.settings.diagnostics.title} hint={strings.settings.diagnostics.hint}>
   <div class="row">
     <label>{strings.settings.diagnostics.logLevel}
       <select bind:value={level}>
         {#each levels as option (option)}<option value={option}>{option}</option>{/each}
       </select>
     </label>
-    <button onclick={exportBundle}>{strings.settings.diagnostics.export}</button>
+    <Button onclick={exportBundle}>{strings.settings.diagnostics.export}</Button>
   </div>
   {#if message}<p class="message {message.tone}" role="status">{message.text}</p>{/if}
-</div>
+</Panel>
 
 <style>
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
-  h2 { margin: 0; font-size: 18px; font-weight: 700; }
-  .hint { margin: 0; font-size: 14px; color: var(--muted); }
   .row { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; }
   label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); width: 180px; }
   select { height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); padding: 0 14px; font-size: 15px; font-family: inherit; }
-  button { height: var(--control-height); padding: 0 var(--control-padding); border-radius: var(--radius); border: 1px solid var(--line); background: var(--raised); color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; }
   .message { margin: 0; font-size: 14px; word-break: break-all; }
   .message.ok { color: var(--green); }
   .message.error { color: var(--red); }

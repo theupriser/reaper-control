@@ -5,7 +5,7 @@ import rawCss from "../tokens.css?raw";
 
 const css = rawCss.replace(/\r\n/g, "\n");
 
-const sources: Record<string, string> = import.meta.glob("../components/*.svelte", {
+const sources: Record<string, string> = import.meta.glob(["../components/*.svelte", "../kit/*.svelte"], {
   query: "?raw",
   import: "default",
   eager: true,
