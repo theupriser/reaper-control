@@ -74,6 +74,7 @@ fn current_problem(
 
 #[tauri::command]
 fn current_system_stats(stats: State<'_, Arc<SystemStatsService>>) -> SystemStats {
+    stats.refresh();
     stats.latest()
 }
 
@@ -308,12 +309,6 @@ pub fn run() {
                 move || ticking.tick(),
             ));
             let stats = Arc::new(SystemStatsService::new(SysinfoStatsSource::default()));
-            let measuring = stats.clone();
-            threads.extend(PeriodicThread::start(
-                "system-stats",
-                Duration::from_secs(2),
-                move || measuring.refresh(),
-            ));
             app.manage(stats);
             app.manage(Mutex::new(threads));
             app.manage(health);

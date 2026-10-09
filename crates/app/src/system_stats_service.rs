@@ -6,7 +6,7 @@ use protocol::SystemStats;
 
 use crate::stats_source::StatsSource;
 
-/// Reads the source on `refresh` and hands out the last reading.
+/// Reads the source on `refresh` (when the window asks, not in the background: it looks at every process) and hands out the last reading.
 pub struct SystemStatsService {
     source: Mutex<Box<dyn StatsSource>>,
     latest: Mutex<SystemStats>,
