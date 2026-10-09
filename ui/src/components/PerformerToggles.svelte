@@ -1,5 +1,6 @@
 <script lang="ts">
   import { strings } from "../lib/strings";
+  import Toggle from "../kit/Toggle.svelte";
   let {
     autoResume,
     countInOnMarker,
@@ -9,12 +10,8 @@
 </script>
 
 <div class="toggles">
-  <button class="item" class:on={autoResume} aria-pressed={autoResume} onclick={onAutoResume}>
-    {strings.performer.autoResume(autoResume)}
-  </button>
-  <button class="item" class:on={countInOnMarker} aria-pressed={countInOnMarker} onclick={onCountIn}>
-    {strings.performer.countInOnMarker(countInOnMarker)}
-  </button>
+  <Toggle on={autoResume} label={strings.performer.autoResume(autoResume)} onchange={onAutoResume} />
+  <Toggle on={countInOnMarker} label={strings.performer.countInOnMarker(countInOnMarker)} onchange={onCountIn} />
 </div>
 
 <style>
@@ -23,24 +20,8 @@
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-  }
-  .item {
     width: 100%;
     max-width: 500px;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    font: inherit;
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-align: center;
-    cursor: pointer;
-    background: var(--tint-danger);
-    color: var(--danger);
-  }
-  .item:active { transform: scale(0.98); }
-  .item.on {
-    background: var(--tint-ok);
-    color: var(--green);
+    margin: 0 auto;
   }
 </style>

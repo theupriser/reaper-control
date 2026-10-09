@@ -1,5 +1,7 @@
 <script lang="ts">
   import { strings } from "../lib/strings";
+  import Button from "../kit/Button.svelte";
+  import Panel from "../kit/Panel.svelte";
   import { onMount } from "svelte";
   import DiagnosticsCard from "./DiagnosticsCard.svelte";
   import SetlistTransferCard from "./SetlistTransferCard.svelte";
@@ -49,14 +51,8 @@
 <section class="screen">
   <h1>{strings.settings.title}</h1>
   {#if view && draft}
-    <div class="card">
-      <div class="head">
-        <div>
-          <h2>{strings.settings.midi.title}</h2>
-          <p class="hint">{strings.settings.midi.hint}</p>
-        </div>
-        <label class="toggle"><input type="checkbox" bind:checked={draft.midiEnabled} />{strings.settings.midi.enabled}</label>
-      </div>
+    <Panel title={strings.settings.midi.title} hint={strings.settings.midi.hint}>
+      <label class="toggle"><input type="checkbox" bind:checked={draft.midiEnabled} />{strings.settings.midi.enabled}</label>
       <div class="row">
         <label class="grow">{strings.settings.midi.device}
           <select bind:value={draft.device}>
@@ -80,25 +76,23 @@
           {/each}
         </tbody>
       </table>
-    </div>
+    </Panel>
 
-    <div class="card">
-      <h2>{strings.settings.queue.title}</h2>
-      <p class="hint">{strings.settings.queue.hint}</p>
+    <Panel title={strings.settings.queue.title} hint={strings.settings.queue.hint}>
       <div class="row">
         <label class="grow">{strings.settings.milliseconds(strings.settings.fields.repeatWindow)}<input inputmode="numeric" bind:value={draft.repeatWindow} /></label>
         <label class="grow">{strings.settings.milliseconds(strings.settings.fields.timeout)}<input inputmode="numeric" bind:value={draft.timeout} /></label>
         <label class="grow">{strings.settings.fields.queueSize}<input inputmode="numeric" bind:value={draft.capacity} /></label>
       </div>
-    </div>
+    </Panel>
 
     <SetlistTransferCard />
 
     <DiagnosticsCard bind:level={draft.logLevel} levels={LOG_LEVELS} />
 
     <div class="actions">
-      <button class="primary" disabled={!changed} onclick={save}>{strings.settings.save}</button>
-      <button disabled={!changed} onclick={() => view && (draft = toDraft(view.settings))}>{strings.settings.discard}</button>
+      <Button kind="primary" disabled={!changed} onclick={save}>{strings.settings.save}</Button>
+      <Button disabled={!changed} onclick={() => view && (draft = toDraft(view.settings))}>{strings.settings.discard}</Button>
       {#if message}<span class="message {message.tone}" role="status">{message.text}</span>{/if}
     </div>
   {:else if message}
@@ -109,10 +103,6 @@
 <style>
   .screen { padding: 28px 32px; display: flex; flex-direction: column; gap: 16px; }
   h1 { margin: 0 0 4px 0; font-size: 28px; font-weight: 800; }
-  h2 { margin: 0; font-size: 18px; font-weight: 700; }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
-  .head { display: flex; justify-content: space-between; align-items: center; }
-  .hint { margin: 4px 0 0 0; font-size: 14px; color: var(--muted); }
   .row { display: flex; gap: 14px; flex-wrap: wrap; }
   .grow { flex: 1; min-width: 160px; }
   .channel { width: 180px; }
@@ -125,9 +115,6 @@
   td { padding: 0 16px; height: 42px; border-top: 1px solid var(--line-soft); font-size: 15px; }
   .note { width: 110px; font-family: ui-monospace, Menlo, monospace; color: var(--amber); font-weight: 700; }
   .actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  button { height: var(--control-height); padding: 0 var(--control-padding); border-radius: var(--radius); border: 1px solid var(--line); background: var(--raised); color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; }
-  button.primary { background: var(--green); color: var(--on-accent); border-color: var(--green); }
-  button:disabled { opacity: 0.4; cursor: default; }
   .message { font-size: 14px; }
   .message.ok { color: var(--green); }
   .message.error { color: var(--red); }

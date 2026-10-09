@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { strings } from "./strings";
 
-const sources: Record<string, string> = import.meta.glob("../components/*.svelte", {
+const sources: Record<string, string> = import.meta.glob(["../components/*.svelte", "../kit/*.svelte"], {
   query: "?raw",
   import: "default",
   eager: true,
