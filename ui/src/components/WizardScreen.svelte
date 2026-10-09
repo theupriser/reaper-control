@@ -17,6 +17,7 @@
 
   const index = $derived(view ? currentStepIndex(view) : 0);
   const step = $derived(view?.steps[index]);
+  const installPending = $derived(view?.steps.find((candidate) => candidate.id === "InstallExtension")?.status !== "Done");
 
   const install = async () => {
     busy = true;
@@ -80,6 +81,7 @@
       <div class="spacer"></div>
       <div class="actions">
         {#if view.complete}
+          {#if installPending}<Button disabled={!view.can_install || busy} onclick={install}>{busy ? text.installing : text.install}</Button>{/if}
           <Button kind="primary" onclick={onclose}>{text.finish}</Button>
         {:else}
           <Button onclick={onclose}>{text.skip}</Button>
