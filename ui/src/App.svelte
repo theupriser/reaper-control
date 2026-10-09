@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
+  import HelpScreen from "./components/HelpScreen.svelte";
   import ChecklistScreen from "./components/ChecklistScreen.svelte";
-  import ComingSoon from "./components/ComingSoon.svelte";
   import ConnectionBanner from "./components/ConnectionBanner.svelte";
   import HealthDialog from "./components/HealthDialog.svelte";
   import Notices from "./components/Notices.svelte";
@@ -17,7 +17,7 @@
   import { backend, currentInstallation, currentSystemStats } from "./lib/ipc";
   import { needsWizard } from "./lib/wizard";
   import type { SystemStats } from "./lib/generated/protocol";
-  import { screenLabel, type ScreenId } from "./lib/screens";
+  import type { ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
   import { keyAction, toKeyPress } from "./lib/keyboard";
   import { seekCommand, type PerformerPhase, type SeekTarget } from "./lib/performer";
@@ -153,7 +153,7 @@
       {:else if screen === "settings"}
         <SettingsScreen onSetup={() => (wizardOpen = true)} />
       {:else}
-        <ComingSoon title={screenLabel(screen)} />
+        <HelpScreen />
       {/if}
     </main>
   </div>
