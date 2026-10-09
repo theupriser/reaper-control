@@ -88,6 +88,8 @@ export const strings = {
     done: "Connected. You are ready.",
     finish: "Continue",
     skip: "Skip for now",
+    stepOf: (step: number, count: number) => `STEP ${step} OF ${count}`,
+    stepsLabel: "Steps",
     connection: { title: "Connection", hint: "The extension lets this app control REAPER. Run the setup again to repair it.", open: "Open the setup" },
   },
 

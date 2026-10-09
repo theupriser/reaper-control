@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { InstallationView, WizardStep, WizardStepStatus } from "./generated/protocol";
-import { needsWizard, watchInstallation } from "./wizard";
+import { currentStepIndex, needsWizard, watchInstallation } from "./wizard";
 
 const step = (id: WizardStep["id"], status: WizardStepStatus): WizardStep => ({ id, status, advice: "" });
 const view = (statuses: WizardStepStatus[], complete = false): InstallationView => ({
@@ -19,6 +19,17 @@ describe("needsWizard", () => {
   it("stays shut once the extension is in place or connected", () => {
     expect(needsWizard(view(["Done", "Done", "Current", "Waiting"]))).toBe(false);
     expect(needsWizard(view(["Done", "Done", "Done", "Done"], true))).toBe(false);
+  });
+});
+
+describe("currentStepIndex", () => {
+  it("is the first step that is not done", () => {
+    expect(currentStepIndex(view(["Done", "Current", "Waiting", "Waiting"]))).toBe(1);
+    expect(currentStepIndex(view(["Done", "Done", "NeedsYou", "Waiting"]))).toBe(2);
+  });
+
+  it("is the last step when everything is done", () => {
+    expect(currentStepIndex(view(["Done", "Done", "Done", "Done"], true))).toBe(3);
   });
 });
 

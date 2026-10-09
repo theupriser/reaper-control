@@ -123,14 +123,14 @@
     onLock={() => (stageLock = lock())}
     onUnlock={() => (stageLock = tapUnlock(stageLock, Date.now()))}
   />
+{:else if wizardOpen}
+  <WizardScreen onclose={() => (wizardOpen = false)} />
 {:else}
   <div class="layout">
     <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} onConnection={openHealth} />
     <main class="content" tabindex="-1" bind:this={content}>
       {#if banner}<ConnectionBanner {banner} />{/if}
-      {#if wizardOpen}
-        <WizardScreen onclose={() => (wizardOpen = false)} />
-      {:else if screen === "player"}
+      {#if screen === "player"}
         <PlayerScreen
           {view}
           rows={playerRows($appState.link.catalog, live)}
