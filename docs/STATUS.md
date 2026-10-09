@@ -2,7 +2,7 @@
 
 Single source for "where are we". `/start` and `/next` read this file first. Update it in the same PR whenever a feature, spike or bug completes (keep it short and true).
 
-Last updated: 2026-10-09, after PR #80; WP 4.1 on `feature/application-ports` (this PR).
+Last updated: 2026-10-09, after PR #81; WP 0.7 (#82) and the Phase 4b plan (#83) are open.
 
 ## Done (merged to main)
 
