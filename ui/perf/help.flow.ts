@@ -9,8 +9,10 @@ test("Help explains the special markers", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Help" }).click();
   await expect(page.getByRole("heading", { name: "Help", level: 1 })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Special markers" })).toBeVisible();
-  await expect(page.getByText("!length:45: the song counts as 45 seconds", { exact: false })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Special markers", level: 2 })).toBeVisible();
+  await expect(page.getByText("The song counts as 45 seconds", { exact: false })).toBeVisible();
+  await page.getByRole("navigation", { name: "Help topics" }).getByRole("button", { name: "MIDI control" }).click();
+  await expect(page.getByRole("heading", { name: "MIDI control" })).toBeInViewport();
   await expect(page.getByText("!length:45 !bpm:140 !1008", { exact: true })).toBeVisible();
   await page.screenshot({ path: "perf-results/help.png", fullPage: true });
 });
