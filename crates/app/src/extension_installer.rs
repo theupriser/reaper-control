@@ -14,6 +14,7 @@ use crate::install_item_kind::InstallItemKind;
 use crate::install_plan::InstallPlan;
 use crate::install_platform::InstallPlatform;
 use crate::install_report::InstallReport;
+use crate::install_stamp::{stamp_matches, stamp_path, write_stamp};
 use crate::install_status::InstallStatus;
 use crate::process_check::ProcessCheck;
 use crate::reaper_install::ReaperInstall;
@@ -94,7 +95,7 @@ impl ExtensionInstaller {
             }
         }
         let target = self.installed_path(install);
-        if same_content(&self.bundled, &target) {
+        if self.is_current(&target) {
             return Ok(InstallPlan::default());
         }
         let mut actions = Vec::new();
@@ -133,6 +134,7 @@ impl ExtensionInstaller {
                         }
                         return Err(InstallError::Preparation(reason));
                     }
+                    write_stamp(&self.bundled, library);
                 }
             }
         }
@@ -166,11 +168,17 @@ impl ExtensionInstaller {
             return Err(InstallError::ReaperIsRunning);
         }
         remove_file(&target)?;
+        let _ = fs::remove_file(stamp_path(&target));
         let backup = self.backup_path(install);
         if restore_previous && backup.exists() {
             copy_file(&backup, &target)?;
         }
         Ok(())
+    }
+
+    /// The installed file is the bundled one, byte for byte or by its stamp.
+    fn is_current(&self, target: &Path) -> bool {
+        same_content(&self.bundled, target) || stamp_matches(&self.bundled, target)
     }
 
     fn architecture_of(&self, install: &ReaperInstall) -> Option<BinaryArchitecture> {
@@ -254,7 +262,7 @@ impl ExtensionInstaller {
                 InstallStatus::Manual,
                 "the extension that ships with the app is missing; reinstall the app",
             )
-        } else if same_content(&self.bundled, &target) {
+        } else if self.is_current(&target) {
             InstallItem::new(
                 InstallItemKind::Extension,
                 InstallStatus::Ok,

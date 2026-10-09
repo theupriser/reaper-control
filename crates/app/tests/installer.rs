@@ -468,3 +468,32 @@ fn the_endpoint_file_follows_the_isolated_directory_then_the_chosen_reaper_then_
     );
     assert_eq!(endpoint_file_from(None, None, None), None);
 }
+
+/// Changes the copy's bytes, as signing does on macOS.
+struct AppendingPreparer;
+
+impl ExtensionPreparer for AppendingPreparer {
+    fn prepare(&self, library: &Path) -> Result<(), String> {
+        let mut bytes = fs::read(library).map_err(|error| error.to_string())?;
+        bytes.extend_from_slice(b" signed");
+        fs::write(library, bytes).map_err(|error| error.to_string())
+    }
+}
+
+#[test]
+fn a_copy_whose_bytes_were_changed_by_preparing_still_counts_as_current_until_the_bundle_changes()
+-> TestResult {
+    let fixture = fixture_with(&MACH_O_ARM64, Box::new(AppendingPreparer))?;
+    fixture.installer.install(&fixture.install)?;
+    assert!(fixture.installer.inspect(&fixture.install).is_healthy());
+    assert!(fixture.installer.plan(&fixture.install)?.is_empty());
+
+    let newer = fixture.root.path().join("bundled.dylib");
+    fs::write(&newer, b"extension version three")?;
+    let report = fixture.installer.inspect(&fixture.install);
+    assert_eq!(
+        report.status_of(InstallItemKind::Extension),
+        Some(InstallStatus::Fixable)
+    );
+    Ok(())
+}

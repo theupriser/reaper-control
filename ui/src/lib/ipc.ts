@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import type { Command, LinkView, Notice, SetlistTransferView, Settings, SettingsView, SystemStats } from "./generated/protocol";
+import type { Command, InstallationView, LinkView, Notice, SetlistTransferView, Settings, SettingsView, SystemStats } from "./generated/protocol";
 
 export const dispatch = (command: Command): Promise<void> => invoke<void>("dispatch", { command });
 
@@ -22,6 +22,10 @@ export const currentSystemStats = (): Promise<SystemStats> => invoke<SystemStats
 export const currentSettings = (): Promise<SettingsView> => invoke<SettingsView>("current_settings");
 
 export const saveSettings = (settings: Settings): Promise<void> => invoke<void>("save_settings", { settings });
+
+export const currentInstallation = (): Promise<InstallationView> => invoke<InstallationView>("current_installation");
+
+export const installExtension = (): Promise<InstallationView> => invoke<InstallationView>("install_extension");
 
 export const currentTransfer = (): Promise<SetlistTransferView> => invoke<SetlistTransferView>("current_transfer");
 

@@ -5,7 +5,10 @@ use tauri::{Emitter, Manager, State};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use protocol::{Command, LinkView, SetlistTransferView, Settings, SettingsView, SystemStats};
+use protocol::{
+    Command, InstallationView, LinkStatus, LinkView, SetlistTransferView, Settings, SettingsView,
+    SystemStats,
+};
 
 use crate::app_event::AppEvent;
 use crate::app_fault::AppFault;
@@ -23,6 +26,7 @@ use crate::event_logger::log_event;
 use crate::fake_process_check::FakeProcessCheck;
 use crate::fault_file_check::FaultFileCheck;
 use crate::health_monitor::HealthMonitor;
+use crate::installation_service::InstallationService;
 use crate::intent_dispatcher::IntentDispatcher;
 use crate::journal_import::JournalImport;
 use crate::legacy_config_import::import_legacy_config;
@@ -42,6 +46,7 @@ use crate::setlist_mirror::SetlistMirror;
 use crate::setlist_transfer::SetlistTransfer;
 use crate::settings_service::SettingsService;
 use crate::shutdown_sequence::ShutdownSequence;
+use crate::start_installation::start_installation;
 use crate::start_link::start_link;
 use crate::sysinfo_stats_source::SysinfoStatsSource;
 use crate::system_clock::SystemClock;
@@ -51,6 +56,7 @@ use crate::system_stats_service::SystemStatsService;
 const VIEW_CHANGED: &str = "link-view";
 const NOTICE: &str = "notice";
 const LINK_PROBLEM: &str = "link-problem";
+const UNSUPPORTED_SYSTEM: &str = "the extension is not built for this system";
 
 #[tauri::command]
 fn current_view(link: State<'_, Arc<dyn LinkViewSource>>) -> LinkView {
@@ -81,6 +87,28 @@ fn save_settings(
     settings: Settings,
 ) -> Result<(), String> {
     service.save(&settings).map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+fn current_installation(
+    installation: State<'_, Option<Arc<InstallationService>>>,
+    link: State<'_, Arc<dyn LinkViewSource>>,
+) -> Result<InstallationView, String> {
+    let service = installation.as_ref().ok_or(UNSUPPORTED_SYSTEM)?;
+    Ok(service.view(is_connected(&link.view().status)))
+}
+
+#[tauri::command]
+fn install_extension(
+    installation: State<'_, Option<Arc<InstallationService>>>,
+    link: State<'_, Arc<dyn LinkViewSource>>,
+) -> Result<InstallationView, String> {
+    let service = installation.as_ref().ok_or(UNSUPPORTED_SYSTEM)?;
+    service.install(is_connected(&link.view().status))
+}
+
+fn is_connected(status: &LinkStatus) -> bool {
+    matches!(status, LinkStatus::Connected { .. })
 }
 
 #[tauri::command]
@@ -197,6 +225,7 @@ pub fn run() {
             } else {
                 Arc::new(SystemProcessCheck)
             };
+            app.manage(start_installation(processes.clone()).map(Arc::new));
             let health = Arc::new(HealthMonitor::new(
                 events.clone(),
                 clock.clone(),
@@ -282,6 +311,8 @@ pub fn run() {
             current_problem,
             current_system_stats,
             current_settings,
+            current_installation,
+            install_extension,
             save_settings,
             current_transfer,
             restore_setlists,

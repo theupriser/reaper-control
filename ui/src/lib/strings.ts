@@ -63,6 +63,28 @@ export const strings = {
     extensionVersion: (version: string) => `extension ${version}`,
   },
 
+  wizard: {
+    title: "Set up the connection",
+    intro: "Reaper Control talks to REAPER through a small extension. This puts it in place and checks that it answers.",
+    steps: {
+      FindReaper: "Find REAPER",
+      InstallExtension: "Install the extension",
+      RestartReaper: "Restart REAPER",
+      Connect: "Connect",
+    },
+    status: { Done: "Done", Current: "Now", Waiting: "Later", NeedsYou: "Needs you" },
+    install: "Install the extension",
+    installing: "Installing",
+    checkAgain: "Check again",
+    folder: "REAPER's folder",
+    copyFolder: "Copy the folder path",
+    copied: "Copied",
+    done: "Connected. You are ready.",
+    finish: "Continue",
+    skip: "Skip for now",
+    connection: { title: "Connection", hint: "The extension lets this app control REAPER. Run the setup again to repair it.", open: "Open the setup" },
+  },
+
   health: {
     title: "Connection and health",
     openReaper: "Open REAPER. We keep trying.",

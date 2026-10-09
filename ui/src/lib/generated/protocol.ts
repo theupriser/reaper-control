@@ -512,3 +512,51 @@ app_memory_megabytes: number,
  * Memory used by REAPER, or none when no REAPER process was found.
  */
 reaper_memory_megabytes: number | null, };
+
+/**
+ * The four steps of the first-run wizard, in order.
+ */
+export type WizardStepId = "FindReaper" | "InstallExtension" | "RestartReaper" | "Connect";
+
+/**
+ * Where one wizard step stands.
+ */
+export type WizardStepStatus = "Done" | "Current" | "Waiting" | "NeedsYou";
+
+/**
+ * One step of the first-run wizard.
+ */
+export type WizardStep = { 
+/**
+ * Which step.
+ */
+id: WizardStepId, 
+/**
+ * Where it stands.
+ */
+status: WizardStepStatus, 
+/**
+ * What to do or what was found, in plain words; empty when there is nothing to add.
+ */
+advice: string, };
+
+/**
+ * What the first-run wizard shows.
+ */
+export type InstallationView = { 
+/**
+ * The four steps in order.
+ */
+steps: Array<WizardStep>, 
+/**
+ * The REAPER resource folder that was found, to copy or reveal.
+ */
+folder: string, 
+/**
+ * Whether the "Install" button can do something now.
+ */
+can_install: boolean, 
+/**
+ * Whether everything is in place and the extension answers.
+ */
+complete: boolean, };

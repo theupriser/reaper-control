@@ -8,11 +8,13 @@
   import PlayerScreen from "./components/PlayerScreen.svelte";
   import SetlistsScreen from "./components/SetlistsScreen.svelte";
   import SettingsScreen from "./components/SettingsScreen.svelte";
+  import WizardScreen from "./components/WizardScreen.svelte";
   import Sidebar from "./components/Sidebar.svelte";
   import { createAppStore } from "./lib/app-store";
   import { connectionBadge } from "./lib/connection";
   import { healthBanner } from "./lib/health";
-  import { backend, currentSystemStats } from "./lib/ipc";
+  import { backend, currentInstallation, currentSystemStats } from "./lib/ipc";
+  import { needsWizard } from "./lib/wizard";
   import type { SystemStats } from "./lib/generated/protocol";
   import { screenLabel, type ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
@@ -31,6 +33,7 @@
 
   const select = async (id: ScreenId) => {
     screen = id;
+    wizardOpen = false;
     await tick();
     content?.focus();
   };
@@ -45,6 +48,7 @@
   const connection = $derived(connectionBadge($appState.link.status, $appState.problem));
 
   const banner = $derived(healthBanner($appState.link.status, $appState.problem));
+  let wizardOpen = $state(false);
   let healthOpen = $state(false);
   let stats = $state<SystemStats | null>(null);
   let statsFailed = $state(false);
@@ -90,7 +94,12 @@
     return () => clearTimeout(timer);
   });
 
-  onMount(() => appState.start());
+  onMount(() => {
+    currentInstallation()
+      .then((installation) => (wizardOpen = needsWizard(installation)))
+      .catch(() => {});
+    return appState.start();
+  });
 </script>
 
 <svelte:window onkeydown={onKeydown} />
@@ -118,7 +127,9 @@
     <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} onConnection={openHealth} />
     <main class="content" tabindex="-1" bind:this={content}>
       {#if banner}<ConnectionBanner {banner} />{/if}
-      {#if screen === "player"}
+      {#if wizardOpen}
+        <WizardScreen onclose={() => (wizardOpen = false)} />
+      {:else if screen === "player"}
         <PlayerScreen
           {view}
           rows={playerRows($appState.link.catalog, live)}
@@ -137,7 +148,7 @@
       {:else if screen === "setlists"}
         <SetlistsScreen catalog={$appState.link.catalog} {send} />
       {:else if screen === "settings"}
-        <SettingsScreen />
+        <SettingsScreen onSetup={() => (wizardOpen = true)} />
       {:else}
         <ComingSoon title={screenLabel(screen)} />
       {/if}

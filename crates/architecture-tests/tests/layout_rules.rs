@@ -36,6 +36,7 @@ const PLURAL_ALLOWED: &[&str] = &[
     "system_stats",
     "tempo_map_tests",
     "tests",
+    "wizard_step_status",
 ];
 
 /// `pub mod` lines that are allowed, as (crate, module): named groups whose items keep their group.
