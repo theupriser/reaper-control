@@ -33,6 +33,7 @@ fn rig(name: &str) -> Rig {
         Arc::new(ConfigStore::new(directory.join("config.json"))),
         AppConfig::default(),
         bus.clone(),
+        Arc::new(|_| {}),
     );
     Rig {
         directory,
@@ -131,7 +132,12 @@ fn a_refused_write_changes_neither_the_values_nor_the_queue() {
         Arc::new(FakeClock::default()),
         QueueSettings::default(),
     ));
-    let service = SettingsService::new(repository.clone(), AppConfig::default(), bus);
+    let service = SettingsService::new(
+        repository.clone(),
+        AppConfig::default(),
+        bus,
+        Arc::new(|_| {}),
+    );
     let mut settings = service.view(Vec::new()).settings;
     settings.queue_capacity = 10;
     repository.refuse_writes();
@@ -141,4 +147,37 @@ fn a_refused_write_changes_neither_the_values_nor_the_queue() {
         AppConfig::default().settings()
     );
     assert!(!repository.exists());
+}
+
+#[test]
+fn only_a_change_in_the_midi_settings_is_passed_on() -> Result<(), ConfigError> {
+    let told = Arc::new(Mutex::new(Vec::new()));
+    let listener = Arc::clone(&told);
+    let repository = Arc::new(crate::fake_config_repository::FakeConfigRepository::default());
+    let bus = Arc::new(CommandBus::new(
+        Arc::new(FakeDriver::default()),
+        Arc::new(EventBus::default()),
+        Arc::new(FakeClock::default()),
+        QueueSettings::default(),
+    ));
+    let service = SettingsService::new(
+        repository,
+        AppConfig::default(),
+        bus,
+        Arc::new(move |midi| {
+            if let Ok(mut told) = listener.lock() {
+                told.push(midi.clone());
+            }
+        }),
+    );
+    let mut settings = service.view(Vec::new()).settings;
+    settings.queue_capacity = 10;
+    service.save(&settings)?;
+    assert_eq!(told.lock().map(|told| told.len()).unwrap_or_default(), 0);
+    settings.midi_channel = Some(3);
+    service.save(&settings)?;
+    let told = told.lock().map(|told| told.clone()).unwrap_or_default();
+    assert_eq!(told.len(), 1);
+    assert_eq!(told.first().and_then(|midi| midi.channel), Some(3));
+    Ok(())
 }

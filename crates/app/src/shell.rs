@@ -29,9 +29,8 @@ use crate::legacy_config_import::import_legacy_config;
 use crate::link_view_source::LinkViewSource;
 use crate::logging::Logging;
 use crate::metered_driver::MeteredDriver;
-use crate::midi_listener::MidiListener;
-use crate::midi_router::MidiRouter;
 use crate::midi_source::MidiSource;
+use crate::midi_switch::MidiSwitch;
 use crate::midir_source::MidirSource;
 use crate::mirror_keeper::MirrorKeeper;
 use crate::mirror_repository::MirrorRepository;
@@ -227,39 +226,31 @@ pub fn run() {
                 clock.clone(),
                 config.queue.settings(),
             ));
+            let watched = link.clone();
+            let intents = Arc::new(IntentDispatcher::new(
+                bus.clone(),
+                events.clone(),
+                move || watched.view(),
+            ));
+            let midi = Arc::new(MidiSwitch::new(
+                Arc::new(MidirSource),
+                intents,
+                events,
+                clock,
+            ));
+            midi.apply(&config.midi);
             let settings_file = config_file().ok_or("the home folder is unknown")?;
             app.manage(Arc::new(SettingsService::new(
                 Arc::new(ConfigStore::new(settings_file)),
                 config.clone(),
                 bus.clone(),
+                Arc::new(move |changed| midi.apply(changed)),
             )));
             app.manage(Arc::new(SetlistTransfer::new(
                 mirror,
                 legacy_setlists_directory(),
                 bus.clone(),
             )));
-            if config.midi.enabled {
-                let watched = link.clone();
-                let intents = Arc::new(IntentDispatcher::new(
-                    bus.clone(),
-                    events.clone(),
-                    move || watched.view(),
-                ));
-                let router = Arc::new(MidiRouter::new(
-                    config.midi.clone(),
-                    intents,
-                    events.clone(),
-                    clock,
-                ));
-                if let Err(error) = MidiListener::start(
-                    Arc::new(MidirSource),
-                    router,
-                    config.midi.device_name.clone(),
-                    events,
-                ) {
-                    tracing::error!(%error, "midi thread failed to start");
-                }
-            }
             let watched = Arc::clone(&bus);
             threads.extend(PeriodicThread::start(
                 "command-timeouts",
