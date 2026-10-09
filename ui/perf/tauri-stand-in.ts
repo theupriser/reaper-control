@@ -14,6 +14,7 @@ export function tauriStandIn(initial: unknown): void {
       actions: [{ id: "TogglePlay", label: "Play / pause" }, { id: "Next", label: "Next song" }, { id: "Previous", label: "Previous song" }],
     },
     current_transfer: { restorable: 0, offers: [] },
+    current_installation: { steps: ["FindReaper", "InstallExtension", "RestartReaper", "Connect"].map((id) => ({ id, status: "Done", advice: "" })), folder: "/reaper", can_install: false, complete: true },
   };
   w.__TAURI_INTERNALS__ = {
     transformCallback(callback: (event: unknown) => void) {
@@ -30,11 +31,16 @@ export function tauriStandIn(initial: unknown): void {
         (w.__saved ??= []).push(args.settings);
         (answers.current_settings as any).settings = args.settings;
       }
+      if (command === "install_extension") {
+        w.__installed = true;
+        answers.current_installation = answers.install_extension;
+      }
       if (command === "dispatch") (w.__dispatched ??= []).push(args.command);
       return command in answers ? answers[command] : null;
     },
   };
   w.__TAURI_EVENT_PLUGIN_INTERNALS__ = { unregisterListener() {} };
+  w.__answer = (command: string, value: unknown) => (answers[command] = value);
   w.__pushEvent = (event: string, payload: unknown) =>
     (listeners.get(event) ?? []).forEach((id) => callbacks.get(id)?.({ event, id, payload }));
 }
