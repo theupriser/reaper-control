@@ -219,6 +219,8 @@ impl Performance {
         out.events.push(Event::SeekPerformed { to: position });
         if self.phase == Phase::CountingIn || self.phase == Phase::HandingOver {
             self.phase = Phase::Playing;
+        } else if self.phase == Phase::Paused && self.flags.autoplay {
+            self.resume(out);
         }
     }
 

@@ -23,6 +23,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "next" => Command::Next,
             "previous" => Command::Previous,
             "restart" => Command::RestartSong,
+            "autoresume" => Command::ToggleAutoResume,
             "countin" => Command::ToggleCountInOnMarker,
             other if other.starts_with("goto:") => Command::GoToSong {
                 index: other["goto:".len()..].parse()?,

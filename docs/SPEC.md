@@ -25,7 +25,7 @@ Non-goals for v2.0: cloud, telemetry, event sourcing; remote clients are a *stre
 | F9 | BPM display (from REAPER tempo map / `!bpm`) + time signature | bpmUtils |
 | F10 | Count-in: jump to the cue and start playback with REAPER's count-in (REAPER holds the playhead on the cue for its own count-in measures). **v1 semantics: count-in applies only when jumping to a marker/cue (toggle is labelled "Count-in when pressing marker"); song-to-song navigation never counts in** | regionService |
 | F11 | Performer mode: song title, song time + remaining, total set elapsed/remaining, next song + duration, hard-stop prompt, clock, record dot, toggles, exit | PerformerMode |
-| F18 | Timeline click-to-seek with time popover (player and performer) | handleProgressBarClick |
+| F18 | Timeline click-to-seek with time popover (player and performer). **v2 change (owner, 2026-10-10): a click while paused also resumes playing from there when "Auto-resume playback" is on; while playing it keeps playing, and with auto-resume off a paused click stays paused (v1 never resumed a paused click)** | handleProgressBarClick |
 | F12 | MIDI input: device select/hotplug, channel filter, note→action mapping, debounce | midiService |
 | F13 | Settings: connection status/repair, MIDI. (Host, port, protocol, polling interval, reconnect settings and transition offset disappear: the extension runs the timing in-process. An advanced `handOverLeadMs`, default 0, may remain, see §3) | Settings |
 | F14 | System stats popover (machine CPU/memory, link latency; Electron/Node figures dropped) | SystemStats |

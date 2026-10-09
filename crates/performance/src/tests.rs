@@ -320,6 +320,38 @@ fn seek_stays_inside_the_current_song() {
 }
 
 #[test]
+fn seek_while_paused_resumes_only_with_auto_resume() {
+    let mut waiting = playing_at_song(0);
+    waiting.step(Input::Pause);
+    let out = waiting.step(Input::Seek { position: t(4.0) });
+    assert_eq!(out.effects, vec![Effect::SeekTo(t(4.0))]);
+    assert_eq!(waiting.phase(), Phase::Paused);
+
+    let mut resuming = performance(Flags {
+        autoplay: true,
+        count_in: false,
+    });
+    resuming.step(Input::Play);
+    resuming.step(Input::Pause);
+    let out = resuming.step(Input::Seek { position: t(4.0) });
+    assert_eq!(out.effects, vec![Effect::SeekTo(t(4.0)), Effect::Play]);
+    assert_eq!(resuming.phase(), Phase::Playing);
+}
+
+#[test]
+fn seek_outside_the_song_while_paused_does_not_resume() {
+    let mut p = performance(Flags {
+        autoplay: true,
+        count_in: false,
+    });
+    p.step(Input::Play);
+    p.step(Input::Pause);
+    let out = p.step(Input::Seek { position: t(14.0) });
+    assert!(out.effects.is_empty());
+    assert_eq!(p.phase(), Phase::Paused);
+}
+
+#[test]
 fn cue_jump_counts_in_when_enabled() {
     let mut p = performance(Flags {
         autoplay: false,
