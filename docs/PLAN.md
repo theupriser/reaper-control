@@ -115,6 +115,19 @@ reaper-control-app-v2/
 
 **Gate 4:** installer suite green on all temp-dir scenarios; conformance + chaos suite green incl. link loss, replay and restart-reattach; CLI harness can run a whole set against `FakeReaper` and the real extension.
 
+## 7b. Phase 4b — Rust refactor (between Phase 4 and Phase 5, owner's decision 2026-10-09)
+Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 or less (one cache line); no big arrays or heavy values passed by value; a heavy type or enum variant goes behind `Box`/`Vec`/`Rc` with a one-line comment saying why; watch `clippy::large_enum_variant`; custom buffers use capacities in multiples of 8, 16 or 64 bytes. Names are `lower_snake_case`, singular for modules; the directory-as-module layout (`auth.rs` next to `auth/`, never `mod.rs`); internals stay private (`mod` without `pub`) and the API is exposed with `pub use`. Behaviour does not change in this phase; the existing tests are the safety net.
+
+| WP | Task | d |
+|----|------|---|
+| ⬜ 4b.1 | Size audit: a test prints `size_of` for every public type of every crate; list everything over 64 bytes and everything over 128. Turn on `clippy::large_enum_variant`, `large_types_passed_by_value`, `large_stack_arrays` and `trivially_copy_pass_by_ref` workspace-wide | 0.5 |
+| ⬜ 4b.2 | Fix the findings: box heavy variants, pass big values by reference, add the comment; a size-budget test per hot type (messages, `Command`, `AppEvent`, `Input`, `Effect`) fails when one grows past 128 bytes | 1 |
+| ⬜ 4b.3 | Layout audit: `app` declares about 100 `pub mod`; make the modules private and re-export the real API from the crate root (and per context), update the tests' paths; check the other crates; names singular and snake_case | 1.5 |
+| ⬜ 4b.4 | Architecture tests: no `mod.rs` anywhere, file and directory names are `lower_snake_case`, a module with submodules is `x.rs` plus `x/`, the allowed `pub mod` list is explicit | 0.5 |
+| ⬜ 4b.5 | Buffers and collections: look for fixed-size buffers and `with_capacity` values (queue, frame decoder, journal, log) and align them with allocator size classes where it matters; measure before and after, keep only what helps | 0.5 |
+
+**Gate 4b:** `cargo test --workspace`, clippy `-D warnings` and the extension builds (macOS and Windows CI) green; no behaviour change (conformance and chaos suites unchanged); size and layout tests in place; before/after sizes of the listed types recorded in STATUS.
+
 ## 8. Phase 5 — UI foundation & design (Claude Design runs in parallel from here)
 | WP | Task | d |
 |----|------|---|
