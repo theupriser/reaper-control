@@ -38,13 +38,15 @@ test("everything in order says ready", async ({ page }) => {
   await open(page, ok);
   await expect(page.getByRole("heading", { name: "Pre-show check" })).toBeVisible();
   await expect(page.getByText("12 songs found.")).toBeVisible();
-  await expect(page.getByRole("status")).toContainText("Ready for the show.");
+  await expect(page.getByRole("status")).toContainText("Ready");
+  await expect(page.getByRole("button", { name: "Open Performer mode" })).toBeVisible();
   await page.screenshot({ path: "perf-results/checklist-ready.png" });
 });
 
 test("failing rows are named and the extension row offers the setup", async ({ page }) => {
   await open(page, broken);
-  await expect(page.getByRole("status")).toContainText("Not ready");
+  await expect(page.getByRole("status")).toContainText("Not ready yet");
+  await expect(page.getByRole("button", { name: "Perform anyway" })).toBeVisible();
   await expect(page.getByText("No MIDI device found. Plug in your controller.")).toBeVisible();
   await expect(page.getByText("Fix this", { exact: true })).toHaveCount(3);
   await page.screenshot({ path: "perf-results/checklist-broken.png" });

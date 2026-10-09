@@ -106,6 +106,14 @@ export const strings = {
     notReady: "Not ready: fix the rows marked \"Fix this\".",
     checkAgain: "Check again",
     openSetup: "Open the setup",
+    readyTitle: "Ready",
+    attentionTitle: "Not ready yet",
+    counts: (passed: number, failed: number) =>
+      `${passed === 1 ? "1 check passed" : `${passed} checks passed`}, ${failed === 0 ? "none needs" : failed === 1 ? "1 needs" : `${failed} need`} your attention.`,
+    performAnyway: "Perform anyway",
+    perform: "Open Performer mode",
+    fixInSetlists: "Fix in Setlists",
+    checksLabel: "Checks",
   },
 
   help: {

@@ -152,7 +152,7 @@
       {:else if screen === "setlists"}
         <SetlistsScreen catalog={$appState.link.catalog} {send} />
       {:else if screen === "checklist"}
-        <ChecklistScreen onSetup={() => (wizardOpen = true)} />
+        <ChecklistScreen onSetup={() => (wizardOpen = true)} onSetlists={() => select("setlists")} onPerform={enterPerformer} />
       {:else if screen === "settings"}
         <SettingsScreen {connection} onSetup={() => (wizardOpen = true)} />
       {:else}
