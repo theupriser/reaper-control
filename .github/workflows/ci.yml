@@ -13,6 +13,33 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  interface-speed:
+    name: Interface speed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ui/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: ui/pnpm-lock.yaml
+      - name: UI install
+        run: pnpm --dir ui install --frozen-lockfile
+      - name: Browser
+        run: pnpm --dir ui exec playwright install --with-deps chromium
+      - name: Input to paint budget
+        run: pnpm --dir ui perf
+      - name: Trace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: interface-speed-trace
+          path: ui/perf-results
+          if-no-files-found: ignore
+
   rust:
     name: Rust (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
