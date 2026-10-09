@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import ComingSoon from "./components/ComingSoon.svelte";
+  import ConnectionBanner from "./components/ConnectionBanner.svelte";
+  import HealthDialog from "./components/HealthDialog.svelte";
   import Notices from "./components/Notices.svelte";
   import PerformerScreen from "./components/PerformerScreen.svelte";
   import PlayerScreen from "./components/PlayerScreen.svelte";
@@ -9,7 +11,9 @@
   import Sidebar from "./components/Sidebar.svelte";
   import { createAppStore } from "./lib/app-store";
   import { connectionBadge } from "./lib/connection";
-  import { backend } from "./lib/ipc";
+  import { healthBanner } from "./lib/health";
+  import { backend, currentSystemStats } from "./lib/ipc";
+  import type { SystemStats } from "./lib/generated/protocol";
   import { screenLabel, type ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
   import { keyAction, toKeyPress } from "./lib/keyboard";
@@ -39,6 +43,21 @@
   const currentTempo = $derived($appState.link.catalog.songs[live?.current_song ?? -1]?.bpm ?? null);
 
   const connection = $derived(connectionBadge($appState.link.status, $appState.problem));
+
+  const banner = $derived(healthBanner($appState.link.status, $appState.problem));
+  let healthOpen = $state(false);
+  let stats = $state<SystemStats | null>(null);
+  let statsFailed = $state(false);
+
+  const openHealth = async () => {
+    healthOpen = true;
+    statsFailed = false;
+    try {
+      stats = await currentSystemStats();
+    } catch {
+      statsFailed = true;
+    }
+  };
 
   const send = appState.send;
 
@@ -96,8 +115,9 @@
   />
 {:else}
   <div class="layout">
-    <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} />
+    <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} onConnection={openHealth} />
     <main class="content" tabindex="-1" bind:this={content}>
+      {#if banner}<ConnectionBanner {banner} />{/if}
       {#if screen === "player"}
         <PlayerScreen
           {view}
@@ -124,6 +144,8 @@
     </main>
   </div>
 {/if}
+
+<HealthDialog open={healthOpen} {connection} {stats} failed={statsFailed} onclose={() => (healthOpen = false)} />
 
 <style>
   .layout {
