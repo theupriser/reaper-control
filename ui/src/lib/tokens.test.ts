@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { applyAppearance, defaultAppearance, themes } from "./appearance";
 
-import css from "../tokens.css?raw";
+import rawCss from "../tokens.css?raw";
+
+const css = rawCss.replace(/\r\n/g, "\n");
 
 const sources: Record<string, string> = import.meta.glob("../components/*.svelte", {
   query: "?raw",
