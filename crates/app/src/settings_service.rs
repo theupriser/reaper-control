@@ -7,11 +7,11 @@ use protocol::{Settings, SettingsView};
 use crate::app_config::AppConfig;
 use crate::command_bus::CommandBus;
 use crate::config_error::ConfigError;
-use crate::config_store::ConfigStore;
+use crate::config_repository::ConfigRepository;
 
 /// Keeps the saved config and applies what can change while the app runs.
 pub struct SettingsService {
-    store: ConfigStore,
+    store: Arc<dyn ConfigRepository>,
     config: Mutex<AppConfig>,
     bus: Arc<CommandBus>,
 }
@@ -19,7 +19,7 @@ pub struct SettingsService {
 impl SettingsService {
     /// A service over `store`, starting from the config the app started with.
     #[must_use]
-    pub fn new(store: ConfigStore, config: AppConfig, bus: Arc<CommandBus>) -> Self {
+    pub fn new(store: Arc<dyn ConfigRepository>, config: AppConfig, bus: Arc<CommandBus>) -> Self {
         Self {
             store,
             config: Mutex::new(config),

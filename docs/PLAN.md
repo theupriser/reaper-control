@@ -14,6 +14,7 @@ Decisions in force: D1 public release (macOS + Windows; D6) · D2 setlists in RE
 4. Spikes before commitments: unknowns (S1–S6) are time-boxed and decided via ADRs.
 5. Test the pure core heavily; keep adapters thin.
 6. Every phase ends with a gate (demo + checklist); no starting the next phase's risky work before the gate.
+7. Before starting a new phase, check if you can complete older phases.
 
 ## 2. Team assumptions & effort
 Solo developer (+ Claude Code). Estimates are focused-work ideal days (d); multiply ×1.5 for real calendar. **Sum of work packages ≈ 205 d for v2.0 (Phases 0–8, re-summed by script after D7 and D8) + 11.5 d stretch (Phase 9). That is about 14 d more than the Lua + web-interface plan (193 d): more spikes (+5.5), the extension adapter/server and 3-target builds (+9.5 in Phase 3), the crash-containment campaign (+3), partly offset by a simpler installer, wizard and no `mlua` host. At ×1.5 ≈ 310 calendar working days; Claude Design work is not included. See REVIEW-1 for scope-reduction options.
@@ -94,7 +95,7 @@ reaper-control-app-v2/
 ## 7. Phase 4 — App core (Rust)
 | WP | Task | d |
 |----|------|---|
-| 🟡 4.1 | Application layer per context: use-case services, ports (`Driver`, `Clock`, repositories, `MidiSource`), in-process domain event bus, command bus **Missing: Clock, MidiSource and repository ports, use-case services.** | 3 |
+| ✅ 4.1 | Application layer per context: use-case services, ports (`Driver`, `Clock`, repositories, `MidiSource`), in-process domain event bus, command bus | 3 |
 | ✅ 4.16 | Reaper Link ACL: `MessageTranslator`/`CommandTranslator`, LinkSession aggregate + health events (with cause classification) `ExtensionFaulted` arrives as the `faulted` file (4.6). No `CommandTranslator`, by design: the command is already the wire type, so one is added only when a second form exists. | 2.5 |
 | 🟡 4.17 | Control context: `ControlBinding`, `IntentTranslator` (one validation path for UI/MIDI/keyboard/remote) **Missing: `ControlBinding` is the MIDI note map in the config for now; keyboard and remote bindings come with the UI (6.x, 9).** | 2 |
 | ✅ 4.2 | Link client over `protocol`: connect via endpoint file, handshake, reconnect with back-off, resume from last event id; decorators Timeout/Metrics/Logging Timeout is `CommandBus` expiry, Logging is `event_logger`, Metrics is `MeteredDriver` (send-to-answer delay); replay after a cut connection and the heartbeat are tested on real sockets. **Windows run on a VM 2026-10-09 (tests pass, live link and app connect).** | 3.5 |

@@ -14,6 +14,7 @@ use crate::config_location::{
     config_file, diagnostics_directory, legacy_config_file, legacy_setlists_directory,
     log_directory, mirror_directory,
 };
+use crate::config_repository::ConfigRepository;
 use crate::config_store::ConfigStore;
 use crate::diagnostics_bundle::DiagnosticsBundle;
 use crate::endpoint_location::{endpoint_file, extension_directory, fault_file};
@@ -28,9 +29,12 @@ use crate::legacy_config_import::import_legacy_config;
 use crate::link_view_source::LinkViewSource;
 use crate::logging::Logging;
 use crate::metered_driver::MeteredDriver;
-use crate::midi_listener::{MidiListener, device_names};
+use crate::midi_listener::MidiListener;
 use crate::midi_router::MidiRouter;
+use crate::midi_source::MidiSource;
+use crate::midir_source::MidirSource;
 use crate::mirror_keeper::MirrorKeeper;
+use crate::mirror_repository::MirrorRepository;
 use crate::notice_for_event::{link_problem, notice_for_event};
 use crate::panic_hook::install_panic_hook;
 use crate::periodic_thread::PeriodicThread;
@@ -69,7 +73,7 @@ fn current_system_stats(stats: State<'_, Arc<SystemStatsService>>) -> SystemStat
 
 #[tauri::command]
 fn current_settings(settings: State<'_, Arc<SettingsService>>) -> SettingsView {
-    settings.view(device_names().unwrap_or_default())
+    settings.view(MidirSource.device_names().unwrap_or_default())
 }
 
 #[tauri::command]
@@ -202,8 +206,9 @@ pub fn run() {
                     fault_file().ok_or("the home folder is unknown")?,
                 )),
             ));
-            let mirror =
-                SetlistMirror::new(mirror_directory().ok_or("the home folder is unknown")?);
+            let mirror: Arc<dyn MirrorRepository> = Arc::new(SetlistMirror::new(
+                mirror_directory().ok_or("the home folder is unknown")?,
+            ));
             let keeper = MirrorKeeper::new(mirror.clone());
             let (link_driver, link) = start_link(
                 simulated,
@@ -224,7 +229,7 @@ pub fn run() {
             ));
             let settings_file = config_file().ok_or("the home folder is unknown")?;
             app.manage(Arc::new(SettingsService::new(
-                ConfigStore::new(settings_file),
+                Arc::new(ConfigStore::new(settings_file)),
                 config.clone(),
                 bus.clone(),
             )));
@@ -246,9 +251,12 @@ pub fn run() {
                     events.clone(),
                     clock,
                 ));
-                if let Err(error) =
-                    MidiListener::start(router, config.midi.device_name.clone(), events)
-                {
+                if let Err(error) = MidiListener::start(
+                    Arc::new(MidirSource),
+                    router,
+                    config.midi.device_name.clone(),
+                    events,
+                ) {
                     tracing::error!(%error, "midi thread failed to start");
                 }
             }
