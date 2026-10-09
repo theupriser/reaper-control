@@ -1,7 +1,7 @@
 //! Size audit (PLAN WP 4b.1): the size of every public type, so growth is seen and the rule
 //! "under 128 bytes, ideally 64 or less" (AGENTS.md "Memory and layout") can be checked.
 //!
-//! `cargo test -p architecture-tests --test size_audit -- --nocapture` prints the table.
+//! `cargo test -p app --test size_audit -- --nocapture` prints the table.
 //! Generic types and the extension's types are not listed.
 
 use std::mem::size_of;

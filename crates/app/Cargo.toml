@@ -27,6 +27,12 @@ tracing-appender.workspace = true
 zip = { version = "8.6.0", default-features = false, features = ["deflate", "time"] }
 time = { version = "0.3", default-features = false, features = ["std"] }
 
+[dev-dependencies]
+# Only for tests/size_audit.rs, which sizes every public type of the workspace.
+catalogue.workspace = true
+projections.workspace = true
+setlists.workspace = true
+
 [features]
 # Set by `tauri build`, and by hand for a plain `cargo build --release`: embeds `ui/dist` instead of
 # loading the dev server at `devUrl` (without it the window shows "localhost refused to connect").
