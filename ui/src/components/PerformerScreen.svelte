@@ -4,8 +4,10 @@
   import PerformerControls from "./PerformerControls.svelte";
   import PerformerToggles from "./PerformerToggles.svelte";
   import RecordDot from "./RecordDot.svelte";
+  import StageLockButton from "./StageLockButton.svelte";
   import SongProgress from "./SongProgress.svelte";
   import SystemStats from "./SystemStats.svelte";
+  import { isLocked, type StageLock } from "../lib/stage-lock";
   import {
     formatLongTime,
     formatTime,
@@ -25,6 +27,9 @@
     onToggleCountIn,
     onToggleRecord,
     onExit,
+    stageLock,
+    onLock,
+    onUnlock,
   }: {
     view: PerformerView;
     onPlayPause: () => void;
@@ -36,10 +41,14 @@
     onToggleCountIn: () => void;
     onToggleRecord: () => void;
     onExit?: () => void;
+    stageLock?: StageLock;
+    onLock?: () => void;
+    onUnlock?: () => void;
   } = $props();
 
   const playing = $derived(view.phase === "Playing" || view.phase === "CountingIn");
   const waiting = $derived(isWaitingAtHardStop(view));
+  const locked = $derived(stageLock !== undefined && isLocked(stageLock));
   const songLength = $derived(view.song?.duration ?? 0);
 </script>
 
@@ -47,7 +56,7 @@
   <header>
     <span class="setlist">{view.setlistName ? strings.performer.setlist(view.setlistName) : ""}</span>
     <span class="clock">
-      <RecordDot armed={view.recordArmed} onToggle={onToggleRecord} />
+      <RecordDot armed={view.recordArmed} onToggle={onToggleRecord} disabled={locked} />
       <Clock />
       <SystemStats stats={view.stats} />
     </span>
@@ -67,7 +76,7 @@
         <span class="remaining">({formatLongTime(view.totalDuration - view.totalElapsed)})</span>
       </div>
     </div>
-    {#if view.song}<SongProgress song={view.song} position={view.songPosition} {onSeek} />{/if}
+    {#if view.song}<SongProgress song={view.song} position={view.songPosition} onSeek={locked ? undefined : onSeek} />{/if}
     {#if view.phase === "CountingIn"}<p class="count-in">{strings.performer.countIn}</p>{/if}
 
     <div class="next">
@@ -93,8 +102,16 @@
     countInOnMarker={view.countInOnMarker}
     onAutoResume={onToggleAutoResume}
     onCountIn={onToggleCountIn}
+    disabled={locked}
   />
-  {#if onExit}<div class="exit"><button onclick={onExit}>{strings.performer.exit}</button></div>{/if}
+  {#if stageLock && onLock && onUnlock}
+    <div class="exit">
+      <StageLockButton state={stageLock} {onLock} {onUnlock} />
+      {#if !locked && onExit}<button onclick={onExit}>{strings.performer.exit}</button>{/if}
+    </div>
+  {:else if onExit}
+    <div class="exit"><button onclick={onExit}>{strings.performer.exit}</button></div>
+  {/if}
 </div>
 
 <style>
@@ -172,7 +189,7 @@
   h2 { font-size: 2.5rem; margin: 0 0 0.5rem; opacity: 0.8; }
   .duration { font-size: 1.5rem; opacity: 0.6; }
   .hold { margin-top: 0.5rem; font-size: 1.2rem; font-weight: bold; color: var(--red); }
-  .exit { display: flex; justify-content: center; }
+  .exit { display: flex; justify-content: center; gap: 1rem; }
   .exit button {
     padding: 0.75rem 1.5rem;
     border: none;

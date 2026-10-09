@@ -44,4 +44,12 @@ describe("keyAction", () => {
     expect(keyAction(press("Escape"), true)).toBe("ExitPerformer");
     expect(keyAction(press("Escape"), false)).toBeNull();
   });
+
+  it("keeps Escape and the auto-resume key quiet while the screen is locked", () => {
+    expect(keyAction(press("Escape"), true, true)).toBeNull();
+    expect(keyAction(press("a"), true, true)).toBeNull();
+    expect(keyAction(press(" "), true, true)).toBe("PlayPause");
+    expect(keyAction(press("ArrowRight"), true, true)).toBe("Next");
+    expect(keyAction(press("Escape"), true, false)).toBe("ExitPerformer");
+  });
 });

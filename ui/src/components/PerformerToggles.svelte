@@ -6,12 +6,13 @@
     countInOnMarker,
     onAutoResume,
     onCountIn,
-  }: { autoResume: boolean; countInOnMarker: boolean; onAutoResume: () => void; onCountIn: () => void } = $props();
+    disabled = false,
+  }: { autoResume: boolean; countInOnMarker: boolean; onAutoResume: () => void; onCountIn: () => void; disabled?: boolean } = $props();
 </script>
 
 <div class="toggles">
-  <Toggle on={autoResume} label={strings.performer.autoResume(autoResume)} onchange={onAutoResume} />
-  <Toggle on={countInOnMarker} label={strings.performer.countInOnMarker(countInOnMarker)} onchange={onCountIn} />
+  <Toggle on={autoResume} label={strings.performer.autoResume(autoResume)} onchange={onAutoResume} {disabled} />
+  <Toggle on={countInOnMarker} label={strings.performer.countInOnMarker(countInOnMarker)} onchange={onCountIn} {disabled} />
 </div>
 
 <style>

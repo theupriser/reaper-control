@@ -15,10 +15,12 @@
   import { seekCommand, type PerformerPhase, type SeekTarget } from "./lib/performer";
   import { performerView } from "./lib/performer-view";
   import { strings } from "./lib/strings";
+  import { isLocked, lock, open, settle, tapUnlock, type StageLock } from "./lib/stage-lock";
 
   const appState = createAppStore(backend);
   let screen = $state<ScreenId>("player");
   let performerMode = $state(false);
+  let stageLock = $state<StageLock>(open);
   let content = $state<HTMLElement>();
 
   const select = async (id: ScreenId) => {
@@ -44,7 +46,7 @@
   const toggleAutoResume = () => send("ToggleAutoResume");
 
   function onKeydown(event: KeyboardEvent) {
-    const action = keyAction(toKeyPress(event), performerMode);
+    const action = keyAction(toKeyPress(event), performerMode, isLocked(stageLock));
     if (!action) return;
     event.preventDefault();
     if (action === "PlayPause") playPause();
@@ -53,6 +55,17 @@
     else if (action === "ExitPerformer") performerMode = false;
     else toggleAutoResume();
   }
+
+  const enterPerformer = () => {
+    stageLock = open;
+    performerMode = true;
+  };
+
+  $effect(() => {
+    if (stageLock.kind !== "unlocking") return;
+    const timer = setTimeout(() => (stageLock = settle(stageLock, Date.now())), stageLock.until - Date.now() + 1);
+    return () => clearTimeout(timer);
+  });
 
   onMount(() => appState.start());
 </script>
@@ -73,10 +86,13 @@
     onToggleCountIn={() => send("ToggleCountInOnMarker")}
     onToggleRecord={() => send("ToggleRecordArm")}
     onExit={() => (performerMode = false)}
+    {stageLock}
+    onLock={() => (stageLock = lock())}
+    onUnlock={() => (stageLock = tapUnlock(stageLock, Date.now()))}
   />
 {:else}
   <div class="layout">
-    <Sidebar active={screen} onSelect={select} onPerformer={() => (performerMode = true)} {connection} />
+    <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} />
     <main class="content" tabindex="-1" bind:this={content}>
       {#if screen === "player"}
         <PerformerScreen

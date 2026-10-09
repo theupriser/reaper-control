@@ -1,8 +1,8 @@
 <script lang="ts">
-  let { on, label, onchange }: { on: boolean; label: string; onchange: () => void } = $props();
+  let { on, label, onchange, disabled = false }: { on: boolean; label: string; onchange: () => void; disabled?: boolean } = $props();
 </script>
 
-<button class="toggle" class:on aria-pressed={on} onclick={onchange}>{label}</button>
+<button class="toggle" class:on aria-pressed={on} {disabled} onclick={onchange}>{label}</button>
 
 <style>
   .toggle {
@@ -21,5 +21,6 @@
     transition: transform var(--motion-fast);
   }
   .toggle:active { transform: scale(0.98); }
+  .toggle:disabled { opacity: 0.5; cursor: default; }
   .on { background: var(--tint-ok); color: var(--green); }
 </style>

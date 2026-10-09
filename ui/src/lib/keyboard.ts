@@ -16,13 +16,14 @@ export type KeyAction = KeyIntent | "ExitPerformer";
 
 const TYPING = new Set(["INPUT", "SELECT", "TEXTAREA"]);
 
-export function keyAction(press: KeyPress, performerMode: boolean): KeyAction | null {
+export function keyAction(press: KeyPress, performerMode: boolean, locked = false): KeyAction | null {
   if (press.repeat || press.metaKey || press.ctrlKey || press.altKey) return null;
   if (press.editable || TYPING.has(press.target)) return null;
-  if (press.key === "Escape") return performerMode ? "ExitPerformer" : null;
+  if (press.key === "Escape") return performerMode && !locked ? "ExitPerformer" : null;
   // Space on a focused button presses that button, not play.
   if (press.key === " " && press.target === "BUTTON") return null;
-  return keyIntent(press.key);
+  const intent = keyIntent(press.key);
+  return locked && intent === "ToggleAutoResume" ? null : intent;
 }
 
 export function toKeyPress(event: KeyboardEvent): KeyPress {
