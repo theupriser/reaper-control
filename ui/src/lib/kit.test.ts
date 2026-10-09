@@ -7,9 +7,9 @@ const sources: Record<string, string> = import.meta.glob("../kit/*.svelte", {
 });
 
 describe("component kit", () => {
-  it("has the first four components", () => {
+  it("has the eight components", () => {
     const names = Object.keys(sources).map((path) => path.split("/").pop());
-    expect(names.sort()).toEqual(["Button.svelte", "Panel.svelte", "StatusBadge.svelte", "Toggle.svelte"]);
+    expect(names.sort()).toEqual(["Button.svelte", "Clock.svelte", "Dialog.svelte", "ListRow.svelte", "Panel.svelte", "StatusBadge.svelte", "Toast.svelte", "Toggle.svelte"]);
   });
 
   it.each(Object.entries(sources))("%s takes its sizes from tokens, not px values", (_path, source) => {
