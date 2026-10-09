@@ -86,7 +86,10 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
     }
     // SAFETY: registers a plain `extern "C" fn` that only removes a file.
     let registered = unsafe { atexit(on_exit) };
-    log.line(&format!("started, atexit registered: {registered}"));
+    log.line(&format!(
+        "started, version {}, atexit registered: {registered}",
+        env!("CARGO_PKG_VERSION")
+    ));
 
     session.plugin_register_add_csurf_inst(Box::new(Surface::new(
         &FAULT,
