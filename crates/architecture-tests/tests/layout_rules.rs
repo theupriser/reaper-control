@@ -10,6 +10,7 @@ type TestResult = Result<(), Box<dyn std::error::Error>>;
 /// constant they hold (`Directives`, `plan_songs`, `Seconds`), or they hold test cases.
 const PLURAL_ALLOWED: &[&str] = &[
     "chaos_settings",
+    "check_status",
     "command_bus",
     "directives",
     "event_bus",

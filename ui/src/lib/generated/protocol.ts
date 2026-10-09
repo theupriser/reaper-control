@@ -560,3 +560,43 @@ can_install: boolean,
  * Whether everything is in place and the extension answers.
  */
 complete: boolean, };
+
+/**
+ * One thing the pre-show checklist looks at (SPEC S-7).
+ */
+export type CheckId = "ExtensionCurrent" | "Connected" | "SongsFound" | "SetlistValid" | "MidiPresent";
+
+/**
+ * How one check came out.
+ */
+export type CheckStatus = "Passed" | "Failed" | "Skipped";
+
+/**
+ * One row of the pre-show checklist.
+ */
+export type CheckItem = { 
+/**
+ * Which check.
+ */
+id: CheckId, 
+/**
+ * How it came out.
+ */
+status: CheckStatus, 
+/**
+ * What was found or what to do, in plain words.
+ */
+detail: string, };
+
+/**
+ * What the pre-show checklist shows.
+ */
+export type ChecklistView = { 
+/**
+ * The checks in order.
+ */
+items: Array<CheckItem>, 
+/**
+ * Whether no check failed.
+ */
+ready: boolean, };

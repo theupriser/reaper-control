@@ -85,6 +85,23 @@ export const strings = {
     connection: { title: "Connection", hint: "The extension lets this app control REAPER. Run the setup again to repair it.", open: "Open the setup" },
   },
 
+  checklist: {
+    title: "Pre-show check",
+    intro: "Look this over before you go on stage. It updates by itself.",
+    checks: {
+      ExtensionCurrent: "Extension up to date",
+      Connected: "Connected to REAPER",
+      SongsFound: "Songs found",
+      SetlistValid: "Setlist valid",
+      MidiPresent: "MIDI present",
+    },
+    status: { Passed: "OK", Failed: "Fix this", Skipped: "Not checked" },
+    ready: "Ready for the show.",
+    notReady: "Not ready: fix the rows marked \"Fix this\".",
+    checkAgain: "Check again",
+    openSetup: "Open the setup",
+  },
+
   health: {
     title: "Connection and health",
     openReaper: "Open REAPER. We keep trying.",
