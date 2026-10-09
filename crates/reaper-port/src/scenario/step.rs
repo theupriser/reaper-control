@@ -25,8 +25,6 @@ pub enum Step {
     SeekCue {
         /// Cue position in seconds.
         position: f64,
-        /// Length of the count-in in seconds.
-        lead_in: f64,
     },
     /// Switch a setting: "autoplay" or "count_in".
     SetFlag {

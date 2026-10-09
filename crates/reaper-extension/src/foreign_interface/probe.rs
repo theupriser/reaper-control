@@ -135,6 +135,14 @@ impl Probe {
                     unsafe { *found.value.as_ptr().cast::<i32>() = value };
                 }
             }
+            ["project-config", name, rest @ ..] => {
+                let value = rest.first().and_then(|text| text.parse::<i32>().ok());
+                Self::project_config(adapter, name, value, log);
+            }
+            ["audio"] => log.line(&format!(
+                "probe: audio running {}",
+                adapter.reaper().audio_is_running()
+            )),
             ["measure", index] => Self::measure(adapter, index, log),
             _ => log.line("probe: unknown command"),
         }
@@ -202,6 +210,30 @@ impl Probe {
                 );
                 log.line(&format!("probe: action {id} {name:?} {state:?}"));
             }
+        }
+    }
+
+    /// Reads (and with a value, writes) a setting that belongs to the current project.
+    fn project_config(adapter: &ReaperRsAdapter, name: &str, value: Option<i32>, log: &Log) {
+        let reaper = adapter.reaper();
+        let Some(offset) = reaper.project_config_var_get_offs(name) else {
+            return log.line(&format!("probe: no project setting {name}"));
+        };
+        let Some(address) =
+            reaper.project_config_var_addr(ProjectContext::CurrentProject, offset.offset)
+        else {
+            return log.line("probe: no address");
+        };
+        let pointer = address.as_ptr().cast::<i32>();
+        // SAFETY: REAPER owns the setting for the session; settings read here are 4 bytes.
+        unsafe {
+            if let Some(value) = value {
+                *pointer = value;
+            }
+            log.line(&format!(
+                "probe: project {name} = {} (size {})",
+                *pointer, offset.size
+            ));
         }
     }
 

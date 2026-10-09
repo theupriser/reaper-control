@@ -6,7 +6,7 @@
   "steps": [
     { "do": "play" },
     { "do": "advance", "seconds": 20 },
-    { "do": "seek_cue", "position": 30, "lead_in": 4 },
+    { "do": "seek_cue", "position": 30 },
     { "do": "expect", "phase": "Playing", "position": 30, "count_in": false, "events": ["PerformanceStarted", "SeekPerformed"] }
   ]
 }

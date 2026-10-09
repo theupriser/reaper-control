@@ -139,3 +139,46 @@ fn the_trace_lists_commands_and_the_ticks_that_did_something() {
     assert!(text.contains("PerformanceFinished"), "{text}");
     assert!(trace.lines().len() < 5, "quiet ticks are left out: {text}");
 }
+
+#[test]
+fn counting_in_holds_the_playhead_only_when_playback_starts_from_a_stop_or_pause() {
+    let mut reaper = fake();
+    reaper.set_count_in(true);
+    reaper.seek(t(10.0));
+    reaper.play();
+    reaper.advance(t(3.0));
+    assert_eq!(reaper.position().get(), 10.0);
+    reaper.advance(t(2.0));
+    assert_eq!(reaper.position().get(), 11.0);
+
+    reaper.seek(t(30.0));
+    reaper.advance(t(1.0));
+    assert_eq!(reaper.position().get(), 31.0);
+
+    reaper.pause();
+    reaper.play();
+    reaper.set_count_in(false);
+    reaper.advance(t(1.0));
+    assert_eq!(
+        reaper.position().get(),
+        31.0,
+        "the count-in runs on after the flag is cleared"
+    );
+}
+
+#[test]
+fn pausing_ends_a_count_in() {
+    let mut reaper = fake();
+    reaper.set_count_in(true);
+    reaper.play();
+    reaper.advance(t(1.0));
+    reaper.pause();
+    reaper.play();
+    reaper.advance(t(1.0));
+    assert_eq!(reaper.position().get(), 0.0);
+    reaper.pause();
+    reaper.set_count_in(false);
+    reaper.play();
+    reaper.advance(t(1.0));
+    assert_eq!(reaper.position().get(), 1.0);
+}

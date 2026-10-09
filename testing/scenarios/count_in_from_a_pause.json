@@ -1,0 +1,19 @@
+{
+  "name": "A cue jump from a pause counts in on the cue, and the song after it is not counted in",
+  "songs": [
+    { "id": "A", "start": 0, "end": 20 },
+    { "id": "B", "start": 20, "end": 60 }
+  ],
+  "count_in": true,
+  "steps": [
+    { "do": "play" },
+    { "do": "advance", "seconds": 5 },
+    { "do": "pause" },
+    { "do": "seek_cue", "position": 10 },
+    { "do": "expect", "phase": "CountingIn", "transport": "Playing", "position": 10, "count_in": true },
+    { "do": "advance", "seconds": 4.25 },
+    { "do": "expect", "phase": "Playing", "position": 10.25, "count_in": false },
+    { "do": "advance", "seconds": 10 },
+    { "do": "expect", "phase": "Playing", "position": 20.25, "count_in": false }
+  ]
+}

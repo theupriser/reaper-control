@@ -22,6 +22,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "next" => Command::Next,
             "previous" => Command::Previous,
             "restart" => Command::RestartSong,
+            "countin" => Command::ToggleCountInOnMarker,
+            other if other.starts_with("seekcue:") => Command::Seek {
+                position: other["seekcue:".len()..].parse()?,
+                count_in: true,
+            },
             other => match other.strip_prefix("active:") {
                 Some(id) => Command::SetActiveSetlist {
                     id: (!id.is_empty()).then(|| id.to_owned()),

@@ -5,15 +5,22 @@ use shared_kernel::Seconds;
 
 use crate::{Marker, ReaperPort, Region, Transport};
 
+/// How long REAPER 7.82 holds the playhead for two bars of 4/4 at 120 bpm (measured: the playhead
+/// stood still for about 4 s, then moved).
+const COUNT_IN: f64 = 4.0;
+
 /// A REAPER that does exactly what it is told and nothing else: the playhead
 /// moves at normal speed while playing, and only when `advance` is called, so
-/// every run gives the same result.
+/// every run gives the same result. Like REAPER it counts in (holds the playhead on the spot) when
+/// playback starts from a stop or pause with the count-in armed, never on a jump while playing;
+/// switching the count-in off during the count-in does not shorten it.
 #[derive(Debug, Clone)]
 pub struct FakeReaper {
     now: Seconds,
     position: Seconds,
     transport: Transport,
     count_in: bool,
+    count_in_left: f64,
     regions: Vec<Region>,
     markers: Vec<Marker>,
     tempo_map: TempoMap,
@@ -29,6 +36,7 @@ impl FakeReaper {
             position: Seconds::ZERO,
             transport: Transport::Stopped,
             count_in: false,
+            count_in_left: 0.0,
             regions,
             markers,
             tempo_map,
@@ -52,7 +60,10 @@ impl FakeReaper {
         }
         self.now = Seconds::new(self.now.get() + span).unwrap_or(self.now);
         if self.transport == Transport::Playing {
-            self.position = Seconds::new(self.position.get() + span).unwrap_or(self.position);
+            let held = span.min(self.count_in_left);
+            self.count_in_left -= held;
+            let moved = self.position.get() + span - held;
+            self.position = Seconds::new(moved).unwrap_or(self.position);
         }
     }
 }
@@ -97,12 +108,16 @@ impl ReaperPort for FakeReaper {
     }
 
     fn play(&mut self) {
+        if self.transport != Transport::Playing && self.count_in {
+            self.count_in_left = COUNT_IN;
+        }
         self.transport = Transport::Playing;
     }
 
     fn pause(&mut self) {
         if self.transport == Transport::Playing {
             self.transport = Transport::Paused;
+            self.count_in_left = 0.0;
         }
     }
 

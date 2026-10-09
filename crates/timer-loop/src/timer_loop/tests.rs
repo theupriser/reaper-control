@@ -137,19 +137,32 @@ fn a_link_seek_is_counted_from_the_start_of_the_current_song_and_live_shows_the_
 }
 
 #[test]
-fn a_link_toggle_flips_the_setting_and_a_count_in_seek_is_refused() {
+fn a_link_toggle_flips_the_setting() {
     let mut timer_loop = TimerLoop::new(fake(two_songs(), vec![]));
     let before = timer_loop.live().autoplay;
     timer_loop.link_command(protocol::Command::ToggleAutoResume);
     assert_ne!(timer_loop.live().autoplay, before);
-    let refused = timer_loop.link_command(protocol::Command::Seek {
-        position: 1.0,
+}
+
+#[test]
+fn a_counted_in_seek_holds_on_the_cue_then_plays_and_gives_the_setting_back() {
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), vec![]));
+    timer_loop.link_command(protocol::Command::ToggleCountInOnMarker);
+    timer_loop.command(Input::Play);
+    run(&mut timer_loop, 20);
+    let done = timer_loop.link_command(protocol::Command::Seek {
+        position: 6.0,
         count_in: true,
     });
-    assert!(matches!(
-        refused,
-        protocol::message::Outcome::Rejected { .. }
-    ));
+    assert!(matches!(done, protocol::message::Outcome::Done));
+    assert_eq!(timer_loop.phase(), Phase::CountingIn);
+    assert!(timer_loop.port_mut().count_in());
+    run(&mut timer_loop, 60);
+    assert_eq!(timer_loop.phase(), Phase::CountingIn);
+    assert!((timer_loop.port_mut().position().get() - 6.0).abs() < 1e-9);
+    run(&mut timer_loop, 40);
+    assert_eq!(timer_loop.phase(), Phase::Playing);
+    assert!(timer_loop.port_mut().position().get() > 6.0);
 }
 
 #[test]

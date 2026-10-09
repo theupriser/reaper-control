@@ -20,7 +20,12 @@ pub(super) fn to_input(
         } => Seconds::new(song_start.get() + position)
             .map(|position| Input::Seek { position })
             .map_err(|_| "not a position"),
-        Command::Seek { count_in: true, .. } => Err("count-in needs the tempo map"),
+        Command::Seek {
+            position,
+            count_in: true,
+        } => Seconds::new(song_start.get() + position)
+            .map(|position| Input::SeekCue { position })
+            .map_err(|_| "not a position"),
         Command::ToggleAutoResume => Ok(Input::SetFlag {
             flag: Flag::Autoplay,
             enabled: !flags.autoplay,
