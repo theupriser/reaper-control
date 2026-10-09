@@ -18,7 +18,7 @@
 <nav aria-label={strings.screens.mainNavigation}>
   <div class="brand">
     <div class="logo">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0a1a0b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3l2-7 4 14 3-10 2 3h4" /></svg>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" style="stroke: var(--on-accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3l2-7 4 14 3-10 2 3h4" /></svg>
     </div>
     <div class="name">{strings.app.name}</div>
   </div>
@@ -49,7 +49,7 @@
     flex-shrink: 0;
     box-sizing: border-box;
     min-height: 100vh;
-    background: #121417;
+    background: var(--sidebar);
     border-right: 1px solid var(--line);
     padding: 24px 16px;
     display: flex;
@@ -84,7 +84,7 @@
     border: none;
     border-radius: 10px;
     background: transparent;
-    color: #c5cad0;
+    color: var(--text-soft);
     font-size: 15px;
     font-weight: 600;
     min-height: 44px;
@@ -93,7 +93,7 @@
     text-align: left;
   }
   .item.active {
-    background: #1e2125;
+    background: var(--raised);
     color: var(--green);
   }
   .spacer {
@@ -108,7 +108,7 @@
     border: none;
     border-radius: 12px;
     background: var(--green);
-    color: #0a1a0b;
+    color: var(--on-accent);
     font-size: 15px;
     font-weight: 800;
     min-height: 48px;

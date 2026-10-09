@@ -132,9 +132,9 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 ## 8. Phase 5 — UI foundation & design (Claude Design runs in parallel from here)
 | WP | Task | d |
 |----|------|---|
-| ⬜ 5.1 | Design system: tokens (colour, type, spacing, motion), light/dark/stage-dark, density, large-touch variant | 3 |
+| 🟡 5.1 | Design system: tokens (colour, type, spacing, motion), light/dark/stage-dark, density, large-touch variant | 3 |
 | ⬜ 5.2 | Component kit: Button, Toggle, Panel, Timeline(markers, hard-stop), Clock, StatusBadge, ListRow, Toast(non-modal), Dialog | 5 |
-| 🟡 5.3 | State bridge: single `appState` store from one event; command helper `send()`; pending/ack indicators | 2 |
+| ✅ 5.3 | State bridge: single `appState` store from one event; command helper `send()`; pending/ack indicators | 2 |
 | ⬜ 5.4 | Navigation shell, keyboard layer (space, ←/→, a — via command bus), focus management | 2 |
 | ✅ 5.5 | UI strings kept in one module (no hard-coded copy in components) so translation can be added in v2.1 **`ui/src/lib/strings.ts`; `strings.test.ts` fails when a component holds copy of its own** | 0.5 |
 | ⬜ 5.6 | Accessibility baseline (contrast, focus, ARIA, reduced motion) | 1.5 |

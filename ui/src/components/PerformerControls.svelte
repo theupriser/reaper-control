@@ -52,7 +52,7 @@
   button {
     background: none;
     border: none;
-    color: white;
+    color: var(--text);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -61,18 +61,18 @@
     cursor: pointer;
   }
   button:hover:enabled {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--tint-hover);
   }
   button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
   .play {
-    background: #333;
+    background: var(--track);
     width: 100px;
     height: 100px;
   }
   .play:hover:enabled {
-    background: #444;
+    background: var(--track-hover);
   }
 </style>

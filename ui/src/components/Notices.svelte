@@ -40,8 +40,8 @@
     padding: 12px 14px;
     border: 1px solid var(--line);
     border-radius: 12px;
-    background: #1e2125;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    background: var(--raised);
+    box-shadow: var(--shadow-raised);
   }
   .dot {
     width: 10px;
@@ -51,7 +51,7 @@
     flex-shrink: 0;
   }
   .info {
-    background: #5aa9f0;
+    background: var(--info);
   }
   .warning {
     background: var(--amber);

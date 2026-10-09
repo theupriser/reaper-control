@@ -75,8 +75,8 @@
   .hint { margin: 0; font-size: 14px; color: var(--muted); }
   .offer { display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 15px; }
   input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--green); }
-  button { height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--line); background: #1e2125; color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; }
-  button.primary { background: var(--green); color: #0a1a0b; border-color: var(--green); }
+  button { height: var(--control-height); padding: 0 var(--control-padding); border-radius: var(--radius); border: 1px solid var(--line); background: var(--raised); color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; }
+  button.primary { background: var(--green); color: var(--on-accent); border-color: var(--green); }
   button:disabled { opacity: 0.4; cursor: default; }
   .message { margin: 0; font-size: 14px; }
   .message.ok { color: var(--green); }

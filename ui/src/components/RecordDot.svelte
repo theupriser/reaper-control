@@ -21,7 +21,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: white;
+    background: var(--on-strong);
   }
   .armed .dot { background: red; }
 </style>

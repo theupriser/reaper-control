@@ -35,12 +35,12 @@
     font-weight: bold;
     text-align: center;
     cursor: pointer;
-    background: rgba(244, 67, 54, 0.2);
-    color: #f44336;
+    background: var(--tint-danger);
+    color: var(--danger);
   }
   .item:active { transform: scale(0.98); }
   .item.on {
-    background: rgba(76, 175, 80, 0.2);
+    background: var(--tint-ok);
     color: var(--green);
   }
 </style>
