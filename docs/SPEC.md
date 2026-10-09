@@ -16,7 +16,7 @@ Non-goals for v2.0: cloud, telemetry, event sourcing; remote clients are a *stre
 |---|---------|-----------|
 | F1 | Connect to REAPER, auto-reconnect, link latency (v1: host/port/protocol; v2: automatic, see §2.2) | reaperConnector, ConnectionStatus |
 | F2 | Transport: play/pause toggle, pause, play with count-in, seek, restart region | reaperConnector, TransportControls |
-| F3 | Region list, current region by playhead, next/previous (honours setlist) | regionService, RegionList |
+| F3 | Region list, current region by playhead, next/previous (honours setlist), **click a song to jump to its start (never a count-in; "Auto-resume playback" decides whether it plays)** | regionService, RegionList |
 | F4 | Markers list/timeline display; special markers hidden; **hover tooltip with the cue name (and "Hard stop point" on the red hard-stop marker), on Player and Performer** | markerService, markerUtils, marker-tooltip in PerformerMode/TransportControls |
 | F5 | Setlists per project: create/rename/delete, add/remove/move items, select | projectService, SetlistEditor |
 | F6 | Playlist mode: auto-switch to next song before region end; pause at end of list | regionService.checkEndOfRegion |

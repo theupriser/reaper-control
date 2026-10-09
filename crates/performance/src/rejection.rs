@@ -7,6 +7,8 @@ pub enum Rejection {
     NoNextSong,
     /// The current song is the first one.
     NoPreviousSong,
+    /// The setlist has no song at that position.
+    NoSuchSong,
     /// The target position is outside the current song.
     OutsideSong,
     /// The command makes no sense in the current phase.

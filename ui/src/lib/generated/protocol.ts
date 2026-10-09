@@ -8,7 +8,11 @@ export type Phase = "Idle" | "Playing" | "Paused" | "CountingIn" | "HardStopped"
 /**
  * Everything the UI can ask for.
  */
-export type Command = "Play" | "Pause" | "Stop" | "Next" | "Previous" | "RestartSong" | { "Seek": { 
+export type Command = "Play" | "Pause" | "Stop" | "Next" | "Previous" | "RestartSong" | { "GoToSong": { 
+/**
+ * Position of the song in the played order (the setlist, or the timeline without one), from 0.
+ */
+index: number, } } | { "Seek": { 
 /**
  * Seconds from the start of the song.
  */

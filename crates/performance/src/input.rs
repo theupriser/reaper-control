@@ -22,6 +22,11 @@ pub enum Input {
     Previous,
     /// Go to the start of the current song.
     RestartSong,
+    /// Go to the start of the song at `index` in the played order.
+    GoToSong {
+        /// Position of the song, from 0.
+        index: usize,
+    },
     /// Jump inside the current song, never with a count-in.
     Seek {
         /// Target position.

@@ -17,6 +17,7 @@
     onPrevious,
     onRewind,
     onNext,
+    onChooseSong,
     onSeek,
     onToggleAutoResume,
     onToggleCountIn,
@@ -32,6 +33,7 @@
     onPrevious: () => void;
     onRewind: () => void;
     onNext: () => void;
+    onChooseSong: (index: number) => void;
     onSeek: (target: SeekTarget) => void;
     onToggleAutoResume: () => void;
     onToggleCountIn: () => void;
@@ -54,7 +56,7 @@
       <h2>{strings.player.songsTitle} <span>{strings.player.inSetlist(rows.length)}</span></h2>
     </div>
     <div class="list">
-      {#if rows.length === 0}<p class="empty">{strings.player.noSetlist}</p>{:else}<SongList {rows} />{/if}
+      {#if rows.length === 0}<p class="empty">{strings.player.noSetlist}</p>{:else}<SongList {rows} onChoose={onChooseSong} />{/if}
     </div>
   </section>
 </section>

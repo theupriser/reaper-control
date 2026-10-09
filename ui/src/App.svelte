@@ -142,6 +142,7 @@
           onPrevious={previous}
           onRewind={rewind}
           onNext={next}
+          onChooseSong={(index) => send({ GoToSong: { index } })}
           onSeek={seek}
           onToggleAutoResume={toggleAutoResume}
           onToggleCountIn={() => send("ToggleCountInOnMarker")}

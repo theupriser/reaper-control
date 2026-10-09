@@ -1,5 +1,6 @@
 //! Connects to a running extension and prints what it pushes. Each extra argument is a command
 //! (`play`, `pause`, `next`, `previous`, `restart`), sent one second apart.
+//! `goto:<index>` jumps to the song at that position (from 0).
 //! `active:<id>` (or `active:` for none) chooses the played setlist.
 //! `save:<id>:<name>:<expected revision>:<song id>,<song id>` stores a setlist.
 //! `cargo run -p link --example send_command -- <resource directory>/RC2/endpoint.json play next`
@@ -23,6 +24,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "previous" => Command::Previous,
             "restart" => Command::RestartSong,
             "countin" => Command::ToggleCountInOnMarker,
+            other if other.starts_with("goto:") => Command::GoToSong {
+                index: other["goto:".len()..].parse()?,
+            },
             other if other.starts_with("seekcue:") => Command::Seek {
                 position: other["seekcue:".len()..].parse()?,
                 count_in: true,

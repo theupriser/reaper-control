@@ -23,11 +23,11 @@ test("the Player screen shows the setlist and sends the transport commands", asy
   await expect(page.getByRole("heading", { name: "Player" })).toBeVisible();
   await expect(page.getByLabel("Choose the setlist to play")).toHaveValue("set");
   await expect(page.getByText("NOW PLAYING · 2 OF 3")).toBeVisible();
-  const list = page.getByRole("list", { name: "Songs in the setlist" });
-  await expect(list.getByRole("listitem")).toHaveCount(3);
-  await expect(list.getByRole("listitem").nth(1)).toContainText("Song 2");
-  await expect(list.getByRole("listitem").nth(2)).toContainText("Next");
-  await expect(list.getByRole("listitem").nth(2)).toContainText("HARD STOP");
+  const rows = page.getByRole("group", { name: "Songs in the setlist" }).getByRole("button");
+  await expect(rows).toHaveCount(3);
+  await expect(rows.nth(1)).toContainText("Song 2");
+  await expect(rows.nth(2)).toContainText("Next");
+  await expect(rows.nth(2)).toContainText("HARD STOP");
   await expect(page.getByText("96 BPM").first()).toBeVisible();
 
   await page.getByRole("button", { name: "Pause" }).click();
@@ -36,6 +36,9 @@ test("the Player screen shows the setlist and sends the transport commands", asy
   await page.getByRole("switch", { name: "Auto-resume playback" }).click();
   const names = (await dispatched(page)).map((entry: unknown) => JSON.stringify(entry));
   expect(names.join(" ")).toMatch(/Pause.*Next.*ToggleRecordArm.*ToggleAutoResume/);
+
+  await rows.nth(2).click();
+  expect(JSON.stringify((await dispatched(page)).at(-1))).toContain('"GoToSong":{"index":2}');
 
   await page.getByLabel("Choose the setlist to play").selectOption("");
   expect(JSON.stringify((await dispatched(page)).at(-1))).toContain("SetActiveSetlist");

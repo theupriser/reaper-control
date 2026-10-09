@@ -14,6 +14,9 @@ pub(super) fn to_input(
         Command::Next => Ok(Input::Next),
         Command::Previous => Ok(Input::Previous),
         Command::RestartSong => Ok(Input::RestartSong),
+        Command::GoToSong { index } => Ok(Input::GoToSong {
+            index: index as usize,
+        }),
         Command::Seek {
             position,
             count_in: false,
