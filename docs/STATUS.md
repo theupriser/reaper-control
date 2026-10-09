@@ -2,7 +2,7 @@
 
 Single source for "where are we". `/start` and `/next` read this file first. Update it in the same PR whenever a feature, spike or bug completes (keep it short and true).
 
-Last updated: 2026-10-09, after PR #81; WP 0.7 is on `feature/more-sample-projects` (this PR).
+Last updated: 2026-10-09, after PR #82; the Phase 4b plan is on `feature/rust-refactor-phase` (this PR).
 
 ## Done (merged to main)
 
