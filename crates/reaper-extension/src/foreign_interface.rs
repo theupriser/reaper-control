@@ -1,5 +1,6 @@
 //! The one module that talks to REAPER and the C runtime. Everything else in the crate is safe.
 
+mod exit_file;
 mod missing_functions;
 #[cfg(feature = "probe")]
 mod probe;
@@ -20,6 +21,7 @@ use crate::fault_file::FaultFile;
 use crate::log::Log;
 use crate::safe_mode_marker::SafeModeMarker;
 use crate::start_up::StartUp;
+use exit_file::ExitFile;
 use missing_functions::MissingFunctions;
 use reaper_rs_adapter::ReaperRsAdapter;
 use surface::Surface;
@@ -27,7 +29,7 @@ use surface::Surface;
 static FAULT: Fault = Fault::new();
 static LOG: OnceLock<Log> = OnceLock::new();
 static FAULTS: OnceLock<FaultFile> = OnceLock::new();
-static MARKER: OnceLock<SafeModeMarker> = OnceLock::new();
+static EXIT_FILE: OnceLock<ExitFile> = OnceLock::new();
 
 unsafe extern "C" {
     fn atexit(callback: extern "C" fn()) -> i32;
@@ -36,11 +38,9 @@ unsafe extern "C" {
 /// REAPER does not call `close_no_reset` or drop the surface at a clean quit (ADR-009), but the C
 /// runtime runs this at exit. A crash, a kill or SIGTERM never gets here, so the marker stays.
 extern "C" fn on_exit() {
-    let _ = std::panic::catch_unwind(|| {
-        if let Some(marker) = MARKER.get() {
-            marker.release();
-        }
-    });
+    if let Some(file) = EXIT_FILE.get() {
+        file.remove();
+    }
 }
 
 #[reaper_extension_plugin]
@@ -81,7 +81,9 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
         }
         StartUp::Normal(marker) => {
             faults.clear();
-            let _ = MARKER.set(marker);
+            if let Some(file) = ExitFile::new(marker.path()) {
+                let _ = EXIT_FILE.set(file);
+            }
         }
     }
     // SAFETY: registers a plain `extern "C" fn` that only removes a file.
