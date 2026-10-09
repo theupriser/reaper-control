@@ -36,7 +36,8 @@
 
   let chosen = $state("");
   const missing = $derived(missingEntries(draft, songs));
-  const nameOf = (songId: string) => songs.find((song) => song.id === songId)?.name ?? songId;
+  const names = $derived(new Map(songs.map((song) => [song.id, song.name])));
+  const nameOf = (songId: string) => names.get(songId) ?? songId;
 </script>
 
 <Panel title={draft.name || strings.setlists.newName}>
@@ -53,7 +54,7 @@
       <SetlistEntryRow
         position={at + 1}
         name={nameOf(entry.song_id)}
-        missing={missing.includes(entry.id)}
+        missing={missing.has(entry.id)}
         first={at === 0}
         last={at === draft.entries.length - 1}
         onUp={() => onMove(entry.id, -1)}

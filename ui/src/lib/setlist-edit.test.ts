@@ -31,7 +31,7 @@ describe("setlist edit", () => {
   });
 
   it("finds entries whose song is gone", () => {
-    expect(missingEntries(draftOf(saved), [song("a"), song("c")])).toEqual([4]);
+    expect(missingEntries(draftOf(saved), [song("a"), song("c")])).toEqual(new Set([4]));
   });
 
   it("knows what changed", () => {

@@ -22,3 +22,17 @@ describe("playerRows", () => {
     expect(rows[2].duration).toBe(30);
   });
 });
+
+describe("playerRows memory", () => {
+  const stable = { revision: 1, setlist_revision: 1, active_setlist: "set", songs: [song(1), song(2)] } as unknown as Catalog;
+
+  it("gives the same rows back when only the position moved", () => {
+    expect(playerRows(stable, live(0, 1))).toBe(playerRows({ ...stable }, live(0, 1)));
+  });
+
+  it("builds new rows when the current song or the catalog changes", () => {
+    const first = playerRows(stable, live(0, 1));
+    expect(playerRows(stable, live(1, null))).not.toBe(first);
+    expect(playerRows({ ...stable, revision: 2 }, live(1, null))).not.toBe(first);
+  });
+});
