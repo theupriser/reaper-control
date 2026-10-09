@@ -17,7 +17,6 @@ export const strings = {
     help: "Help",
     performerMode: "Performer mode",
     mainNavigation: "Main",
-    comingSoon: "This screen is not built yet. Its design is in the canvas.",
   },
 
   setlists: {
@@ -100,6 +99,53 @@ export const strings = {
     notReady: "Not ready: fix the rows marked \"Fix this\".",
     checkAgain: "Check again",
     openSetup: "Open the setup",
+  },
+
+  help: {
+    title: "Help",
+    intro: "How to set up REAPER for this app, and how to mark your songs.",
+    sections: [
+      {
+        title: "Connect the app",
+        steps: [
+          "Open Settings and run the setup. It finds REAPER, installs the extension and asks you to restart REAPER.",
+          "Open REAPER with your project. The app connects by itself: the dot in the sidebar turns green.",
+          "If it does not connect, check that REAPER is running and open the Pre-show check to see what fails.",
+        ],
+      },
+      {
+        title: "Songs and cues",
+        steps: [
+          "Every region in your project is a song. Name the regions as you want them on stage.",
+          "To make a region, drag over the ruler and press Shift+R. Double-click the region to name it.",
+          "Every marker is a cue, a point you can jump to. Press M to add one.",
+        ],
+      },
+      {
+        title: "Special markers",
+        intro: "Put a token in the name of a marker or region. Tokens can be combined, in any order, separated by spaces. A marker that holds only tokens is not shown on the timeline.",
+        steps: [
+          "!1008 (or !hardstop): the show stops at the end of the song until you press play again. The marker may lie anywhere inside the song.",
+          "!length:45: the song counts as 45 seconds, for the hard stop and the setlist time. Use it with !1008.",
+          "!bpm:120: the tempo shown for the song. Put it at the very start of the song. It does not change REAPER's tempo.",
+        ],
+        example: "!length:45 !bpm:140 !1008",
+      },
+      {
+        title: "Count-in",
+        steps: [
+          "Switch on Count-in when pressing marker, then press a cue: the app jumps there and REAPER counts in.",
+          "The count-in uses REAPER's tempo and its Count-in measures setting.",
+        ],
+      },
+      {
+        title: "MIDI control",
+        steps: [
+          "Open Settings and switch on MIDI. Choose your device or leave it on all devices.",
+          "Add a mapping: a note number from 0 to 127 and the action it triggers.",
+        ],
+      },
+    ],
   },
 
   health: {

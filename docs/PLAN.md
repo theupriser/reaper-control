@@ -151,8 +151,8 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 | ✅ 6.4 | Connection/health (banner shows the cause text from the app's health monitor; the sidebar status opens a dialog with CPU and memory instead of a popover; diagnostics stay in Settings): header status, popovers, banners (Lost/NotLoaded/Outdated/Faulted), diagnostics | F1, F14 | 3 |
 | ✅ 6.5 | Settings: connection status + repair, MIDI (devices, channel, mapping), behaviour, appearance **MIDI device, channel, the editable note table, the appearance controls (theme, density, touch) and the connection card (opens the wizard to repair) are done.** | F12, F13 | 4 |
 | ✅ 6.6 | First-run wizard + Repair screen driven by `InstallReport`: find REAPER → install extension → restart REAPER → connect; per-step status (Ok/Fixed/Manual), instruction cards with copy/reveal buttons, "Check again", REAPER-running handling, safe-mode re-enable, success only on live handshake **The four steps, install, polling until connected and "Open the setup" in Settings are done; reveal in Finder/Explorer, the safe-mode re-enable card and choosing a REAPER folder in the wizard are not.** | new (D3, R-INST) | 5 |
-| 🟡 6.7 | Pre-show checklist **Five rows (extension, connection, songs, setlist, MIDI) with a detail and a ready line; done except a run against a connected REAPER.** | S-7 | 2 |
-| ⬜ 6.8 | Help + marker guide (+ optional marker helper) | F15, F8 | 3 |
+| ✅ 6.7 | Pre-show checklist **Five rows (extension, connection, songs, setlist, MIDI) with a detail and a ready line; not yet run against a connected REAPER.** | S-7 | 2 |
+| 🟡 6.8 | Help + marker guide **Help screen with setup, songs, special markers, count-in and MIDI; the optional marker helper is left out.** | F15, F8 | 3 |
 | ⬜ 6.9 | Perf pass: virtualised lists, batch updates, no layout thrash; verify budgets | goal 5 | 3 |
 
 **Gate 6 (feature complete):** parity checklist F1–F18 all ticked with evidence (test or manual script).
