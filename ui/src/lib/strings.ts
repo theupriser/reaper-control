@@ -54,6 +54,7 @@ export const strings = {
     cpu: (percent: number) => `CPU ${percent}%`,
   },
 
+  pending: { sending: "Sending…" },
   notices: { dismiss: "Dismiss" },
 
   settings: {
