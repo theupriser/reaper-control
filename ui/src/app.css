@@ -9,3 +9,8 @@ body {
 button {
   font-family: inherit;
 }
+
+:focus-visible {
+  outline: 3px solid var(--info);
+  outline-offset: 2px;
+}

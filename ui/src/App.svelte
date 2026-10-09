@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import ComingSoon from "./components/ComingSoon.svelte";
   import Notices from "./components/Notices.svelte";
   import PerformerScreen from "./components/PerformerScreen.svelte";
@@ -10,13 +10,21 @@
   import { backend } from "./lib/ipc";
   import { screenLabel, type ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
-  import { keyIntent, seekCommand, type PerformerPhase, type SeekTarget } from "./lib/performer";
+  import { keyAction, toKeyPress } from "./lib/keyboard";
+  import { seekCommand, type PerformerPhase, type SeekTarget } from "./lib/performer";
   import { performerView } from "./lib/performer-view";
   import { strings } from "./lib/strings";
 
   const appState = createAppStore(backend);
   let screen = $state<ScreenId>("player");
   let performerMode = $state(false);
+  let content = $state<HTMLElement>();
+
+  const select = async (id: ScreenId) => {
+    screen = id;
+    await tick();
+    content?.focus();
+  };
 
   const phases: PerformerPhase[] = ["Idle", "Playing", "Paused", "CountingIn", "HardStopped"];
   const forced = new URLSearchParams(location.search).get("phase") as PerformerPhase | null;
@@ -35,13 +43,13 @@
   const toggleAutoResume = () => send("ToggleAutoResume");
 
   function onKeydown(event: KeyboardEvent) {
-    if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
-    const intent = keyIntent(event.key);
-    if (!intent) return;
+    const action = keyAction(toKeyPress(event), performerMode);
+    if (!action) return;
     event.preventDefault();
-    if (intent === "PlayPause") playPause();
-    else if (intent === "Previous") previous();
-    else if (intent === "Next") next();
+    if (action === "PlayPause") playPause();
+    else if (action === "Previous") previous();
+    else if (action === "Next") next();
+    else if (action === "ExitPerformer") performerMode = false;
     else toggleAutoResume();
   }
 
@@ -67,8 +75,8 @@
   />
 {:else}
   <div class="layout">
-    <Sidebar active={screen} onSelect={(id) => (screen = id)} onPerformer={() => (performerMode = true)} {connection} />
-    <div class="content">
+    <Sidebar active={screen} onSelect={select} onPerformer={() => (performerMode = true)} {connection} />
+    <div class="content" tabindex="-1" bind:this={content}>
       {#if screen === "player"}
         <PerformerScreen
           {view}
@@ -105,6 +113,7 @@
     color: var(--red);
     padding: 0 2rem;
   }
+  .content:focus { outline: none; }
   .content {
     flex: 1;
     min-width: 0;
