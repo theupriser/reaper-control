@@ -12,6 +12,7 @@ type TestResult = Result<(), Box<dyn std::error::Error>>;
 fn song(id: &str, name: &str) -> SongInfo {
     SongInfo {
         id: id.into(),
+        number: 0,
         name: name.into(),
         start: 0.0,
         end: 1.0,
@@ -80,6 +81,45 @@ fn items_map_to_songs_by_name_and_a_missing_song_is_reported() -> TestResult {
     );
     assert_eq!(resolved.setlist.revision, 0);
     println!("{resolved:#?}");
+    Ok(())
+}
+
+#[test]
+fn the_region_number_tells_songs_with_the_same_name_apart() -> TestResult {
+    let legacy = LegacyFile::parse(WITH_METADATA)?.setlists;
+    let numbered = |id: &str, number: u32| SongInfo {
+        number,
+        ..song(id, "Opener")
+    };
+    // v1 stored region 3 for both Opener items; the song numbered 3 comes first, then the
+    // other one by name.
+    let songs = [
+        numbered("{A}", 7),
+        song("{B}", "Ballad"),
+        numbered("{C}", 3),
+    ];
+    let resolved = resolve(legacy.first().ok_or("no setlist")?, &songs);
+    let ids: Vec<_> = resolved
+        .setlist
+        .entries
+        .iter()
+        .map(|entry| entry.song_id.as_str())
+        .collect();
+    assert_eq!(ids, ["{C}", "{B}", "{A}"]);
+    Ok(())
+}
+
+#[test]
+fn a_region_number_may_be_text_a_number_or_missing() -> TestResult {
+    let file = LegacyFile::parse(
+        r#"[{"id":"s","name":"S","items":[{"name":"A","regionId":4},{"name":"B","regionId":"5"},{"name":"C"},{"name":"D","regionId":"x"}]}]"#,
+    )?;
+    let numbers: Vec<_> = file
+        .setlists
+        .iter()
+        .flat_map(|setlist| setlist.items.iter().map(|item| item.region_number))
+        .collect();
+    assert_eq!(numbers, [Some(4), Some(5), None, None]);
     Ok(())
 }
 

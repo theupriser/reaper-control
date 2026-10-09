@@ -7,6 +7,7 @@ publish.workspace = true
 
 [dev-dependencies]
 cargo_metadata = "0.20"
+serde_json.workspace = true
 
 [lints]
 workspace = true

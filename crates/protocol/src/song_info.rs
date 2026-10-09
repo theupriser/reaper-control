@@ -6,6 +6,8 @@ use ts_rs::TS;
 pub struct SongInfo {
     /// Identity that survives renames and moves (ADR-008).
     pub id: String,
+    /// The region number REAPER shows.
+    pub number: u32,
     /// Display name.
     pub name: String,
     /// Start on the project timeline, in seconds.

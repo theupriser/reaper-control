@@ -110,6 +110,7 @@ name = "architecture-tests"
 version = "0.0.0"
 dependencies = [
  "cargo_metadata 0.20.0",
+ "serde_json",
 ]
 
 [[package]]

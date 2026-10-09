@@ -1,6 +1,6 @@
 # ADR-003: Link = loopback TCP, all socket work off the main thread
 
-Status: **Proposed**. Spike S3 is positive on macOS arm64; Windows and several design points are untested (below).
+Status: **Proposed**. Spike S3 is positive on macOS arm64 and Windows x64 (VM); several design points are untested (below).
 Date: 2026-10-07. Related: ADR-002, SPEC §2.5 (link), S-9 (no blocking on main/audio thread), PLAN WP 1.3.
 
 ## Question (S3)
@@ -34,9 +34,24 @@ Tick summary during all of this: average 30.0 ms. The only large values (129 ms,
 ## Framing in the real implementation (2026-10-07)
 The spike used newline-terminated text lines. The real protocol follows SPEC §2.2: 4-byte big-endian length plus one JSON document, at most 1 MiB, handshake `Hello{protocol, token}` as the first message (`crates/protocol`). The measurements above were taken with lines; a frame adds 4 bytes and no extra copy, so they are expected to hold, but they were not repeated.
 
+## Measured again with the real implementation (2026-10-09)
+`cargo run --release -p link --example measure_link -- <RC2/endpoint.json> 10 100 play`: a client connects, the transport plays, the example counts the pushed states for 10 s (and misses by sequence number), then sends 100 `ToggleAutoResume` commands 100 ms apart and times each until its answer. Release extension, the synthetic sample project, no real audio load.
+
+| | macOS arm64 (isolated REAPER 7.82) | Windows 11 x64 (VM, REAPER 7.82 portable, dummy audio) |
+|---|---|---|
+| States in 10 s, playing | 368, 0 missed | 347, 0 missed |
+| Interval between states | mean 27.3 ms, median 30.0, p99 33.1, max 37.3 | mean 29.0 ms, median 31.9, p99 33.2, max 35.4 |
+| Round trip, command to answer | mean 9.6 ms, median 8.8, p99 21.4, max 21.5 | mean 8.9 ms, median 15.5, p99 16.9, max 32.3 |
+| Idle (5 s) states | 1 per second (heartbeat) | 160 in 5 s |
+
+Reading: the round trip is bounded by the main-thread tick (about 30 ms), as designed; Windows and macOS agree within that. An interval of about 0 ms means two states arrived back to back; the cause was not investigated. These are VM numbers on Windows, not stage numbers.
+
+## Firewall on Windows
+The Windows firewall was on in all three profiles. After REAPER with the extension listened on 127.0.0.1 and the measurement ran, `netsh advfirewall firewall show rule name=all` held no rule for REAPER, which is what a loopback-only listener should give (no prompt creates no rule). A prompt on a real desktop was not seen by anyone, so the owner's check stays on the list.
+
 ## Not tested (do before Gate 1 or in the real implementation)
-- Windows: only compiled by CI, never run (needs a machine). Named pipes / Unix sockets were not compared; TCP worked, so no reason to switch yet.
-- Firewall or antivirus prompts for a loopback listener (macOS and Windows).
+- Named pipes / Unix sockets were not compared; TCP works on macOS and Windows (above), so no reason to switch.
+- Firewall or antivirus prompts for a loopback listener as seen on a real desktop (macOS: none seen; Windows: no firewall rule created, nobody looked at the screen).
 - Reconnect with replay (resume after a gap): protocol design, not part of this spike.
 - Behaviour during REAPER menus and modal dialogs (same open item as ADR-005); sockets run on their own threads, so only the tick is at risk.
 - Log writes from several threads interleave in the spike; the real extension needs one logging thread.

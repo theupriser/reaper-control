@@ -152,7 +152,7 @@ fn a_note_from_a_real_midi_port_reaches_the_bus() -> TestResult {
         .create_virtual(&name)
         .map_err(|error| error.to_string())?;
     let (router, driver, _) = router(MidiConfig::default(), false);
-    MidiListener::start(
+    let _listener = MidiListener::start(
         Arc::new(app::MidirSource),
         Arc::new(router),
         Some(name),
@@ -233,4 +233,77 @@ fn only_the_named_device_is_opened_when_one_is_named() {
     source.plug(Some(&["A", "B"]));
     follower.poll();
     assert_eq!(source.open_devices(), vec!["B".to_owned()]);
+}
+
+fn wait_until(condition: impl Fn() -> bool) -> bool {
+    let deadline = std::time::Instant::now() + Duration::from_secs(5);
+    while !condition() && std::time::Instant::now() < deadline {
+        std::thread::sleep(Duration::from_millis(20));
+    }
+    condition()
+}
+
+fn switch(source: &Arc<app::FakeMidiSource>) -> (app::MidiSwitch, Arc<FakeDriver>) {
+    let driver = Arc::new(FakeDriver::default());
+    let clock = Arc::new(FakeClock::default());
+    let events = Arc::new(EventBus::default());
+    let bus = Arc::new(CommandBus::new(
+        driver.clone(),
+        events.clone(),
+        clock.clone(),
+        QueueSettings {
+            repeat_window: Duration::ZERO,
+            ..QueueSettings::default()
+        },
+    ));
+    let intents = Arc::new(IntentDispatcher::new(
+        bus,
+        events.clone(),
+        LinkView::default,
+    ));
+    (
+        app::MidiSwitch::new(source.clone(), intents, events, clock),
+        driver,
+    )
+}
+
+#[test]
+fn new_midi_settings_take_effect_without_a_restart() {
+    let source = Arc::new(app::FakeMidiSource::default());
+    source.plug(Some(&["FootCtrl Mini"]));
+    let (switch, driver) = switch(&source);
+
+    // Listening to channel 5 only: a note on channel 0 is ignored.
+    switch.apply(&MidiConfig {
+        channel: Some(5),
+        ..MidiConfig::default()
+    });
+    assert!(wait_until(|| source.open_devices().len() == 1));
+    assert!(source.send("FootCtrl Mini", &note_on(0, 51, 100)));
+    assert!(driver.sent().is_empty());
+
+    // The setting changes to all channels: the device is reopened with the new router.
+    switch.apply(&MidiConfig::default());
+    assert!(wait_until(|| source.open_devices().len() == 1));
+    assert!(source.send("FootCtrl Mini", &note_on(0, 51, 100)));
+    assert_eq!(driver.sent().first(), Some(&Command::Next));
+
+    // Switched off: the device is closed and the thread has ended.
+    switch.apply(&MidiConfig {
+        enabled: false,
+        ..MidiConfig::default()
+    });
+    assert!(!switch.is_running());
+    assert!(source.open_devices().is_empty());
+}
+
+#[test]
+fn dropping_the_listener_closes_its_devices() {
+    let source = Arc::new(app::FakeMidiSource::default());
+    source.plug(Some(&["A"]));
+    let (switch, _) = switch(&source);
+    switch.apply(&MidiConfig::default());
+    assert!(wait_until(|| source.open_devices().len() == 1));
+    drop(switch);
+    assert!(source.open_devices().is_empty());
 }

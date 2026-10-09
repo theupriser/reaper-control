@@ -150,6 +150,7 @@ fn planned_song(song: &ScenarioSong) -> Result<PlannedSong, ScenarioError> {
 fn region(song: &ScenarioSong) -> Result<Region, ScenarioError> {
     Ok(Region {
         id: SongId::new(song.id.clone()),
+        number: 0,
         name: song.id.clone(),
         start: secs(song.start)?,
         end: secs(song.end)?,

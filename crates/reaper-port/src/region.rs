@@ -5,6 +5,8 @@ use shared_kernel::{Seconds, SongId};
 pub struct Region {
     /// Stable identity (the region GUID).
     pub id: SongId,
+    /// The number REAPER shows for the region (v1 setlists stored it).
+    pub number: u32,
     /// The region's name.
     pub name: String,
     /// Where it starts.

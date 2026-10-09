@@ -27,6 +27,7 @@ const V1_FILE: &str = r#"{"setlists":[
 fn song(id: &str, name: &str) -> SongInfo {
     SongInfo {
         id: id.into(),
+        number: 0,
         name: name.into(),
         start: 0.0,
         end: 1.0,

@@ -1,0 +1,5 @@
+resource folder: ok - found
+writable: manual - the folder is read-only; change its permissions or run the app as the owner of the folder
+reaper running: ok - no conflict
+architecture: ok - matches
+extension: fixable - not installed

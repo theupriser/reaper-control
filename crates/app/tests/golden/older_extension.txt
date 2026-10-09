@@ -1,0 +1,5 @@
+resource folder: ok - found
+writable: ok - can be written
+reaper running: ok - no conflict
+architecture: ok - matches
+extension: fixable - installed, but not the version that ships with the app

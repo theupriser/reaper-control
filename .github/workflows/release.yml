@@ -1,0 +1,95 @@
+name: Release
+
+# A tag like v0.1.0 builds both platforms and opens a DRAFT release; publishing it is a manual
+# step (ADR-006: ad-hoc signed on macOS, unsigned on Windows, until accounts exist).
+on:
+  push:
+    tags: ["v*"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  version:
+    name: Tag matches version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: The tag equals the workspace version
+        shell: bash
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -1)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "tag $GITHUB_REF_NAME does not match Cargo.toml version $version" >&2
+            exit 1
+          fi
+
+  build:
+    name: Build (${{ matrix.os }})
+    needs: version
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: macos-14
+            binary: target/release/app
+            name: reaper-control-macos-arm64
+          - os: windows-latest
+            binary: target/release/app.exe
+            name: reaper-control-windows-x64.exe
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain (from rust-toolchain.toml)
+        run: rustup show
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ui/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: ui/pnpm-lock.yaml
+      - name: UI install and build
+        run: |
+          pnpm --dir ui install --frozen-lockfile
+          pnpm --dir ui build
+      - uses: Swatinem/rust-cache@v2
+      - name: Build the extension (release)
+        run: cargo build --release -p reaper-extension
+      - name: Package the extension with its checksum
+        shell: bash
+        run: scripts/package_extension.sh
+      - name: Build the app (release)
+        run: cargo build --release -p app --features custom-protocol
+      - name: Name the app file and checksum it
+        shell: bash
+        run: |
+          cp "${{ matrix.binary }}" "dist/${{ matrix.name }}"
+          cd dist
+          if command -v sha256sum >/dev/null; then sha256sum "${{ matrix.name }}" > "${{ matrix.name }}.sha256"; else shasum -a 256 "${{ matrix.name }}" > "${{ matrix.name }}.sha256"; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.os }}
+          path: dist/
+
+  draft:
+    name: Draft release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --draft \
+            --title "$GITHUB_REF_NAME" \
+            --notes "Draft. macOS: ad-hoc signed. Windows: unsigned (SmartScreen will warn). Verify with the .sha256 files."

@@ -142,6 +142,7 @@ fn live() -> Live {
 fn opener() -> SongInfo {
     SongInfo {
         id: "{A}".into(),
+        number: 1,
         name: "Opener".into(),
         start: 0.0,
         end: 200.5,

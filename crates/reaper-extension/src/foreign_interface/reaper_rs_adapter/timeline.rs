@@ -48,6 +48,7 @@ fn entry_at(reaper: &Reaper<MainThreadScope>, index: u32) -> Option<Option<Entry
             Some(end) => start.zip(Seconds::new(end.get()).ok()).map(|(start, end)| {
                 Entry::Region(Region {
                     id: SongId::new(guid(reaper, index)),
+                    number: found.id.get(),
                     name,
                     start,
                     end,

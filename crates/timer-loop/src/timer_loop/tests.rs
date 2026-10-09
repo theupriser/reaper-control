@@ -11,6 +11,7 @@ pub(super) fn seconds(value: f64) -> Seconds {
 pub(super) fn region(id: &str, start: f64, end: f64) -> Region {
     Region {
         id: SongId::new(id),
+        number: 0,
         name: id.to_string(),
         start: seconds(start),
         end: seconds(end),
