@@ -9,12 +9,12 @@ use crate::command_bus::CommandBus;
 use crate::import_error::ImportError;
 use crate::legacy_file::LegacyFile;
 use crate::legacy_resolver::resolve;
-use crate::setlist_mirror::SetlistMirror;
+use crate::mirror_repository::MirrorRepository;
 
 /// Offers and carries out a restore or an import. Both end in `SaveSetlist` through the
 /// command bus, so the project is only ever changed the way an edit changes it.
 pub struct SetlistTransfer {
-    mirror: SetlistMirror,
+    mirror: Arc<dyn MirrorRepository>,
     legacy_directory: Option<PathBuf>,
     bus: Arc<CommandBus>,
 }
@@ -23,7 +23,7 @@ impl SetlistTransfer {
     /// A service over the backup copy and the folder of v1's setlist files, if v1 left one.
     #[must_use]
     pub fn new(
-        mirror: SetlistMirror,
+        mirror: Arc<dyn MirrorRepository>,
         legacy_directory: Option<PathBuf>,
         bus: Arc<CommandBus>,
     ) -> Self {

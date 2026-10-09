@@ -3,6 +3,7 @@ use std::time::Duration;
 use protocol::Command;
 
 use super::*;
+use crate::config_store::ConfigStore;
 use crate::event_bus::EventBus;
 use crate::fake_clock::FakeClock;
 use crate::fake_driver::FakeDriver;
@@ -29,7 +30,7 @@ fn rig(name: &str) -> Rig {
         QueueSettings::default(),
     ));
     let service = SettingsService::new(
-        ConfigStore::new(directory.join("config.json")),
+        Arc::new(ConfigStore::new(directory.join("config.json"))),
         AppConfig::default(),
         bus.clone(),
     );
@@ -118,4 +119,26 @@ fn the_queue_limits_apply_without_a_restart() -> Result<(), ConfigError> {
     assert_eq!(rig.driver.sent().len(), 2, "no repeat window any more");
     let _ = std::fs::remove_dir_all(&rig.directory);
     Ok(())
+}
+
+#[test]
+fn a_refused_write_changes_neither_the_values_nor_the_queue() {
+    let repository = Arc::new(crate::fake_config_repository::FakeConfigRepository::default());
+    let driver = Arc::new(FakeDriver::default());
+    let bus = Arc::new(CommandBus::new(
+        driver,
+        Arc::new(EventBus::default()),
+        Arc::new(FakeClock::default()),
+        QueueSettings::default(),
+    ));
+    let service = SettingsService::new(repository.clone(), AppConfig::default(), bus);
+    let mut settings = service.view(Vec::new()).settings;
+    settings.queue_capacity = 10;
+    repository.refuse_writes();
+    assert!(matches!(service.save(&settings), Err(ConfigError::Io(_))));
+    assert_eq!(
+        service.view(Vec::new()).settings,
+        AppConfig::default().settings()
+    );
+    assert!(!repository.exists());
 }

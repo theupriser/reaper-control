@@ -5,6 +5,7 @@ use std::time::Duration;
 
 use app::app_config::AppConfig;
 use app::command_bus::CommandBus;
+use app::config_repository::ConfigRepository;
 use app::config_store::ConfigStore;
 use app::event_bus::EventBus;
 use app::fake_clock::FakeClock;
@@ -151,7 +152,12 @@ fn a_note_from_a_real_midi_port_reaches_the_bus() -> TestResult {
         .create_virtual(&name)
         .map_err(|error| error.to_string())?;
     let (router, driver, _) = router(MidiConfig::default(), false);
-    MidiListener::start(Arc::new(router), Some(name), Arc::default())?;
+    MidiListener::start(
+        Arc::new(app::midir_source::MidirSource),
+        Arc::new(router),
+        Some(name),
+        Arc::default(),
+    )?;
     let deadline = std::time::Instant::now() + Duration::from_secs(10);
     while driver.sent().is_empty() && std::time::Instant::now() < deadline {
         source.send(&note_on(0, 51, 100))?;
@@ -159,4 +165,76 @@ fn a_note_from_a_real_midi_port_reaches_the_bus() -> TestResult {
     }
     assert_eq!(driver.sent().first(), Some(&Command::Next));
     Ok(())
+}
+
+type Changes = Arc<std::sync::Mutex<Vec<Vec<String>>>>;
+
+fn follower(
+    source: &Arc<app::fake_midi_source::FakeMidiSource>,
+    wanted: Option<&str>,
+) -> (
+    app::midi_device_follower::MidiDeviceFollower,
+    Arc<FakeDriver>,
+    Changes,
+) {
+    let (router, driver, _) = router(MidiConfig::default(), false);
+    let events = Arc::new(EventBus::default());
+    let changes = Arc::new(std::sync::Mutex::new(Vec::new()));
+    let seen = Arc::clone(&changes);
+    events.subscribe(move |event| {
+        if let app::app_event::AppEvent::MidiDevicesChanged { devices } = event
+            && let Ok(mut seen) = seen.lock()
+        {
+            seen.push(devices.clone());
+        }
+    });
+    let follower = app::midi_device_follower::MidiDeviceFollower::new(
+        source.clone(),
+        Arc::new(router),
+        wanted.map(str::to_owned),
+        events,
+    );
+    (follower, driver, changes)
+}
+
+#[test]
+fn a_plugged_in_device_is_opened_once_and_its_notes_reach_the_bus() {
+    let source = Arc::new(app::fake_midi_source::FakeMidiSource::default());
+    let (mut follower, driver, changes) = follower(&source, None);
+    source.plug(Some(&["FootCtrl Mini"]));
+    follower.poll();
+    follower.poll();
+    assert_eq!(source.open_devices(), vec!["FootCtrl Mini".to_owned()]);
+    assert_eq!(changes.lock().map(|c| c.len()).unwrap_or_default(), 1);
+    assert!(source.send("FootCtrl Mini", &note_on(0, 51, 100)));
+    assert_eq!(driver.sent().first(), Some(&Command::Next));
+}
+
+#[test]
+fn an_unplugged_device_is_closed_and_a_failed_listing_closes_nothing() {
+    let source = Arc::new(app::fake_midi_source::FakeMidiSource::default());
+    let (mut follower, _, changes) = follower(&source, None);
+    source.plug(Some(&["A", "B"]));
+    follower.poll();
+    source.plug(None);
+    follower.poll();
+    assert_eq!(source.open_devices(), vec!["A".to_owned(), "B".to_owned()]);
+    source.plug(Some(&["B"]));
+    follower.poll();
+    assert_eq!(source.open_devices(), vec!["B".to_owned()]);
+    assert!(!source.send("A", &note_on(0, 51, 100)));
+    let changes = changes.lock().map(|c| c.clone()).unwrap_or_default();
+    assert_eq!(
+        changes,
+        vec![vec!["A".to_owned(), "B".to_owned()], vec!["B".to_owned()]]
+    );
+}
+
+#[test]
+fn only_the_named_device_is_opened_when_one_is_named() {
+    let source = Arc::new(app::fake_midi_source::FakeMidiSource::default());
+    let (mut follower, _, _) = follower(&source, Some("B"));
+    source.plug(Some(&["A", "B"]));
+    follower.poll();
+    assert_eq!(source.open_devices(), vec!["B".to_owned()]);
 }

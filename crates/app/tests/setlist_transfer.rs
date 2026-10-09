@@ -8,6 +8,7 @@ use app::event_bus::EventBus;
 use app::fake_clock::FakeClock;
 use app::fake_driver::FakeDriver;
 use app::mirror_keeper::MirrorKeeper;
+use app::mirror_repository::MirrorRepository;
 use app::queue_settings::QueueSettings;
 use app::setlist_mirror::SetlistMirror;
 use app::setlist_transfer::SetlistTransfer;
@@ -88,7 +89,7 @@ fn rig(name: &str, with_v1_file: bool) -> Result<Rig, std::io::Error> {
         QueueSettings::default(),
     ));
     let mirror = SetlistMirror::new(directory.join("mirror"));
-    let transfer = SetlistTransfer::new(mirror.clone(), Some(legacy), bus);
+    let transfer = SetlistTransfer::new(Arc::new(mirror.clone()), Some(legacy), bus);
     Ok(Rig {
         directory,
         mirror,
@@ -100,7 +101,7 @@ fn rig(name: &str, with_v1_file: bool) -> Result<Rig, std::io::Error> {
 #[test]
 fn the_keeper_writes_changes_but_never_an_empty_list_over_the_copy() -> TestResult {
     let rig = rig("keeper", false)?;
-    let keeper = MirrorKeeper::new(rig.mirror.clone());
+    let keeper = MirrorKeeper::new(Arc::new(rig.mirror.clone()));
     keeper.observe(&view("", vec![setlist("s", "Friday", &["{A}"])]));
     assert!(rig.mirror.restore("project-1")?.is_empty());
     let friday = setlist("s", "Friday", &["{A}"]);
