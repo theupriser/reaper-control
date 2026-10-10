@@ -26,6 +26,7 @@ fn setlist(min: usize, hard_stops: bool) -> impl Strategy<Value = Vec<PlannedSon
                     song_id: format!("song-{index}"),
                     window: SongWindow::new(t(start), t(cursor)).unwrap(),
                     hard_stop: hard_stops && hard_stop,
+                    hard_stop_marker: None,
                 });
             }
             songs

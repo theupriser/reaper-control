@@ -144,6 +144,7 @@ fn planned_song(song: &ScenarioSong) -> Result<PlannedSong, ScenarioError> {
         song_id: song.id.clone(),
         window,
         hard_stop: song.hard_stop,
+        hard_stop_marker: None,
     })
 }
 
