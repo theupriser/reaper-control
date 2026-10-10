@@ -140,7 +140,7 @@
   <WizardScreen onclose={() => (wizardOpen = false)} />
 {:else}
   <div class="layout">
-    <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} {midi} onConnection={openConnection} />
+    <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} {midi} onMidi={() => select("settings")} onConnection={openConnection} />
     <main class="content" tabindex="-1" bind:this={content}>
       {#if screen === "player"}
         <PlayerScreen

@@ -9,13 +9,15 @@
     onConnection,
     connection,
     midi,
+    onMidi,
   }: {
     active: ScreenId;
     onSelect: (id: ScreenId) => void;
     onPerformer: () => void;
     onConnection: () => void;
-    connection: { label: string; detail: string; tone: "ok" | "error" };
+    connection: { label: string; line?: string; tone: "ok" | "error" };
     midi: { label: string; detail: string; tone: "ok" | "error" } | null;
+    onMidi: () => void;
   } = $props();
 </script>
 
@@ -42,15 +44,14 @@
   </button>
 
   {#if midi}
-    <div class="midi" role="status">
+    <button class="midi" aria-label={strings.midiStatus.openLabel} onclick={onMidi}>
       <div class="state"><span class="dot {midi.tone}"></span>{midi.label}</div>
       <div class="detail">{midi.detail}</div>
-    </div>
+    </button>
   {/if}
 
   <button class="connection" aria-label={strings.health.open} onclick={onConnection}>
-    <div class="state"><span class="dot {connection.tone}"></span>{connection.label}</div>
-    <div class="detail">{connection.detail}</div>
+    <div class="state"><span class="dot {connection.tone}"></span>{connection.line ?? connection.label}</div>
   </button>
 </nav>
 
