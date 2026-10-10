@@ -18,6 +18,11 @@ pub enum Command {
     Previous,
     /// Go back to the start of the current song.
     RestartSong,
+    /// Jump to the start of a song, never with a count-in.
+    GoToSong {
+        /// Position of the song in the played order (the setlist, or the timeline without one), from 0.
+        index: u32,
+    },
     /// Jump to a position in the current song, in seconds from its start.
     Seek {
         /// Seconds from the start of the song.

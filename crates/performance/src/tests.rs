@@ -282,6 +282,33 @@ fn restart_goes_back_to_the_start_of_the_song() {
 }
 
 #[test]
+fn go_to_song_jumps_to_that_songs_start_and_autoplay_decides_whether_it_plays() {
+    let mut waiting = playing_at_song(0);
+    let out = waiting.step(Input::GoToSong { index: 2 });
+    assert_eq!(out.effects, vec![Effect::SeekTo(t(30.0)), Effect::Pause]);
+    assert_eq!(waiting.current_index(), Some(2));
+
+    let mut playing = performance(Flags {
+        autoplay: true,
+        ..Flags::default()
+    });
+    playing.step(Input::Play);
+    let out = playing.step(Input::GoToSong { index: 1 });
+    assert_eq!(out.effects, vec![Effect::SeekTo(t(10.0)), Effect::Play]);
+    assert_eq!(playing.phase(), Phase::Playing);
+}
+
+#[test]
+fn go_to_song_refuses_a_song_that_is_not_in_the_setlist() {
+    let mut p = playing_at_song(0);
+    assert_eq!(
+        p.step(Input::GoToSong { index: 40 }).events,
+        rejected(Rejection::NoSuchSong)
+    );
+    assert_eq!(p.current_index(), Some(0));
+}
+
+#[test]
 fn seek_stays_inside_the_current_song() {
     let mut p = playing_at_song(0);
     let out = p.step(Input::Seek { position: t(4.0) });

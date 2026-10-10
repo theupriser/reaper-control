@@ -4,12 +4,12 @@
   import type { PlayerRow } from "../lib/player-rows";
   import { strings } from "../lib/strings";
 
-  let { rows }: { rows: PlayerRow[] } = $props();
+  let { rows, onChoose }: { rows: PlayerRow[]; onChoose: (index: number) => void } = $props();
 </script>
 
-<div role="list" aria-label={strings.player.songs}>
-  {#each rows as row (row.id)}
-    <ListRow selected={row.state === "current"}>
+<div role="group" aria-label={strings.player.songs}>
+  {#each rows as row, index (row.id)}
+    <ListRow selected={row.state === "current"} onclick={() => onChoose(index)}>
       {#snippet leading()}<span class="number">{row.number}</span>{/snippet}
       <span class="name" class:current={row.state === "current"} class:played={row.state === "played"}>{row.name}</span>
       {#snippet trailing()}

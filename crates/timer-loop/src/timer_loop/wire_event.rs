@@ -27,6 +27,7 @@ fn reason(rejection: Rejection) -> &'static str {
     match rejection {
         Rejection::NothingToPlay => "the setlist has no songs",
         Rejection::NoNextSong => "this is the last song",
+        Rejection::NoSuchSong => "there is no such song",
         Rejection::NoPreviousSong => "this is the first song",
         Rejection::OutsideSong => "that position is outside the song",
         Rejection::NotNow => "not possible right now",

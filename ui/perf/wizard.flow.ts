@@ -62,3 +62,18 @@ test("an installation that is already in place does not open the wizard", async 
   await page.getByRole("navigation").waitFor();
   await expect(page.getByRole("heading", { name: "Set up the connection" })).toHaveCount(0);
 });
+
+test("a connected link with no extension in REAPER's folder still offers to install it", async ({ page }) => {
+  const connectedButMissing = installation([["FindReaper", "Done", ""], ["InstallExtension", "Current", "not installed"], ["RestartReaper", "Done", ""], ["Connect", "Done", ""]], true, true);
+  await page.addInitScript(tauriStandIn, connected);
+  await page.addInitScript((answer) => {
+    const w = window as any;
+    const wait = setInterval(() => { if (w.__answer) { clearInterval(wait); w.__answer("current_installation", answer); } }, 1);
+  }, connectedButMissing);
+  await page.goto("/");
+  await page.getByRole("navigation").getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Open the setup" }).click();
+
+  await expect(page.getByRole("button", { name: "Install the extension" })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
+});

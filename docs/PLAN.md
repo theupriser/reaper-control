@@ -145,7 +145,7 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 ## 9. Phase 6 — Screens
 | WP | Screen | Parity | d |
 |----|--------|--------|---|
-| ✅ 6.1 | Player (clicking a song in the list to jump is not done: no command for it yet): transport, timeline w/ markers, region/setlist list, toggles, BPM, record arm | F2–F4, F7, F9 | 5 |
+| 🟡 6.1 | Player (F3 click a song to jump to its start: bugfix/go-to-song, open until merged): transport, timeline w/ markers, region/setlist list, toggles, BPM, record arm | F2–F4, F7, F9 | 5 |
 | ✅ 6.2 | Setlist editor (drag to reorder is not done: buttons): create/rename/delete, add/remove/reorder (drag), select, validation (missing regions) | F5 | 5 |
 | ✅ 6.3 | **Performer** (the v1 parts were done in Phase 3; this WP added stage-lock): title, song/total time, next song, hard-stop prompt, clock, toggles, exit; stage-lock | F11 | 5 |
 | ✅ 6.4 | Connection/health (banner shows the cause text from the app's health monitor; the sidebar status opens a dialog with CPU and memory instead of a popover; diagnostics stay in Settings): header status, popovers, banners (Lost/NotLoaded/Outdated/Faulted), diagnostics | F1, F14 | 3 |

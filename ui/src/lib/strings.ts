@@ -63,8 +63,8 @@ export const strings = {
   connection: {
     notRunning: "REAPER not running",
     waitingForExtension: "waiting for the extension",
-    seeMessage: "see the message at the bottom",
-    connected: "Connected",
+    seeMessage: "see the banner above",
+    connected: "Connected to REAPER",
     disconnected: "Disconnected",
     extensionVersion: (version: string) => `extension ${version}`,
   },

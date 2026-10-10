@@ -66,6 +66,7 @@ impl Performance {
             Input::Next => self.step_by(1, &mut out),
             Input::Previous => self.step_by(-1, &mut out),
             Input::RestartSong => self.restart(&mut out),
+            Input::GoToSong { index } => self.go_to_song(index, &mut out),
             Input::Seek { position } => self.seek(position, &mut out),
             Input::SeekCue { position } => self.seek_cue(position, &mut out),
             Input::SetFlag { flag, enabled } => self.set_flag(flag, enabled, &mut out),
@@ -165,6 +166,13 @@ impl Performance {
             Some(current) => self.go_to(current, out),
             None => self.reject(Rejection::NothingToPlay, out),
         }
+    }
+
+    fn go_to_song(&mut self, index: usize, out: &mut Output) {
+        if self.song_at(index).is_none() {
+            return self.reject(Rejection::NoSuchSong, out);
+        }
+        self.go_to(index, out);
     }
 
     /// Manual navigation: honours the setlist, never counts in, autoplay decides.
