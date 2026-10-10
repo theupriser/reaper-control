@@ -12,9 +12,11 @@
   import Sidebar from "./components/Sidebar.svelte";
   import { createAppStore } from "./lib/app-store";
   import { connectionBadge } from "./lib/connection";
-  import { backend, bundledExtensionVersion, currentInstallation, currentSystemStats } from "./lib/ipc";
+  import { midiBadge } from "./lib/midi-status";
+  import { watchView } from "./lib/watch";
+  import { backend, bundledExtensionVersion, currentInstallation, currentSettings, currentSystemStats } from "./lib/ipc";
   import { needsWizard } from "./lib/wizard";
-  import type { SystemStats } from "./lib/generated/protocol";
+  import type { SettingsView, SystemStats } from "./lib/generated/protocol";
   import type { ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
   import { keyAction, toKeyPress } from "./lib/keyboard";
@@ -46,6 +48,9 @@
 
   let bundledVersion = $state<string | null>(null);
   const connection = $derived(connectionBadge($appState.link.status, $appState.problem, bundledVersion));
+
+  let settingsView = $state<SettingsView | null>(null);
+  const midi = $derived(settingsView && midiBadge(settingsView));
 
   const notices = $derived($appState.notices.filter((notice) => notice.key !== "link"));
   let wizardOpen = $state(false);
@@ -102,7 +107,12 @@
     currentInstallation()
       .then((installation) => (wizardOpen = needsWizard(installation)))
       .catch(() => {});
-    return appState.start();
+    const stopWatching = watchView(currentSettings, (found) => (settingsView = found), 3000);
+    const stopStore = appState.start();
+    return () => {
+      stopWatching();
+      stopStore();
+    };
   });
 </script>
 
@@ -130,7 +140,7 @@
   <WizardScreen onclose={() => (wizardOpen = false)} />
 {:else}
   <div class="layout">
-    <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} onConnection={openConnection} />
+    <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} {midi} onConnection={openConnection} />
     <main class="content" tabindex="-1" bind:this={content}>
       {#if screen === "player"}
         <PlayerScreen

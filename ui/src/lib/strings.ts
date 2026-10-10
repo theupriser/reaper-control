@@ -71,6 +71,14 @@ export const strings = {
     extensionVersion: (version: string) => `extension ${version}`,
   },
 
+  midiStatus: {
+    connected: "MIDI connected",
+    notConnected: "MIDI not connected",
+    noneFound: "No MIDI found",
+    connectIt: "connect it, we keep looking",
+    plusMore: (name: string, more: number) => `${name} and ${more} more`,
+  },
+
   wizard: {
     title: "Set up the connection",
     intro: "Reaper Control talks to REAPER through a small extension. This puts it in place and checks that it answers.",

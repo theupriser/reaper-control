@@ -8,12 +8,14 @@
     onPerformer,
     onConnection,
     connection,
+    midi,
   }: {
     active: ScreenId;
     onSelect: (id: ScreenId) => void;
     onPerformer: () => void;
     onConnection: () => void;
     connection: { label: string; detail: string; tone: "ok" | "error" };
+    midi: { label: string; detail: string; tone: "ok" | "error" } | null;
   } = $props();
 </script>
 
@@ -38,6 +40,13 @@
     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
     {strings.screens.performerMode}
   </button>
+
+  {#if midi}
+    <div class="midi" role="status">
+      <div class="state"><span class="dot {midi.tone}"></span>{midi.label}</div>
+      <div class="detail">{midi.detail}</div>
+    </div>
+  {/if}
 
   <button class="connection" aria-label={strings.health.open} onclick={onConnection}>
     <div class="state"><span class="dot {connection.tone}"></span>{connection.label}</div>
@@ -119,6 +128,7 @@
     margin-bottom: 16px;
     cursor: pointer;
   }
+  .midi,
   .connection {
     background: var(--panel);
     border: 1px solid var(--line);
@@ -130,8 +140,14 @@
     color: inherit;
     font: inherit;
     text-align: left;
-    cursor: pointer;
     min-height: 44px;
+    box-sizing: border-box;
+  }
+  .connection {
+    cursor: pointer;
+  }
+  .midi {
+    margin-bottom: 8px;
   }
   .state {
     display: flex;
