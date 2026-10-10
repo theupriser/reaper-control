@@ -132,7 +132,7 @@ jobs:
         run: ../../ui/node_modules/.bin/tauri build --features custom-protocol --config bundle.${{ startsWith(matrix.os, 'windows') && 'windows' || 'macos' }}.json
       - name: Installer file names
         shell: bash
-        run: ls -l target/release/bundle/dmg/*.dmg target/release/bundle/nsis/*-setup.exe 2>/dev/null
+        run: ls -l target/release/bundle/dmg/*.dmg target/release/bundle/nsis/*-setup.exe 2>/dev/null || true
       - uses: actions/upload-artifact@v4
         with:
           name: extension-${{ matrix.os }}
