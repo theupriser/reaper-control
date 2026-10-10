@@ -13,6 +13,7 @@ fn song(id: &str, start: f64, end: f64, hard_stop: bool) -> PlannedSong {
         song_id: id.to_string(),
         window: SongWindow::new(t(start), t(end)).unwrap(),
         hard_stop,
+        hard_stop_marker: None,
     }
 }
 
@@ -512,4 +513,108 @@ fn an_idle_or_hard_stopped_performance_ignores_the_transport() {
     let mut idle = performance(Flags::default());
     observe(&mut idle, true, 10);
     assert_eq!(idle.phase(), Phase::Idle);
+}
+
+/// A 0-60 song with a hard stop whose marker lies at 40 (REAPER stops there), then a next song.
+fn stopped_by_marker() -> Performance {
+    let mut first = song("A", 0.0, 60.0, true);
+    first.hard_stop_marker = Some(t(40.0));
+    let songs = vec![first, song("B", 70.0, 80.0, false)];
+    let mut p = Performance::new(songs, Flags::default(), HandOverPolicy::default());
+    p.step(Input::Play);
+    p
+}
+
+fn observe_once(performance: &mut Performance, playing: bool) {
+    performance.step(Input::Observed { playing });
+}
+
+#[test]
+fn reaper_stopping_at_the_marker_does_not_end_the_song_early() {
+    let mut p = stopped_by_marker();
+    observe_once(&mut p, false);
+    tick(&mut p, 100.0, 40.0);
+    for second in 1..=5 {
+        observe_once(&mut p, false);
+        tick(&mut p, 100.0 + f64::from(second), 40.0);
+    }
+    assert_eq!(p.phase(), Phase::Playing);
+    assert_eq!(p.shown_position(t(105.0), t(40.0)), t(45.0));
+}
+
+#[test]
+fn the_hard_stop_comes_at_the_end_of_the_length_after_reaper_stopped() {
+    let mut p = stopped_by_marker();
+    observe_once(&mut p, false);
+    tick(&mut p, 100.0, 40.0);
+    observe_once(&mut p, false);
+    let out = tick(&mut p, 120.0, 40.0);
+    assert_eq!(out.effects, vec![Effect::Pause]);
+    assert_eq!(
+        out.events,
+        vec![Event::HardStopReached {
+            song_id: "A".into()
+        }]
+    );
+    assert_eq!(p.phase(), Phase::HardStopped);
+    assert_eq!(p.shown_position(t(130.0), t(40.0)), t(60.0));
+}
+
+#[test]
+fn play_after_that_hard_stop_goes_into_the_next_song() {
+    let mut p = stopped_by_marker();
+    observe_once(&mut p, false);
+    tick(&mut p, 100.0, 40.0);
+    observe_once(&mut p, false);
+    tick(&mut p, 120.0, 40.0);
+    let out = p.step(Input::Play);
+    assert_eq!(out.effects, vec![Effect::SeekTo(t(70.0)), Effect::Play]);
+    assert_eq!(p.shown_position(t(121.0), t(70.0)), t(70.0));
+}
+
+#[test]
+fn play_while_the_timeline_runs_on_goes_to_the_next_song() {
+    let mut p = stopped_by_marker();
+    observe_once(&mut p, false);
+    tick(&mut p, 100.0, 40.0);
+    let out = p.step(Input::Play);
+    assert_eq!(out.effects, vec![Effect::SeekTo(t(70.0)), Effect::Play]);
+    assert_eq!(p.current().map(|s| s.song_id.as_str()), Some("B"));
+}
+
+#[test]
+fn a_pause_before_the_marker_stays_a_pause() {
+    let mut p = stopped_by_marker();
+    for second in 0..4 {
+        observe_once(&mut p, false);
+        tick(&mut p, 100.0 + f64::from(second), 20.0);
+    }
+    assert_eq!(p.phase(), Phase::Paused);
+    assert_eq!(p.shown_position(t(104.0), t(20.0)), t(20.0));
+}
+
+#[test]
+fn reaper_playing_again_takes_over_from_the_timeline() {
+    let mut p = stopped_by_marker();
+    observe_once(&mut p, false);
+    tick(&mut p, 100.0, 40.0);
+    observe_once(&mut p, true);
+    assert_eq!(p.shown_position(t(105.0), t(41.0)), t(41.0));
+    assert_eq!(tick(&mut p, 105.0, 41.0), Output::default());
+    assert_eq!(p.phase(), Phase::Playing);
+}
+
+#[test]
+fn a_song_without_a_marker_position_gives_way_to_a_stopped_reaper() {
+    let mut p = Performance::new(
+        vec![song("A", 0.0, 60.0, true)],
+        Flags::default(),
+        HandOverPolicy::default(),
+    );
+    p.step(Input::Play);
+    for second in 0..4 {
+        observe_once(&mut p, false);
+        tick(&mut p, 100.0 + f64::from(second), 40.0);
+    }
+    assert_eq!(p.phase(), Phase::Paused);
 }

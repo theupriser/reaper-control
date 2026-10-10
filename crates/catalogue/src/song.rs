@@ -63,7 +63,13 @@ impl Song {
         Directives::collect(
             cues.iter()
                 .filter(|cue| self.contains(cue.position()))
-                .flat_map(|cue| cue.parsed().directives().iter().copied()),
+                .flat_map(|cue| {
+                    let position = cue.position();
+                    cue.parsed()
+                        .directives()
+                        .iter()
+                        .map(move |directive| (position, *directive))
+                }),
         )
     }
 

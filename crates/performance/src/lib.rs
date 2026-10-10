@@ -12,6 +12,7 @@ mod output;
 mod performance;
 mod phase;
 mod planned_song;
+mod reaper_stop_bridge;
 mod rejection;
 mod song_window;
 mod tempo_map;

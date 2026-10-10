@@ -572,3 +572,23 @@ fn deleting_the_played_setlist_plays_the_songs_in_timeline_order_again() {
     assert_eq!(timer_loop.catalog().active_setlist, None);
     assert_eq!(timer_loop.catalog().songs.len(), 2);
 }
+
+#[test]
+fn when_reaper_stops_at_the_hard_stop_marker_the_timeline_runs_on_to_the_end_of_the_length() {
+    use reaper_port::ReaperPort;
+    let regions = vec![region("A", 0.0, 30.0), region("B", 40.0, 50.0)];
+    let markers = vec![marker("!1008 !length:20", 8.0)];
+    let mut timer_loop = TimerLoop::new(fake(regions, markers));
+    timer_loop.link_command(protocol::Command::Play);
+    run(&mut timer_loop, 160);
+    timer_loop.port.pause();
+    let stopped_at = timer_loop.port_mut().position().get();
+    assert!(stopped_at > 7.9);
+    run(&mut timer_loop, 40);
+    assert_eq!(timer_loop.live().transport, protocol::Transport::Paused);
+    assert_eq!(timer_loop.live().phase, protocol::Phase::Playing);
+    assert!(timer_loop.live().position > stopped_at + 1.0);
+    run(&mut timer_loop, 400);
+    assert_eq!(timer_loop.live().phase, protocol::Phase::HardStopped);
+    assert!((timer_loop.live().position - 20.0).abs() < 0.001);
+}

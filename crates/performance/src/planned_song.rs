@@ -1,3 +1,5 @@
+use shared_kernel::Seconds;
+
 use crate::SongWindow;
 
 /// One entry of the setlist as the performance sees it. The extension builds
@@ -10,4 +12,7 @@ pub struct PlannedSong {
     pub window: SongWindow,
     /// Whether playback halts at the end (`!1008`).
     pub hard_stop: bool,
+    /// Where the `!1008` marker lies. REAPER can stop there by itself (SWS); the performance then
+    /// keeps time up to the end of the window.
+    pub hard_stop_marker: Option<Seconds>,
 }

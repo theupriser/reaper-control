@@ -162,7 +162,10 @@ impl<Port: ReaperPort> TimerLoop<Port> {
                 reaper_port::Transport::Playing => Transport::Playing,
                 reaper_port::Transport::Paused => Transport::Paused,
             },
-            position: self.port.position().get(),
+            position: self
+                .performance
+                .shown_position(self.port.now(), self.port.position())
+                .get(),
             phase: map_phase(self.performance.phase()),
             setlist_id: self.catalog.active_setlist.clone(),
             current_song: index.and_then(song),

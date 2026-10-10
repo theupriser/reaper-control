@@ -100,3 +100,15 @@ fn cue_keeps_its_name_and_hides_command_only_names() -> Result<(), Box<dyn std::
     assert!(!Cue::new("Bridge", secs(1.0)?).parsed().is_hidden());
     Ok(())
 }
+
+#[test]
+fn the_hard_stop_remembers_where_its_marker_lies() -> Result<(), Box<dyn std::error::Error>> {
+    let cues = [
+        Cue::new("!1008 !length:50", secs(45.0)?),
+        Cue::new("!hardstop", secs(30.0)?),
+    ];
+    let directives = song(0.0, 60.0)?.directives(&cues);
+    assert!(directives.hard_stop());
+    assert_eq!(directives.hard_stop_at(), Some(secs(30.0)?));
+    Ok(())
+}

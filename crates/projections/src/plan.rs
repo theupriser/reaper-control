@@ -40,5 +40,6 @@ fn planned(song: &Song, cues: &[Cue]) -> Option<PlannedSong> {
         song_id: song.id().as_str().to_string(),
         window: SongWindow::new(song.start(), end).ok()?,
         hard_stop: found.hard_stop(),
+        hard_stop_marker: found.hard_stop_at(),
     })
 }
