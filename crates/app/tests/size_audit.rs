@@ -109,6 +109,7 @@ fn all_sizes() -> Vec<(String, usize)> {
         app::MidiListener,
         app::MidiMessage,
         app::MidiRouter,
+        app::MidirAnchor,
         app::MidirSource,
         app::MirrorError,
         app::MirrorFile,
