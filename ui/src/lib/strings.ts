@@ -63,7 +63,7 @@ export const strings = {
   connection: {
     notRunning: "REAPER not running",
     waitingForExtension: "waiting for the extension",
-    seeMessage: "see the banner above",
+    seeMessage: "we keep trying",
     connected: "Connected to REAPER",
     disconnected: "Disconnected",
     extensionVersion: (version: string) => `extension ${version}`,
@@ -174,8 +174,6 @@ export const strings = {
 
   health: {
     title: "Connection and health",
-    openReaper: "Open REAPER. We keep trying.",
-    keepTrying: "We keep trying.",
     close: "Close",
     open: "Connection details",
     machineCpu: "Machine CPU",

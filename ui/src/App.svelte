@@ -2,7 +2,6 @@
   import { onMount, tick } from "svelte";
   import HelpScreen from "./components/HelpScreen.svelte";
   import ChecklistScreen from "./components/ChecklistScreen.svelte";
-  import ConnectionBanner from "./components/ConnectionBanner.svelte";
   import HealthDialog from "./components/HealthDialog.svelte";
   import Notices from "./components/Notices.svelte";
   import PerformerScreen from "./components/PerformerScreen.svelte";
@@ -13,7 +12,6 @@
   import Sidebar from "./components/Sidebar.svelte";
   import { createAppStore } from "./lib/app-store";
   import { connectionBadge } from "./lib/connection";
-  import { healthBanner } from "./lib/health";
   import { backend, currentInstallation, currentSystemStats } from "./lib/ipc";
   import { needsWizard } from "./lib/wizard";
   import type { SystemStats } from "./lib/generated/protocol";
@@ -48,7 +46,7 @@
 
   const connection = $derived(connectionBadge($appState.link.status, $appState.problem));
 
-  const banner = $derived(healthBanner($appState.link.status, $appState.problem));
+  const notices = $derived($appState.notices.filter((notice) => notice.key !== "link"));
   let wizardOpen = $state(false);
   let healthOpen = $state(false);
   let stats = $state<SystemStats | null>(null);
@@ -105,7 +103,7 @@
 
 <svelte:window onkeydown={onKeydown} />
 
-<Notices notices={$appState.notices} onDismiss={appState.dismissNotice} />
+<Notices {notices} onDismiss={appState.dismissNotice} />
 
 {#if performerMode}
   <PerformerScreen
@@ -129,7 +127,6 @@
   <div class="layout">
     <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} onConnection={openHealth} />
     <main class="content" tabindex="-1" bind:this={content}>
-      {#if banner}<ConnectionBanner {banner} />{/if}
       {#if screen === "player"}
         <PlayerScreen
           {view}
