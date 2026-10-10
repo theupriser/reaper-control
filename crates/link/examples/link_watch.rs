@@ -1,5 +1,5 @@
-//! Keeps one client connected for a number of seconds and prints every change of connection and
-//! phase, so a script can restart REAPER underneath it. It ends with the number of connections.
+//! Keeps one client connected for a number of seconds and prints every change of connection,
+//! catalog and phase, so a script can restart REAPER underneath it. It ends with the number of connections.
 //! `cargo run -p link --example link_watch -- <resource directory>/RC2/endpoint.json <seconds>`
 
 use std::time::{Duration, Instant};
@@ -35,7 +35,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     live.phase, live.transport, live.position
                 );
             }
-            LinkEvent::Live(_) | LinkEvent::Catalog(_) => {}
+            LinkEvent::Catalog(catalog) => println!(
+                "{at:>6.1}s catalog revision {}, project {}, {} songs, {} cues",
+                catalog.revision,
+                catalog.project_id,
+                catalog.project_songs.len(),
+                catalog.cues.len()
+            ),
+            LinkEvent::Live(_) => {}
             other => println!("{at:>6.1}s {other:?}"),
         }
     }
