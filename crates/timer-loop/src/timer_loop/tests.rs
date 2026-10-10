@@ -592,3 +592,22 @@ fn when_reaper_stops_at_the_hard_stop_marker_the_timeline_runs_on_to_the_end_of_
     assert_eq!(timer_loop.live().phase, protocol::Phase::HardStopped);
     assert!((timer_loop.live().position - 20.0).abs() < 0.001);
 }
+
+#[test]
+fn moving_the_playhead_in_reaper_moves_the_current_song_with_it() {
+    use reaper_port::ReaperPort;
+    let regions = vec![region("A", 0.0, 30.0), region("B", 40.0, 50.0)];
+    let mut timer_loop = TimerLoop::new(fake(regions, vec![]));
+    run(&mut timer_loop, 5);
+    assert_eq!(timer_loop.live().current_song, Some(0));
+    timer_loop
+        .port_mut()
+        .seek(shared_kernel::Seconds::new(45.0).unwrap());
+    run(&mut timer_loop, 5);
+    assert_eq!(timer_loop.live().current_song, Some(1));
+    timer_loop
+        .port_mut()
+        .seek(shared_kernel::Seconds::new(3.0).unwrap());
+    run(&mut timer_loop, 5);
+    assert_eq!(timer_loop.live().current_song, Some(0));
+}

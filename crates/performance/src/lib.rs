@@ -14,6 +14,7 @@ mod phase;
 mod planned_song;
 mod reaper_stop_bridge;
 mod rejection;
+mod song_at_playhead;
 mod song_window;
 mod tempo_map;
 mod tempo_segment;
