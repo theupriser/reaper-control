@@ -182,13 +182,13 @@ impl Performance {
         };
         self.cancel_count_in(out);
         self.current = Some(index);
+        out.effects.push(Effect::Pause);
         out.effects.push(Effect::SeekTo(start));
         out.events.push(Event::SeekPerformed { to: start });
         if self.flags.autoplay {
             out.effects.push(Effect::Play);
             self.phase = Phase::Playing;
         } else {
-            out.effects.push(Effect::Pause);
             self.phase = Phase::Paused;
         }
     }
@@ -215,10 +215,17 @@ impl Performance {
             return;
         }
         self.cancel_count_in(out);
+        let playing = matches!(
+            self.phase,
+            Phase::Playing | Phase::CountingIn | Phase::HandingOver
+        );
+        if playing {
+            out.effects.push(Effect::Pause);
+        }
         out.effects.push(Effect::SeekTo(position));
         out.events.push(Event::SeekPerformed { to: position });
-        if self.phase == Phase::CountingIn || self.phase == Phase::HandingOver {
-            self.phase = Phase::Playing;
+        if playing || (self.phase == Phase::Paused && self.flags.autoplay) {
+            self.resume(out);
         }
     }
 

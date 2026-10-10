@@ -246,7 +246,10 @@ fn next_with_autoplay_seeks_and_plays() {
     });
     p.step(Input::Play);
     let out = p.step(Input::Next);
-    assert_eq!(out.effects, vec![Effect::SeekTo(t(10.0)), Effect::Play]);
+    assert_eq!(
+        out.effects,
+        vec![Effect::Pause, Effect::SeekTo(t(10.0)), Effect::Play]
+    );
     assert_eq!(p.phase(), Phase::Playing);
 }
 
@@ -255,7 +258,7 @@ fn next_without_autoplay_seeks_and_waits() {
     let mut p = performance(Flags::default());
     p.step(Input::Play);
     let out = p.step(Input::Next);
-    assert_eq!(out.effects, vec![Effect::SeekTo(t(10.0)), Effect::Pause]);
+    assert_eq!(out.effects, vec![Effect::Pause, Effect::SeekTo(t(10.0))]);
     assert_eq!(p.phase(), Phase::Paused);
 }
 
@@ -277,7 +280,7 @@ fn next_and_previous_stop_at_the_ends_of_the_setlist() {
 fn restart_goes_back_to_the_start_of_the_song() {
     let mut p = playing_at_song(1);
     let out = p.step(Input::RestartSong);
-    assert_eq!(out.effects, vec![Effect::SeekTo(t(10.0)), Effect::Pause]);
+    assert_eq!(out.effects, vec![Effect::Pause, Effect::SeekTo(t(10.0))]);
     assert_eq!(p.current_index(), Some(1));
 }
 
@@ -285,7 +288,7 @@ fn restart_goes_back_to_the_start_of_the_song() {
 fn go_to_song_jumps_to_that_songs_start_and_autoplay_decides_whether_it_plays() {
     let mut waiting = playing_at_song(0);
     let out = waiting.step(Input::GoToSong { index: 2 });
-    assert_eq!(out.effects, vec![Effect::SeekTo(t(30.0)), Effect::Pause]);
+    assert_eq!(out.effects, vec![Effect::Pause, Effect::SeekTo(t(30.0))]);
     assert_eq!(waiting.current_index(), Some(2));
 
     let mut playing = performance(Flags {
@@ -294,7 +297,10 @@ fn go_to_song_jumps_to_that_songs_start_and_autoplay_decides_whether_it_plays() 
     });
     playing.step(Input::Play);
     let out = playing.step(Input::GoToSong { index: 1 });
-    assert_eq!(out.effects, vec![Effect::SeekTo(t(10.0)), Effect::Play]);
+    assert_eq!(
+        out.effects,
+        vec![Effect::Pause, Effect::SeekTo(t(10.0)), Effect::Play]
+    );
     assert_eq!(playing.phase(), Phase::Playing);
 }
 
@@ -312,11 +318,46 @@ fn go_to_song_refuses_a_song_that_is_not_in_the_setlist() {
 fn seek_stays_inside_the_current_song() {
     let mut p = playing_at_song(0);
     let out = p.step(Input::Seek { position: t(4.0) });
-    assert_eq!(out.effects, vec![Effect::SeekTo(t(4.0))]);
+    assert_eq!(
+        out.effects,
+        vec![Effect::Pause, Effect::SeekTo(t(4.0)), Effect::Play]
+    );
     assert_eq!(p.phase(), Phase::Playing);
     let out = p.step(Input::Seek { position: t(14.0) });
     assert!(out.effects.is_empty());
     assert_eq!(out.events, rejected(Rejection::OutsideSong));
+}
+
+#[test]
+fn seek_while_paused_resumes_only_with_auto_resume() {
+    let mut waiting = playing_at_song(0);
+    waiting.step(Input::Pause);
+    let out = waiting.step(Input::Seek { position: t(4.0) });
+    assert_eq!(out.effects, vec![Effect::SeekTo(t(4.0))]);
+    assert_eq!(waiting.phase(), Phase::Paused);
+
+    let mut resuming = performance(Flags {
+        autoplay: true,
+        count_in: false,
+    });
+    resuming.step(Input::Play);
+    resuming.step(Input::Pause);
+    let out = resuming.step(Input::Seek { position: t(4.0) });
+    assert_eq!(out.effects, vec![Effect::SeekTo(t(4.0)), Effect::Play]);
+    assert_eq!(resuming.phase(), Phase::Playing);
+}
+
+#[test]
+fn seek_outside_the_song_while_paused_does_not_resume() {
+    let mut p = performance(Flags {
+        autoplay: true,
+        count_in: false,
+    });
+    p.step(Input::Play);
+    p.step(Input::Pause);
+    let out = p.step(Input::Seek { position: t(14.0) });
+    assert!(out.effects.is_empty());
+    assert_eq!(p.phase(), Phase::Paused);
 }
 
 #[test]
@@ -347,7 +388,10 @@ fn cue_jump_counts_in_when_enabled() {
 fn cue_jump_without_the_flag_is_a_plain_seek() {
     let mut p = playing_at_song(0);
     let out = p.step(Input::SeekCue { position: t(6.0) });
-    assert_eq!(out.effects, vec![Effect::SeekTo(t(6.0))]);
+    assert_eq!(
+        out.effects,
+        vec![Effect::Pause, Effect::SeekTo(t(6.0)), Effect::Play]
+    );
     assert_eq!(p.phase(), Phase::Playing);
 }
 
