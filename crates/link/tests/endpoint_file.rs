@@ -1,11 +1,11 @@
 //! The endpoint file holds the token, so only its owner may read it.
 
-use link::Endpoint;
-
 #[cfg(unix)]
 #[test]
 fn the_endpoint_file_is_readable_only_by_its_owner() -> Result<(), Box<dyn std::error::Error>> {
     use std::os::unix::fs::PermissionsExt;
+
+    use link::Endpoint;
 
     let directory = std::env::temp_dir().join(format!("rc2-endpoint-{}", std::process::id()));
     std::fs::create_dir_all(&directory)?;
