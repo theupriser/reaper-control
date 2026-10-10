@@ -29,7 +29,8 @@ pub struct Performance {
     count_in_target: Option<Seconds>,
     disagreeing: u8,
     reaper_playing: bool,
-    bridge: Option<ReaperStopBridge>,
+    /// Boxed: it only exists while REAPER stands still, and keeps `Performance` under 128 bytes.
+    bridge: Option<Box<ReaperStopBridge>>,
     held: Option<Seconds>,
 }
 
@@ -349,7 +350,7 @@ impl Performance {
     /// The position the timeline is at: REAPER's, unless REAPER stopped at the `!1008` marker and
     /// the performance has been keeping time since.
     fn follow_reaper_stop(&mut self, now: Seconds, position: Seconds) -> Seconds {
-        if let Some(bridge) = self.bridge {
+        if let Some(bridge) = &self.bridge {
             return Seconds::new(bridge.position_at(now)).unwrap_or(position);
         }
         let at_marker = self
@@ -357,7 +358,7 @@ impl Performance {
             .and_then(|song| song.hard_stop_marker)
             .is_some_and(|marker| position.get() >= marker.get() - MARKER_TOLERANCE);
         if !self.reaper_playing && at_marker {
-            self.bridge = Some(ReaperStopBridge::begin(now, position));
+            self.bridge = Some(Box::new(ReaperStopBridge::begin(now, position)));
             self.disagreeing = 0;
         }
         position
@@ -366,7 +367,7 @@ impl Performance {
     /// Where to show the timeline: the position the performance kept time to while REAPER stood
     /// still, else REAPER's own.
     pub fn shown_position(&self, now: Seconds, reaper: Seconds) -> Seconds {
-        if let Some(bridge) = self.bridge {
+        if let Some(bridge) = &self.bridge {
             let end = self.current().map(|song| song.window.end().get());
             let position = end.map_or(bridge.position_at(now), |end| {
                 bridge.position_at(now).min(end)
