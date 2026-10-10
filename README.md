@@ -9,4 +9,4 @@ This is the v2 rewrite (Rust + Tauri + Svelte, with a native REAPER extension). 
 - Designs: `docs/design/`
 - Working notes for contributors and AI agents: `AGENTS.md`
 
-See `LICENSE` for the terms of use.
+Free to use, change and share; selling it is not allowed. See `LICENSE` (MIT with the Commons Clause).
