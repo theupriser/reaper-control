@@ -18,7 +18,7 @@ members = [
 [workspace.package]
 version = "2.0.0"
 edition = "2024"
-license = "LicenseRef-Proprietary"
+license = "LicenseRef-MIT-Commons-Clause"
 publish = false
 
 [workspace.dependencies]

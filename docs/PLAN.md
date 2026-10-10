@@ -40,7 +40,7 @@ reaper-control-app-v2/
 | ✅ 0.3 | Layer/context dependency check in CI (SPEC §14.5) — merged with 0.9 | 0.5 |
 | ✅ 0.4 | Type generation pipeline Rust → TS (specta/ts-rs) with CI drift check | 1 |
 | ✅ 0.5 | ADR template + ADR-001 (Tauri), 002 (extension-owned playback), 003 (local socket link), 004 (hexagonal + DDD contexts) | 1 |
-| ⬜ 0.6 | Licence decision (v1 is proprietary source-available; v2 public → choose) | 0.5 |
+| ✅ 0.6 | Licence decision: MIT with the Commons Clause (use and change freely, no selling; owner, 2026-10-10) | 0.5 |
 | 🟡 0.8 | **Domain discovery**: event storming per context (timeline of events, commands, aggregates, invariants), glossary `docs/language.md`, context map ADR-007, invariant tables `docs/domain/*.md` **Drafted 2026-10-09 from SPEC §14 and the code, for the owner to correct: `docs/language.md`, ADR-007 (Proposed), `docs/domain/{performance,setlists,catalogue,link,installation}.md` with every invariant mapped to a named test. Missing: the event storm itself (a session with the owner) and the owner's approval.** | 4 |
 | ✅ 0.9 | Crate-per-context workspace skeleton + CI dependency rules (§14.5), banned-synonym lint (`crates/architecture-tests/tests/vocabulary.rs`: "transition" and "playlist" in Rust sources and UI script/markup, CSS skipped) | 1.5 |
 | ✅ 0.7 | Dev REAPER portable install + sample project with regions/markers/special markers for testing | 0.5 |
