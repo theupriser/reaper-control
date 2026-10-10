@@ -175,17 +175,22 @@ impl Performance {
         self.go_to(index, out);
     }
 
-    /// Manual navigation: honours the setlist, never counts in, autoplay decides.
+    /// Manual navigation: honours the setlist, never counts in. Playback continues only when it was
+    /// playing and "Auto-resume playback" is on (v1: "only resume if it was already playing").
     fn go_to(&mut self, index: usize, out: &mut Output) {
         let Some(start) = self.start_of(index) else {
             return;
         };
+        let was_playing = matches!(
+            self.phase,
+            Phase::Playing | Phase::CountingIn | Phase::HandingOver
+        );
         self.cancel_count_in(out);
         self.current = Some(index);
         out.effects.push(Effect::Pause);
         out.effects.push(Effect::SeekTo(start));
         out.events.push(Event::SeekPerformed { to: start });
-        if self.flags.autoplay {
+        if was_playing && self.flags.autoplay {
             out.effects.push(Effect::Play);
             self.phase = Phase::Playing;
         } else {
