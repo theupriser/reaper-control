@@ -1,7 +1,0 @@
-# Seeds for failure cases proptest has generated in the past. It is
-# automatically read and these particular cases re-run before any
-# novel cases are generated.
-#
-# It is recommended to check this file in to source control so that
-# everyone who runs the test benefits from these saved cases.
-cc 6ea855599f9e6206c88044c59822e810798e87c410753f5ea0fa9236d15cf1da # shrinks to songs = [PlannedSong { song_id: "song-0", window: SongWindow { start: Seconds(0.0), end: Seconds(11.023766410283358) }, hard_stop: false, hard_stop_marker: None }, PlannedSong { song_id: "song-1", window: SongWindow { start: Seconds(11.023766410283358), end: Seconds(11.523766410283358) }, hard_stop: false, hard_stop_marker: None }], flags = Flags { autoplay: false, count_in: false }, ops = [Play, Tick { dt: 0.0, position: 19.24322816452632 }, RestartSong, Tick { dt: 0.0, position: 0.0 }]
