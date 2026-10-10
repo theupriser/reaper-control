@@ -145,15 +145,16 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 ## 9. Phase 6 — Screens
 | WP | Screen | Parity | d |
 |----|--------|--------|---|
-| 🟡 6.1 | Player (F3 click a song to jump to its start: bugfix/go-to-song, open until merged): transport, timeline w/ markers, region/setlist list, toggles, BPM, record arm | F2–F4, F7, F9 | 5 |
+| ✅ 6.1 | Player (a click on a song jumps to its start, a click on the timeline moves the playhead; Pause, SeekTo, then Play only when it was playing and auto-resume is on, as in v1; SPEC F3, F18; PRs #112, #114, #115): transport, timeline w/ markers, region/setlist list, toggles, BPM, record arm | F2–F4, F7, F9 | 5 |
 | ✅ 6.2 | Setlist editor (drag to reorder is not done: buttons): create/rename/delete, add/remove/reorder (drag), select, validation (missing regions) | F5 | 5 |
 | ✅ 6.3 | **Performer** (the v1 parts were done in Phase 3; this WP added stage-lock): title, song/total time, next song, hard-stop prompt, clock, toggles, exit; stage-lock | F11 | 5 |
-| ✅ 6.4 | Connection/health (banner shows the cause text from the app's health monitor; the sidebar status opens a dialog with CPU and memory instead of a popover; diagnostics stay in Settings): header status, popovers, banners (Lost/NotLoaded/Outdated/Faulted), diagnostics | F1, F14 | 3 |
+| ✅ 6.4 | Connection/health (the connection shows only in the sidebar indicator at the bottom left: no top banner and no toast, PR #116; the indicator shows the cause text from the app's health monitor; the sidebar status opens a dialog with CPU and memory instead of a popover; diagnostics stay in Settings): header status, popovers, banners (Lost/NotLoaded/Outdated/Faulted), diagnostics | F1, F14 | 3 |
 | ✅ 6.5 | Settings: connection status + repair, MIDI (devices, channel, mapping), behaviour, appearance **MIDI device, channel, the editable note table, the appearance controls (theme, density, touch) and the connection card (opens the wizard to repair) are done.** | F12, F13 | 4 |
 | ✅ 6.6 | First-run wizard + Repair screen driven by `InstallReport`: find REAPER → install extension → restart REAPER → connect; per-step status (Ok/Fixed/Manual), instruction cards with copy/reveal buttons, "Check again", REAPER-running handling, safe-mode re-enable, success only on live handshake **The four steps, install, polling until connected and "Open the setup" in Settings are done; reveal in Finder/Explorer, the safe-mode re-enable card and choosing a REAPER folder in the wizard are not.** | new (D3, R-INST) | 5 |
 | ✅ 6.7 | Pre-show checklist **Five rows (extension, connection, songs, setlist, MIDI) with a detail and a ready line; not yet run against a connected REAPER.** | S-7 | 2 |
 | 🟡 6.8 | Help + marker guide **Help screen with setup, songs, special markers, count-in and MIDI; the optional marker helper is left out.** | F15, F8 | 3 |
 | 🟡 6.9 | Perf pass: virtualised lists, batch updates, no layout thrash; verify budgets **Measured with 300 and 2000 songs; fixed a quadratic editor and a list that rebuilt on every push; full virtualisation not needed; real hardware still open.** | goal 5 | 3 |
+| ✅ 6.10 | **Stale extension detection** (found live 2026-10-10: an extension older than the app connected, then the link dropped again and again, and the UI said only "connect to REAPER"): bump `PROTOCOL_VERSION` when the command set changes, a test that fails when the generated protocol changes without a version decision, the sidebar names the cause ("The extension is another version"), and `scripts/build_release.sh` keeps `dist/` current. **Still open: the sidebar detail says "we keep trying" for every cause, also for an extension that will not fix itself.** | R-INST, S-9 | 1 |
 
 **Gate 6 (feature complete):** parity checklist F1–F18 all ticked with evidence (test or manual script).
 
@@ -161,7 +162,8 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 | WP | Task | d |
 |----|------|---|
 | ⬜ 7.1 | Soak: 2 h/40-song simulated set, random link drops/app kills; assert zero missed hand-overs | 3 |
-| ⬜ 7.2 | Chaos tests: REAPER paused/unfocused, project switch mid-song, regions edited live, huge projects (1000 regions) | 3 |
+| ⬜ 7.2 | Chaos tests: REAPER paused/unfocused, project switch mid-song, regions edited live, huge projects (1000 regions); **REAPER quit and started again with the app open, the app killed while REAPER plays (the hand-over must still happen), both several times in a row** | 3 |
+| ⬜ 7.8 | **State reconciliation** (owner saw the app and REAPER disagree after random song clicks, pause and play): the performance phase only follows commands, so a transport change made in REAPER itself is not seen. Follow REAPER's real transport, and keep the `random_actions` example (random commands, phase against transport, fails when it never connects) as the regression test, run on the isolated REAPER | S-9 | 2 |
 | ⬜ 7.3 | Real-rig rehearsals ×3 (mac + windows) with audio interface and MIDI foot controller | 3 |
 | ⬜ 7.4 | Security review: localhost-only, input validation, Tauri capability allow-list, CSP | 1.5 |
 | 🟡 7.5 | Resource audit: idle CPU/RAM budget (target < 1% CPU, < 120 MB) **macOS idle measured: app 0.30% CPU, 114 MB after the stats thread fix; Windows and a long run open.** | 1 |

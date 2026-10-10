@@ -91,3 +91,50 @@ fn typescript_matches_the_rust_types() -> Result<(), Box<dyn std::error::Error>>
     );
     Ok(())
 }
+
+/// The version and the fingerprint of the types the extension link carries. The extension and the
+/// app are built apart, so a change to these types without a new `PROTOCOL_VERSION` lets an old
+/// extension connect and then fail on a message it cannot read.
+const LINK_SCHEMA: (u32, u64) = (3, 3799876410148336785);
+
+fn fingerprint(text: &str) -> u64 {
+    text.bytes().fold(0xcbf2_9ce4_8422_2325, |hash, byte| {
+        (hash ^ u64::from(byte)).wrapping_mul(0x0100_0000_01b3)
+    })
+}
+
+#[test]
+fn a_changed_link_protocol_needs_a_new_version() -> Result<(), Box<dyn std::error::Error>> {
+    let config = Config::default();
+    let mut text = String::new();
+    for declaration in [
+        Command::export_to_string(&config)?,
+        WireEvent::export_to_string(&config)?,
+        EventRecord::export_to_string(&config)?,
+        Live::export_to_string(&config)?,
+        Catalog::export_to_string(&config)?,
+        SongInfo::export_to_string(&config)?,
+        CueInfo::export_to_string(&config)?,
+        SetlistInfo::export_to_string(&config)?,
+        EntryInfo::export_to_string(&config)?,
+        Phase::export_to_string(&config)?,
+        Transport::export_to_string(&config)?,
+        Setting::export_to_string(&config)?,
+    ] {
+        for line in strip_imports(&declaration).lines() {
+            let line = line.trim();
+            if !(line.starts_with("/**") || line.starts_with('*') || line.starts_with("//")) {
+                text.push_str(line);
+            }
+        }
+    }
+    let found = (
+        crate::message::PROTOCOL_VERSION,
+        fingerprint(&text.replace("\r\n", "\n")),
+    );
+    assert_eq!(
+        found, LINK_SCHEMA,
+        "the link types changed: raise PROTOCOL_VERSION if an older extension cannot read them, then set LINK_SCHEMA to {found:?}"
+    );
+    Ok(())
+}
