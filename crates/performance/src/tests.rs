@@ -633,7 +633,9 @@ fn reaper_playing_again_takes_over_from_the_timeline() {
     let mut p = stopped_by_marker();
     observe_once(&mut p, false);
     tick(&mut p, 100.0, 40.0);
-    observe_once(&mut p, true);
+    for _ in 0..3 {
+        observe_once(&mut p, true);
+    }
     assert_eq!(p.shown_position(t(105.0), t(41.0)), t(41.0));
     assert_eq!(tick(&mut p, 105.0, 41.0), Output::default());
     assert_eq!(p.phase(), Phase::Playing);
@@ -652,4 +654,76 @@ fn a_song_without_a_marker_position_gives_way_to_a_stopped_reaper() {
         tick(&mut p, 100.0 + f64::from(second), 40.0);
     }
     assert_eq!(p.phase(), Phase::Paused);
+}
+
+#[test]
+fn a_seek_after_the_marker_moves_only_the_timeline() {
+    let mut p = stopped_by_marker();
+    observe_once(&mut p, false);
+    tick(&mut p, 100.0, 40.0);
+    let out = p.step(Input::Seek { position: t(50.0) });
+    assert_eq!(out.effects, vec![Effect::Pause]);
+    assert_eq!(out.events, vec![Event::SeekPerformed { to: t(50.0) }]);
+    assert_eq!(p.phase(), Phase::Playing);
+    assert_eq!(p.shown_position(t(101.0), t(40.0)), t(50.0));
+    tick(&mut p, 101.0, 40.0);
+    tick(&mut p, 105.0, 40.0);
+    assert_eq!(p.shown_position(t(105.0), t(40.0)), t(54.0));
+    assert_eq!(p.current().map(|s| s.song_id.as_str()), Some("A"));
+}
+
+#[test]
+fn a_seek_after_the_marker_while_reaper_still_plays_stops_reaper_and_keeps_time() {
+    let mut p = stopped_by_marker();
+    observe_once(&mut p, true);
+    tick(&mut p, 100.0, 20.0);
+    let out = p.step(Input::Seek { position: t(50.0) });
+    assert_eq!(out.effects, vec![Effect::Pause]);
+    observe_once(&mut p, true);
+    observe_once(&mut p, true);
+    tick(&mut p, 101.0, 21.0);
+    tick(&mut p, 103.0, 22.0);
+    assert_eq!(p.shown_position(t(103.0), t(22.0)), t(52.0));
+}
+
+#[test]
+fn a_timeline_seek_still_ends_in_the_hard_stop_at_the_end_of_the_length() {
+    let mut p = stopped_by_marker();
+    observe_once(&mut p, false);
+    tick(&mut p, 100.0, 40.0);
+    p.step(Input::Seek { position: t(50.0) });
+    tick(&mut p, 101.0, 40.0);
+    let out = tick(&mut p, 111.0, 40.0);
+    assert_eq!(out.effects, vec![Effect::Pause]);
+    assert_eq!(p.phase(), Phase::HardStopped);
+}
+
+#[test]
+fn a_seek_before_the_marker_still_moves_reaper() {
+    let mut p = stopped_by_marker();
+    observe_once(&mut p, false);
+    tick(&mut p, 100.0, 40.0);
+    let out = p.step(Input::Seek { position: t(10.0) });
+    assert_eq!(
+        out.effects,
+        vec![Effect::Pause, Effect::SeekTo(t(10.0)), Effect::Play]
+    );
+}
+
+#[test]
+fn a_timeline_seek_while_paused_without_auto_resume_stays_paused() {
+    let flags = Flags {
+        autoplay: false,
+        ..Flags::default()
+    };
+    let mut first = song("A", 0.0, 60.0, true);
+    first.hard_stop_marker = Some(t(40.0));
+    let mut p = Performance::new(vec![first], flags, HandOverPolicy::default());
+    p.step(Input::Play);
+    p.step(Input::Pause);
+    let out = p.step(Input::Seek { position: t(50.0) });
+    assert_eq!(out.effects, vec![Effect::Pause]);
+    assert_eq!(p.phase(), Phase::Paused);
+    tick(&mut p, 200.0, 20.0);
+    assert_eq!(p.shown_position(t(205.0), t(20.0)), t(50.0));
 }

@@ -166,8 +166,14 @@ impl Performance {
     fn observe(&mut self, playing: bool) {
         self.reaper_playing = playing;
         if self.bridge.is_some() {
+            // REAPER may still report playing for a tick or two after the pause that stilled it.
             if playing {
-                self.bridge = None;
+                self.disagreeing += 1;
+                if self.disagreeing >= DISAGREEING_TICKS {
+                    self.bridge = None;
+                    self.disagreeing = 0;
+                }
+            } else {
                 self.disagreeing = 0;
             }
             return;
@@ -316,6 +322,9 @@ impl Performance {
         if !self.check_jump(position, out) {
             return;
         }
+        if self.beyond_the_marker(position) {
+            return self.seek_the_timeline(position, out);
+        }
         self.cancel_count_in(out);
         let playing = matches!(
             self.phase,
@@ -331,6 +340,40 @@ impl Performance {
         }
     }
 
+    /// Whether `position` lies after the song's `!1008` marker while the performance runs: REAPER
+    /// stops at the marker, and what lies beyond it in the project is another song's audio.
+    fn beyond_the_marker(&self, position: Seconds) -> bool {
+        let running = !matches!(
+            self.phase,
+            Phase::Idle | Phase::HardStopped | Phase::Finished
+        );
+        running
+            && self
+                .current()
+                .and_then(|song| song.hard_stop_marker)
+                .is_some_and(|marker| position.get() > marker.get())
+    }
+
+    /// A seek after the marker moves the timeline only. REAPER stands still (it is paused when it
+    /// still plays) and the performance keeps time from `position` on, to the end of the length.
+    fn seek_the_timeline(&mut self, position: Seconds, out: &mut Output) {
+        self.cancel_count_in(out);
+        let running = matches!(
+            self.phase,
+            Phase::Playing | Phase::CountingIn | Phase::HandingOver
+        ) || (self.phase == Phase::Paused && self.flags.autoplay);
+        out.effects.push(Effect::Pause);
+        out.events.push(Event::SeekPerformed { to: position });
+        let mut bridge = ReaperStopBridge::begin(position, position);
+        bridge.freeze();
+        self.bridge = Some(Box::new(bridge));
+        self.phase = if running {
+            Phase::Playing
+        } else {
+            Phase::Paused
+        };
+    }
+
     /// REAPER counts in only when playback starts from a pause, not on a jump while playing, so a
     /// counted-in jump is: pause, move to the cue, arm the count-in, play. REAPER holds the playhead
     /// on the cue while it counts in (measured in REAPER 7.82).
@@ -340,6 +383,9 @@ impl Performance {
         }
         if !self.check_jump(position, out) {
             return;
+        }
+        if self.beyond_the_marker(position) {
+            return self.seek_the_timeline(position, out);
         }
         if self.phase == Phase::Idle {
             out.events.push(Event::PerformanceStarted);
