@@ -22,6 +22,16 @@ describe("connectionBadge", () => {
     expect(badge.tone).toBe("error");
   });
 
+  it("asks for an update when the connected extension is not the bundled version", () => {
+    const status = { Connected: { extension_version: "0.0.0" } };
+    expect(connectionBadge(status, null, "1.0.0")).toEqual({
+      label: "Extension out of date",
+      detail: "extension 0.0.0, click to update it",
+      tone: "error",
+    });
+    expect(connectionBadge(status, null, "0.0.0").tone).toBe("ok");
+  });
+
   it("asks for an update when the installed extension is older", () => {
     const badge = connectionBadge("NotRunning", { message: "A new version of the extension is available", extension_outdated: true });
     expect(badge.label).toBe("A new version of the extension is available");

@@ -12,7 +12,7 @@
   import Sidebar from "./components/Sidebar.svelte";
   import { createAppStore } from "./lib/app-store";
   import { connectionBadge } from "./lib/connection";
-  import { backend, currentInstallation, currentSystemStats } from "./lib/ipc";
+  import { backend, bundledExtensionVersion, currentInstallation, currentSystemStats } from "./lib/ipc";
   import { needsWizard } from "./lib/wizard";
   import type { SystemStats } from "./lib/generated/protocol";
   import type { ScreenId } from "./lib/screens";
@@ -44,7 +44,8 @@
 
   const currentTempo = $derived($appState.link.catalog.songs[live?.current_song ?? -1]?.bpm ?? null);
 
-  const connection = $derived(connectionBadge($appState.link.status, $appState.problem));
+  let bundledVersion = $state<string | null>(null);
+  const connection = $derived(connectionBadge($appState.link.status, $appState.problem, bundledVersion));
 
   const notices = $derived($appState.notices.filter((notice) => notice.key !== "link"));
   let wizardOpen = $state(false);
@@ -62,7 +63,8 @@
     }
   };
 
-  const openConnection = () => ($appState.problem?.extension_outdated ? (wizardOpen = true) : openHealth());
+  const outdated = $derived($appState.problem?.extension_outdated || connection.label === strings.connection.outdated);
+  const openConnection = () => (outdated ? (wizardOpen = true) : openHealth());
 
   const send = appState.send;
 
@@ -96,6 +98,7 @@
   });
 
   onMount(() => {
+    bundledExtensionVersion().then((version) => (bundledVersion = version)).catch(() => {});
     currentInstallation()
       .then((installation) => (wizardOpen = needsWizard(installation)))
       .catch(() => {});

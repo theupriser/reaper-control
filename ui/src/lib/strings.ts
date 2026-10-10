@@ -65,6 +65,7 @@ export const strings = {
     waitingForExtension: "waiting for the extension",
     seeMessage: "we keep trying",
     updateExtension: "click to update it",
+    outdated: "Extension out of date",
     connected: "Connected to REAPER",
     disconnected: "Disconnected",
     extensionVersion: (version: string) => `extension ${version}`,
