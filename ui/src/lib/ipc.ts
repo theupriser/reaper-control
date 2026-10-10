@@ -1,12 +1,12 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import type { ChecklistView, Command, InstallationView, LinkView, Notice, SetlistTransferView, Settings, SettingsView, SystemStats } from "./generated/protocol";
+import type { ChecklistView, Command, InstallationView, LinkProblem, LinkView, Notice, SetlistTransferView, Settings, SettingsView, SystemStats } from "./generated/protocol";
 
 export const dispatch = (command: Command): Promise<void> => invoke<void>("dispatch", { command });
 
 export const currentView = (): Promise<LinkView> => invoke<LinkView>("current_view");
 
-export const currentProblem = (): Promise<string | null> => invoke<string | null>("current_problem");
+export const currentProblem = (): Promise<LinkProblem | null> => invoke<LinkProblem | null>("current_problem");
 
 export const onViewChange = (handler: (view: LinkView) => void): Promise<UnlistenFn> =>
   listen<LinkView>("link-view", (event) => handler(event.payload));
@@ -14,8 +14,8 @@ export const onViewChange = (handler: (view: LinkView) => void): Promise<Unliste
 export const onNotice = (handler: (notice: Notice) => void): Promise<UnlistenFn> =>
   listen<Notice>("notice", (event) => handler(event.payload));
 
-export const onLinkProblem = (handler: (problem: string | null) => void): Promise<UnlistenFn> =>
-  listen<string | null>("link-problem", (event) => handler(event.payload));
+export const onLinkProblem = (handler: (problem: LinkProblem | null) => void): Promise<UnlistenFn> =>
+  listen<LinkProblem | null>("link-problem", (event) => handler(event.payload));
 
 export const currentSystemStats = (): Promise<SystemStats> => invoke<SystemStats>("current_system_stats");
 

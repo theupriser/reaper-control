@@ -6,8 +6,8 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use protocol::{
-    ChecklistView, Command, InstallationView, LinkStatus, LinkView, SetlistTransferView, Settings,
-    SettingsView, SystemStats,
+    ChecklistView, Command, InstallationView, LinkProblem, LinkStatus, LinkView,
+    SetlistTransferView, Settings, SettingsView, SystemStats,
 };
 
 use crate::app_event::AppEvent;
@@ -68,8 +68,14 @@ fn current_view(link: State<'_, Arc<dyn LinkViewSource>>) -> LinkView {
 fn current_problem(
     health: State<'_, Arc<HealthMonitor>>,
     fault: State<'_, Arc<AppFault>>,
-) -> Option<String> {
-    fault.message().or_else(|| link_problem(&health.health()))
+) -> Option<LinkProblem> {
+    fault
+        .message()
+        .map(|message| LinkProblem {
+            message,
+            extension_outdated: false,
+        })
+        .or_else(|| link_problem(&health.health()))
 }
 
 #[tauri::command]

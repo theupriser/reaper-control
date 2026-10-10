@@ -1,4 +1,4 @@
-use protocol::{Command, EventRecord, NoticeLevel, WireEvent};
+use protocol::{Command, EventRecord, LinkProblem, NoticeLevel, WireEvent};
 
 use super::{link_problem, notice_for_event};
 use crate::app_event::AppEvent;
@@ -80,7 +80,22 @@ fn the_sidebar_names_the_problem_only_while_the_link_is_down() {
         link_problem(&LinkHealth::Dead(LinkCause::ExtensionFaulted {
             reason: "safe mode".into()
         })),
-        Some("The extension turned itself off".to_owned())
+        Some(LinkProblem {
+            message: "The extension turned itself off".to_owned(),
+            extension_outdated: false,
+        })
+    );
+}
+
+#[test]
+fn an_older_extension_asks_for_an_update() {
+    let problem = link_problem(&LinkHealth::Dead(LinkCause::ExtensionOutdated { found: 2 }));
+    assert_eq!(
+        problem,
+        Some(LinkProblem {
+            message: "A new version of the extension is available".to_owned(),
+            extension_outdated: true,
+        })
     );
 }
 

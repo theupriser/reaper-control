@@ -1,6 +1,6 @@
 //! Decides which app events a person on stage needs to see, and in which words.
 
-use protocol::{Notice, NoticeLevel, WireEvent};
+use protocol::{LinkProblem, Notice, NoticeLevel, WireEvent};
 
 use crate::app_event::AppEvent;
 use crate::link_cause::LinkCause;
@@ -66,10 +66,17 @@ pub fn notice_for_event(event: &AppEvent) -> Option<Notice> {
 
 /// What is wrong with the link, in a few words for the sidebar; `None` while the link works.
 #[must_use]
-pub fn link_problem(health: &LinkHealth) -> Option<String> {
+pub fn link_problem(health: &LinkHealth) -> Option<LinkProblem> {
     match health {
         LinkHealth::Connected | LinkHealth::Degraded => None,
-        _ => Some(health_notice(health).title),
+        LinkHealth::Dead(LinkCause::ExtensionOutdated { .. }) => Some(LinkProblem {
+            message: "A new version of the extension is available".to_owned(),
+            extension_outdated: true,
+        }),
+        _ => Some(LinkProblem {
+            message: health_notice(health).title,
+            extension_outdated: false,
+        }),
     }
 }
 

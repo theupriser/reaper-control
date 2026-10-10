@@ -77,3 +77,22 @@ test("a connected link with no extension in REAPER's folder still offers to inst
   await expect(page.getByRole("button", { name: "Install the extension" })).toBeEnabled();
   await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
 });
+
+test("an outdated extension says a new version is available and the indicator opens the setup", async ({ page }) => {
+  const outdated = installation([["FindReaper", "Done", ""], ["InstallExtension", "Current", "installed, but not the version that ships with the app"], ["RestartReaper", "Waiting", ""], ["Connect", "Waiting", ""]], true);
+  await page.addInitScript(tauriStandIn, down);
+  await page.addInitScript((answer) => {
+    const w = window as any;
+    const wait = setInterval(() => { if (w.__answer) { clearInterval(wait); w.__answer("current_installation", answer); } }, 1);
+  }, outdated);
+  await page.goto("/");
+  await page.getByRole("button", { name: "Skip for now" }).click();
+  await page.evaluate(() => (window as any).__pushEvent("link-problem", { message: "A new version of the extension is available", extension_outdated: true }));
+
+  const indicator = page.getByRole("button", { name: "Connection details" });
+  await expect(indicator).toContainText("A new version of the extension is available");
+  await expect(indicator).toContainText("click to update it");
+  await indicator.click();
+  await expect(page.getByRole("heading", { name: "Set up the connection" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Install the extension" })).toBeEnabled();
+});

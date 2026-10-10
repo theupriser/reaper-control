@@ -1,15 +1,15 @@
 import { writable, type Readable } from "svelte/store";
-import type { Command, LinkView, Notice } from "./generated/protocol";
+import type { Command, LinkProblem, LinkView, Notice } from "./generated/protocol";
 import * as state from "./app-state";
 
 /** What the store needs from the outside: the backend calls and its events. */
 export interface Backend {
   dispatch(command: Command): Promise<void>;
   currentView(): Promise<LinkView>;
-  currentProblem(): Promise<string | null>;
+  currentProblem(): Promise<LinkProblem | null>;
   onViewChange(handler: (view: LinkView) => void): Promise<() => void>;
   onNotice(handler: (notice: Notice) => void): Promise<() => void>;
-  onLinkProblem(handler: (problem: string | null) => void): Promise<() => void>;
+  onLinkProblem(handler: (problem: LinkProblem | null) => void): Promise<() => void>;
 }
 
 export interface AppStore extends Readable<state.AppState> {
