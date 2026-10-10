@@ -37,8 +37,18 @@ impl Endpoint {
     /// Write the endpoint file in one step, so a reader never sees half of it.
     pub fn write(&self, path: &Path) -> Result<(), EndpointError> {
         let temporary = path.with_extension("temporary");
-        fs::write(&temporary, serde_json::to_vec(self)?)?;
+        write_private(&temporary, &serde_json::to_vec(self)?)?;
         fs::rename(&temporary, path)?;
         Ok(())
     }
+}
+
+/// Writes a file only its owner can read: the token must not be readable by other accounts.
+fn write_private(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
+    use std::io::Write;
+    let mut options = fs::OpenOptions::new();
+    options.write(true).create(true).truncate(true);
+    #[cfg(unix)]
+    std::os::unix::fs::OpenOptionsExt::mode(&mut options, 0o600);
+    options.open(path)?.write_all(bytes)
 }
