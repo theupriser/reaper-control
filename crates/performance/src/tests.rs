@@ -573,13 +573,48 @@ fn play_after_that_hard_stop_goes_into_the_next_song() {
 }
 
 #[test]
-fn play_while_the_timeline_runs_on_goes_to_the_next_song() {
+fn pause_freezes_the_run_on_and_play_runs_it_on_again() {
     let mut p = stopped_by_marker();
     observe_once(&mut p, false);
     tick(&mut p, 100.0, 40.0);
-    let out = p.step(Input::Play);
-    assert_eq!(out.effects, vec![Effect::SeekTo(t(70.0)), Effect::Play]);
-    assert_eq!(p.current().map(|s| s.song_id.as_str()), Some("B"));
+    tick(&mut p, 105.0, 40.0);
+    let paused = p.step(Input::Pause);
+    assert_eq!(paused, Output::default());
+    assert_eq!(p.phase(), Phase::Paused);
+    assert_eq!(p.shown_position(t(130.0), t(40.0)), t(45.0));
+    tick(&mut p, 130.0, 40.0);
+    assert_eq!(p.shown_position(t(130.0), t(40.0)), t(45.0));
+    let resumed = p.step(Input::Play);
+    assert_eq!(resumed, Output::default());
+    assert_eq!(p.phase(), Phase::Playing);
+    tick(&mut p, 131.0, 40.0);
+    tick(&mut p, 134.0, 40.0);
+    assert_eq!(p.shown_position(t(134.0), t(40.0)), t(48.0));
+    assert_eq!(p.current().map(|s| s.song_id.as_str()), Some("A"));
+}
+
+#[test]
+fn play_while_the_run_on_has_not_reached_its_end_does_not_skip_the_song() {
+    let mut p = stopped_by_marker();
+    observe_once(&mut p, false);
+    tick(&mut p, 100.0, 40.0);
+    assert_eq!(p.step(Input::Play), Output::default());
+    assert_eq!(p.current().map(|s| s.song_id.as_str()), Some("A"));
+    tick(&mut p, 110.0, 40.0);
+    assert_eq!(p.shown_position(t(110.0), t(40.0)), t(50.0));
+}
+
+#[test]
+fn a_resumed_run_on_still_ends_in_the_hard_stop() {
+    let mut p = stopped_by_marker();
+    observe_once(&mut p, false);
+    tick(&mut p, 100.0, 40.0);
+    p.step(Input::Pause);
+    p.step(Input::Play);
+    tick(&mut p, 200.0, 40.0);
+    let out = tick(&mut p, 220.0, 40.0);
+    assert_eq!(out.effects, vec![Effect::Pause]);
+    assert_eq!(p.phase(), Phase::HardStopped);
 }
 
 #[test]
