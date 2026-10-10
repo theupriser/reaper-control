@@ -1,5 +1,6 @@
-//! The app and the extension must report the same version, or the handshake check of the
-//! installer (SPEC §13.1 step 6) would call a fresh install "wrong version" (WP 3.10).
+//! The app and the extension have their own versions (owner's decision, 2026-10-10: app 2.0.0,
+//! extension 1.0.0). Every crate takes the app version except the extension, whose version is
+//! the one the installer's handshake check (SPEC §13.1 step 6) expects (WP 3.10).
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -23,7 +24,11 @@ fn workspace_version() -> Result<String, Box<dyn std::error::Error>> {
 #[test]
 fn every_crate_takes_the_workspace_version() -> TestResult {
     for entry in fs::read_dir(root().join("crates"))? {
-        let manifest = entry?.path().join("Cargo.toml");
+        let directory = entry?.path();
+        if directory.ends_with("reaper-extension") {
+            continue;
+        }
+        let manifest = directory.join("Cargo.toml");
         let text = fs::read_to_string(&manifest)?;
         assert!(
             text.lines()
@@ -32,6 +37,17 @@ fn every_crate_takes_the_workspace_version() -> TestResult {
             manifest.display()
         );
     }
+    Ok(())
+}
+
+#[test]
+fn the_extension_has_its_own_version() -> TestResult {
+    let text = fs::read_to_string(root().join("crates/reaper-extension/Cargo.toml"))?;
+    assert!(
+        text.lines()
+            .any(|line| line.trim() == "version = \"1.0.0\""),
+        "the extension version is 1.0.0 until the extension changes"
+    );
     Ok(())
 }
 
