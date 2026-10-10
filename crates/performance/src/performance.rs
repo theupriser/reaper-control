@@ -42,6 +42,24 @@ impl Performance {
         }
     }
 
+    /// Swaps in the songs after an edit and keeps the show going: the phase, settings and last
+    /// hand-over stay, and the current song is found again by its identity. Returns false, and
+    /// changes nothing, when the current song is gone; the caller then starts over.
+    pub fn replan(&mut self, songs: Vec<PlannedSong>) -> bool {
+        let Some(current) = self.current() else {
+            return false;
+        };
+        let Some(index) = songs
+            .iter()
+            .position(|song| song.song_id == current.song_id)
+        else {
+            return false;
+        };
+        self.songs = songs;
+        self.current = Some(index);
+        true
+    }
+
     /// The current phase.
     pub fn phase(&self) -> Phase {
         self.phase
