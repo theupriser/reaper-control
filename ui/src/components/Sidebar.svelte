@@ -14,8 +14,8 @@
     onSelect: (id: ScreenId) => void;
     onPerformer: () => void;
     onConnection: () => void;
-    connection: { label: string; detail: string; tone: "ok" | "error" };
-    midi: { label: string; detail: string; tone: "ok" | "error" } | null;
+    connection: { label: string; line?: string; tone: "ok" | "error" };
+    midi: { text: string; tone: "ok" | "error" } | null;
   } = $props();
 </script>
 
@@ -41,17 +41,16 @@
     {strings.screens.performerMode}
   </button>
 
-  {#if midi}
-    <div class="midi" role="status">
-      <div class="state"><span class="dot {midi.tone}"></span>{midi.label}</div>
-      <div class="detail">{midi.detail}</div>
-    </div>
-  {/if}
-
-  <button class="connection" aria-label={strings.health.open} onclick={onConnection}>
-    <div class="state"><span class="dot {connection.tone}"></span>{connection.label}</div>
-    <div class="detail">{connection.detail}</div>
-  </button>
+  <div class="card">
+    <button class="row connection" aria-label={strings.health.open} onclick={onConnection}>
+      <div class="state"><span class="dot {connection.tone}"></span>{connection.line ?? connection.label}</div>
+    </button>
+    {#if midi}
+      <div class="row midi" role="status">
+        <div class="state"><span class="dot {midi.tone}"></span>{midi.text}</div>
+      </div>
+    {/if}
+  </div>
 </nav>
 
 <style>
@@ -128,26 +127,32 @@
     margin-bottom: 16px;
     cursor: pointer;
   }
-  .midi,
-  .connection {
+  .card {
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 12px;
-    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .row {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    padding: 12px 14px;
+    min-height: 44px;
+    box-sizing: border-box;
+    background: transparent;
+    border: none;
     color: inherit;
     font: inherit;
     text-align: left;
-    min-height: 44px;
-    box-sizing: border-box;
   }
   .connection {
     cursor: pointer;
   }
   .midi {
-    margin-bottom: 8px;
+    border-top: 1px solid var(--line);
   }
   .state {
     display: flex;

@@ -12,7 +12,7 @@
   import Sidebar from "./components/Sidebar.svelte";
   import { createAppStore } from "./lib/app-store";
   import { connectionBadge } from "./lib/connection";
-  import { midiBadge } from "./lib/midi-status";
+  import { midiLine } from "./lib/midi-status";
   import { watchView } from "./lib/watch";
   import { backend, bundledExtensionVersion, currentInstallation, currentSettings, currentSystemStats } from "./lib/ipc";
   import { needsWizard } from "./lib/wizard";
@@ -50,7 +50,7 @@
   const connection = $derived(connectionBadge($appState.link.status, $appState.problem, bundledVersion));
 
   let settingsView = $state<SettingsView | null>(null);
-  const midi = $derived(settingsView && midiBadge(settingsView));
+  const midi = $derived(settingsView && midiLine(settingsView));
 
   const notices = $derived($appState.notices.filter((notice) => notice.key !== "link"));
   let wizardOpen = $state(false);

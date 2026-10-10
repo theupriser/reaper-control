@@ -1,18 +1,18 @@
 import type { SettingsView } from "./generated/protocol";
-import type { ConnectionBadge } from "./connection";
 import { strings } from "./strings";
 
+export type MidiLine = { text: string; tone: "ok" | "error" };
+
 /** The MIDI controller line of the sidebar; `null` when MIDI is switched off. */
-export function midiBadge(view: SettingsView): ConnectionBadge | null {
+export function midiLine(view: SettingsView): MidiLine | null {
   const { midi_enabled: enabled, midi_device_name: wanted } = view.settings;
   if (!enabled) return null;
   if (wanted !== null) {
-    return view.devices.includes(wanted)
-      ? { label: strings.midiStatus.connected, detail: wanted, tone: "ok" }
-      : { label: strings.midiStatus.notConnected, detail: wanted, tone: "error" };
+    const present = view.devices.includes(wanted);
+    return { text: `${wanted} ${present ? strings.midiStatus.connected : strings.midiStatus.notConnected}`, tone: present ? "ok" : "error" };
   }
   const [first, ...others] = view.devices;
-  if (first === undefined) return { label: strings.midiStatus.noneFound, detail: strings.midiStatus.connectIt, tone: "error" };
-  const detail = others.length === 0 ? first : strings.midiStatus.plusMore(first, others.length);
-  return { label: strings.midiStatus.connected, detail, tone: "ok" };
+  if (first === undefined) return { text: strings.midiStatus.noDevice, tone: "error" };
+  const name = others.length === 0 ? first : strings.midiStatus.plusMore(first, others.length);
+  return { text: `${name} ${strings.midiStatus.connected}`, tone: "ok" };
 }

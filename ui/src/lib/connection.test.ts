@@ -7,6 +7,7 @@ describe("connectionBadge", () => {
       label: "REAPER not running",
       detail: "waiting for the extension",
       tone: "error",
+      line: "REAPER not running",
     });
   });
 
@@ -14,6 +15,7 @@ describe("connectionBadge", () => {
     const badge = connectionBadge({ Connected: { extension_version: "0.0.0" } });
     expect(badge.tone).toBe("ok");
     expect(badge.detail).toBe("extension 0.0.0");
+    expect(badge.line).toBe("REAPER connected");
   });
 
   it("names the problem the app found instead of guessing", () => {
@@ -28,6 +30,7 @@ describe("connectionBadge", () => {
       label: "Extension out of date",
       detail: "extension 0.0.0, click to update it",
       tone: "error",
+      line: "REAPER extension out of date",
     });
     expect(connectionBadge(status, null, "0.0.0").tone).toBe("ok");
   });
