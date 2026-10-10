@@ -124,9 +124,22 @@ jobs:
       - name: Package the extension with its checksum
         shell: bash
         run: scripts/package_extension.sh
-      - name: Build the app (release, no installer yet)
-        run: cargo build --release -p app --features custom-protocol
+      - name: Build the installer (macOS .dmg, Windows setup)
+        shell: bash
+        working-directory: crates/app
+        env:
+          CI: "true"
+        run: ../../ui/node_modules/.bin/tauri build --features custom-protocol --config bundle.${{ startsWith(matrix.os, 'windows') && 'windows' || 'macos' }}.json
+      - name: Installer file names
+        shell: bash
+        run: ls -l target/release/bundle/dmg/*.dmg target/release/bundle/nsis/*-setup.exe 2>/dev/null || true
       - uses: actions/upload-artifact@v4
         with:
           name: extension-${{ matrix.os }}
           path: dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.os }}
+          path: |
+            target/release/bundle/dmg/*.dmg
+            target/release/bundle/nsis/*-setup.exe
