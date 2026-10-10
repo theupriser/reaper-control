@@ -305,6 +305,25 @@ fn go_to_song_jumps_to_that_songs_start_and_autoplay_decides_whether_it_plays() 
 }
 
 #[test]
+fn a_song_click_does_not_start_playback_that_was_not_running() {
+    let flags = Flags {
+        autoplay: true,
+        count_in: false,
+    };
+    let mut idle = performance(flags);
+    let out = idle.step(Input::GoToSong { index: 1 });
+    assert_eq!(out.effects, vec![Effect::Pause, Effect::SeekTo(t(10.0))]);
+    assert_eq!(idle.phase(), Phase::Paused);
+
+    let mut paused = performance(flags);
+    paused.step(Input::Play);
+    paused.step(Input::Pause);
+    let out = paused.step(Input::GoToSong { index: 2 });
+    assert_eq!(out.effects, vec![Effect::Pause, Effect::SeekTo(t(30.0))]);
+    assert_eq!(paused.phase(), Phase::Paused);
+}
+
+#[test]
 fn go_to_song_refuses_a_song_that_is_not_in_the_setlist() {
     let mut p = playing_at_song(0);
     assert_eq!(
