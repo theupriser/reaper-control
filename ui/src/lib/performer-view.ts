@@ -1,4 +1,4 @@
-import type { Catalog, LinkView, SongInfo } from "./generated/protocol";
+import type { Catalog, LinkProblem, LinkView, SongInfo } from "./generated/protocol";
 import { performerPhase, type PerformerView, type SongView } from "./performer";
 
 const setlistName = (catalog: Catalog): string | null =>
@@ -17,7 +17,7 @@ function songView(song: SongInfo, catalog: Catalog): SongView {
   };
 }
 
-export function performerView(link: LinkView, problem: string | null = null): PerformerView {
+export function performerView(link: LinkView, problem: LinkProblem | null = null): PerformerView {
   const { catalog, live, status } = link;
   const index = live?.current_song ?? null;
   const song = index === null ? undefined : catalog.songs[index];

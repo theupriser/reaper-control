@@ -17,13 +17,19 @@ describe("connectionBadge", () => {
   });
 
   it("names the problem the app found instead of guessing", () => {
-    const badge = connectionBadge("NotRunning", "The extension turned itself off");
+    const badge = connectionBadge("NotRunning", { message: "The extension turned itself off", extension_outdated: false });
     expect(badge.label).toBe("The extension turned itself off");
     expect(badge.tone).toBe("error");
   });
 
+  it("asks for an update when the installed extension is older", () => {
+    const badge = connectionBadge("NotRunning", { message: "A new version of the extension is available", extension_outdated: true });
+    expect(badge.label).toBe("A new version of the extension is available");
+    expect(badge.detail).toBe("click to update it");
+  });
+
   it("shows a problem even while the connection still answers", () => {
-    const badge = connectionBadge({ Connected: { extension_version: "0.0.0" } }, "The extension turned itself off");
+    const badge = connectionBadge({ Connected: { extension_version: "0.0.0" } }, { message: "The extension turned itself off", extension_outdated: false });
     expect(badge.label).toBe("The extension turned itself off");
   });
 });

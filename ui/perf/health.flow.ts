@@ -36,7 +36,7 @@ test("a problem the app found shows in the sidebar indicator and clears again", 
   await page.addInitScript(tauriStandIn, view(connected));
   await page.goto("/");
   await page.getByRole("navigation").waitFor();
-  await page.evaluate(() => (window as any).__pushEvent("link-problem", "The extension is not loaded"));
+  await page.evaluate(() => (window as any).__pushEvent("link-problem", { message: "The extension is not loaded", extension_outdated: false }));
   const indicator = page.getByRole("button", { name: "Connection details" });
   await expect(indicator).toContainText("The extension is not loaded");
   await expect(page.getByRole("alert")).toHaveCount(0);

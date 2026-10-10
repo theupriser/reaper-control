@@ -2,10 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 import { get } from "svelte/store";
 import { createAppStore, type Backend } from "./app-store";
 import { emptyLink } from "./app-state";
-import type { LinkView, Notice } from "./generated/protocol";
+import type { LinkProblem, LinkView, Notice } from "./generated/protocol";
 
 function fakeBackend(overrides: Partial<Backend> = {}) {
-  const handlers: { view?: (v: LinkView) => void; notice?: (n: Notice) => void; problem?: (p: string | null) => void } = {};
+  const handlers: { view?: (v: LinkView) => void; notice?: (n: Notice) => void; problem?: (p: LinkProblem | null) => void } = {};
   const backend: Backend = {
     dispatch: vi.fn().mockResolvedValue(undefined),
     currentView: vi.fn().mockResolvedValue(emptyLink),
@@ -53,9 +53,9 @@ describe("app store", () => {
     const store = createAppStore(backend, () => 0);
     const stop = store.start();
     await Promise.resolve();
-    handlers.problem?.("Wrong token");
+    handlers.problem?.({ message: "Wrong token", extension_outdated: false });
     handlers.notice?.({ key: "a", level: "Info", title: "Hi", text: "There" });
-    expect(get(store).problem).toBe("Wrong token");
+    expect(get(store).problem?.message).toBe("Wrong token");
     expect(get(store).notices).toHaveLength(1);
     store.dismissNotice("a");
     expect(get(store).notices).toEqual([]);

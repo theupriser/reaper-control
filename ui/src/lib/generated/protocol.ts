@@ -350,6 +350,20 @@ title: string,
 text: string, };
 
 /**
+ * What is wrong with the link, for the sidebar.
+ */
+export type LinkProblem = { 
+/**
+ * A few words naming the problem.
+ */
+message: string, 
+/**
+ * The installed extension is older than the one that ships with the app, so the way out is the
+ * setup wizard.
+ */
+extension_outdated: boolean, };
+
+/**
  * The settings a person can change on the Settings screen.
  */
 export type Settings = { 

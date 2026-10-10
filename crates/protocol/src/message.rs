@@ -18,7 +18,7 @@ pub use outcome::Outcome;
 pub use server_message::ServerMessage;
 
 /// Bumped on every incompatible change; checked in the handshake.
-pub const PROTOCOL_VERSION: u32 = 2;
+pub const PROTOCOL_VERSION: u32 = 3;
 
 #[cfg(test)]
 mod tests;

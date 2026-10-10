@@ -62,6 +62,8 @@
     }
   };
 
+  const openConnection = () => ($appState.problem?.extension_outdated ? (wizardOpen = true) : openHealth());
+
   const send = appState.send;
 
   const playPause = () => send(live?.phase === "Playing" ? "Pause" : "Play");
@@ -125,7 +127,7 @@
   <WizardScreen onclose={() => (wizardOpen = false)} />
 {:else}
   <div class="layout">
-    <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} onConnection={openHealth} />
+    <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} onConnection={openConnection} />
     <main class="content" tabindex="-1" bind:this={content}>
       {#if screen === "player"}
         <PlayerScreen

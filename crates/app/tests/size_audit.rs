@@ -197,6 +197,7 @@ fn all_sizes() -> Vec<(String, usize)> {
         protocol::NoteMapping,
         protocol::NoticeLevel,
         protocol::Notice,
+        protocol::LinkProblem,
         protocol::Phase,
         protocol::SetlistInfo,
         protocol::SetlistTransferView,

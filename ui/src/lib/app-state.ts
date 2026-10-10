@@ -1,9 +1,9 @@
-import type { Command, LinkView, Notice } from "./generated/protocol";
+import type { Command, LinkProblem, LinkView, Notice } from "./generated/protocol";
 import { addNotice, dismissNotice, expireNotices, type ShownNotice } from "./notices";
 
 export interface AppState {
   link: LinkView;
-  problem: string | null;
+  problem: LinkProblem | null;
   notices: ShownNotice[];
   /** The last command that failed, shown until the next one succeeds. */
   error: string | null;
@@ -27,7 +27,7 @@ const removeOne = (names: string[], name: string): string[] => {
 };
 
 export const withLink = (state: AppState, link: LinkView): AppState => ({ ...state, link });
-export const withProblem = (state: AppState, problem: string | null): AppState => ({ ...state, problem });
+export const withProblem = (state: AppState, problem: LinkProblem | null): AppState => ({ ...state, problem });
 export const withNotice = (state: AppState, notice: Notice, now: number): AppState => ({ ...state, notices: addNotice(state.notices, notice, now) });
 export const withoutNotice = (state: AppState, key: string): AppState => ({ ...state, notices: dismissNotice(state.notices, key) });
 export const withExpiredNotices = (state: AppState, now: number): AppState => ({ ...state, notices: expireNotices(state.notices, now) });
