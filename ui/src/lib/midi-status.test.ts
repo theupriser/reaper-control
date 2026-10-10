@@ -11,13 +11,13 @@ describe("midiLine", () => {
   });
 
   it("names the chosen device and says whether it is there", () => {
-    expect(midiLine(view(true, "Pad", ["Pad"]))).toEqual({ text: "Pad connected", tone: "ok" });
-    expect(midiLine(view(true, "Pad", []))).toEqual({ text: "Pad not connected", tone: "error" });
+    expect(midiLine(view(true, "Pad", ["Pad"]))).toEqual({ text: "Pad Connected", tone: "ok" });
+    expect(midiLine(view(true, "Pad", []))).toEqual({ text: "Pad Not connected", tone: "error" });
   });
 
   it("looks at every device when none is chosen", () => {
     expect(midiLine(view(true, null, []))).toEqual({ text: "No MIDI device", tone: "error" });
-    expect(midiLine(view(true, null, ["A"]))).toEqual({ text: "A connected", tone: "ok" });
-    expect(midiLine(view(true, null, ["A", "B", "C"]))?.text).toBe("A and 2 more connected");
+    expect(midiLine(view(true, null, ["A"]))).toEqual({ text: "A Connected", tone: "ok" });
+    expect(midiLine(view(true, null, ["A", "B", "C"]))?.text).toBe("A and 2 more Connected");
   });
 });

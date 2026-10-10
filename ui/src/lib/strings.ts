@@ -66,7 +66,8 @@ export const strings = {
     seeMessage: "we keep trying",
     updateExtension: "click to update it",
     outdated: "Extension out of date",
-    outdatedLine: "REAPER extension out of date",
+    outdatedLine: "REAPER extension outdated",
+    notConnectedLine: "REAPER not connected",
     connectedLine: "REAPER connected",
     connected: "Connected to REAPER",
     disconnected: "Disconnected",
@@ -74,9 +75,10 @@ export const strings = {
   },
 
   midiStatus: {
-    connected: "connected",
-    notConnected: "not connected",
+    connected: "Connected",
+    notConnected: "Not connected",
     noDevice: "No MIDI device",
+    openLabel: "Open the MIDI settings",
     plusMore: (name: string, more: number) => `${name} and ${more} more`,
   },
 

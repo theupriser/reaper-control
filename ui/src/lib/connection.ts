@@ -6,10 +6,10 @@ export type ConnectionBadge = { label: string; detail: string; tone: "ok" | "err
 export function connectionBadge(status: LinkStatus, problem: LinkProblem | null = null, bundledVersion: string | null = null): ConnectionBadge {
   if (problem) {
     const detail = problem.extension_outdated ? strings.connection.updateExtension : strings.connection.seeMessage;
-    return { label: problem.message, detail, tone: "error", line: problem.message };
+    return { label: problem.message, detail, tone: "error", line: strings.connection.notConnectedLine };
   }
   if (status === "NotRunning") {
-    return { label: strings.connection.notRunning, detail: strings.connection.waitingForExtension, tone: "error", line: strings.connection.notRunning };
+    return { label: strings.connection.notRunning, detail: strings.connection.waitingForExtension, tone: "error", line: strings.connection.notConnectedLine };
   }
   if (bundledVersion !== null && status.Connected.extension_version !== bundledVersion) {
     return { label: strings.connection.outdated, detail: `${strings.connection.extensionVersion(status.Connected.extension_version)}, ${strings.connection.updateExtension}`, tone: "error", line: strings.connection.outdatedLine };

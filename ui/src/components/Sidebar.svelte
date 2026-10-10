@@ -9,6 +9,7 @@
     onConnection,
     connection,
     midi,
+    onMidi,
   }: {
     active: ScreenId;
     onSelect: (id: ScreenId) => void;
@@ -16,6 +17,7 @@
     onConnection: () => void;
     connection: { label: string; line?: string; tone: "ok" | "error" };
     midi: { text: string; tone: "ok" | "error" } | null;
+    onMidi: () => void;
   } = $props();
 </script>
 
@@ -43,19 +45,27 @@
 
   <div class="card">
     <button class="row connection" aria-label={strings.health.open} onclick={onConnection}>
-      <div class="state"><span class="dot {connection.tone}"></span>{connection.line ?? connection.label}</div>
+      <div class="state">
+        <span class="badge {connection.tone}">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h3l2-7 4 14 3-10 2 3h4" /></svg>
+        </span>{connection.line ?? connection.label}
+      </div>
     </button>
     {#if midi}
-      <div class="row midi" role="status">
-        <div class="state"><span class="dot {midi.tone}"></span>{midi.text}</div>
-      </div>
+      <button class="row midi" aria-label={strings.midiStatus.openLabel} onclick={onMidi}>
+        <div class="state">
+          <span class="badge {midi.tone}">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 7.5l11 9-5.5 4.5v-18l5.5 4.5-11 9" /></svg>
+          </span>{midi.text}
+        </div>
+      </button>
     {/if}
   </div>
 </nav>
 
 <style>
   nav {
-    width: 240px;
+    width: 280px;
     flex-shrink: 0;
     box-sizing: border-box;
     height: 100%;
@@ -148,7 +158,8 @@
     font: inherit;
     text-align: left;
   }
-  .connection {
+  .connection,
+  .midi {
     cursor: pointer;
   }
   .midi {
@@ -162,9 +173,26 @@
     font-weight: 700;
   }
   .dot {
-    width: 9px;
-    height: 9px;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
     border-radius: 50%;
+  }
+  .badge {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--on-accent);
+  }
+  .badge.ok {
+    background: var(--green);
+  }
+  .badge.error {
+    background: var(--red);
   }
   .dot.ok {
     background: var(--green);
