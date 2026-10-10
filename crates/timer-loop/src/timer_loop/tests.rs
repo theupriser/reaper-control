@@ -98,15 +98,47 @@ fn an_edit_that_leaves_the_songs_alone_does_not_restart_the_performance() {
 }
 
 #[test]
-fn an_edit_that_changes_the_songs_starts_over_with_the_new_ones() {
+fn an_edit_that_removes_the_playing_song_starts_over() {
     let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
     timer_loop.command(Input::Play);
     timer_loop
         .port_mut()
-        .replace_regions(vec![region("A", 0.0, 10.0)]);
+        .replace_regions(vec![region("B", 10.0, 20.0)]);
     run(&mut timer_loop, 1);
     assert_eq!(timer_loop.rebuilds(), 1);
     assert_eq!(timer_loop.phase(), Phase::Idle);
+}
+
+#[test]
+fn an_edit_of_another_song_mid_song_keeps_the_show_and_the_hand_over_follows_the_new_plan() {
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    timer_loop.command(Input::Play);
+    run(&mut timer_loop, 20);
+    timer_loop
+        .port_mut()
+        .replace_regions(vec![region("A", 0.0, 10.0), region("B", 12.0, 22.0)]);
+    run(&mut timer_loop, 1);
+    assert_eq!(timer_loop.rebuilds(), 0);
+    assert_eq!(timer_loop.phase(), Phase::Playing);
+    run(&mut timer_loop, 230);
+    assert_eq!(timer_loop.phase(), Phase::Playing);
+    assert_eq!(timer_loop.current_song_id().as_deref(), Some("B"));
+    assert!(timer_loop.port_mut().position().get() >= 12.0);
+}
+
+#[test]
+fn a_song_inserted_before_the_playing_one_keeps_the_playing_song() {
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    timer_loop.command(Input::Play);
+    run(&mut timer_loop, 20);
+    timer_loop.port_mut().replace_regions(vec![
+        region("Z", 0.0, 0.5),
+        region("A", 0.5, 10.0),
+        region("B", 10.0, 20.0),
+    ]);
+    run(&mut timer_loop, 1);
+    assert_eq!(timer_loop.rebuilds(), 0);
+    assert_eq!(timer_loop.current_song_id().as_deref(), Some("A"));
 }
 
 #[test]

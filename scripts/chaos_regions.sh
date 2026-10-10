@@ -39,20 +39,18 @@ stop_reaper; start_reaper "$SAMPLE"
 edit() {
   example send_command "$ENDPOINT" play seek:20 >/dev/null 2>&1; sleep 2
   probe region-edit 2 40 70 Moved and renamed
-  sleep 12
+  sleep 22
 }
 log=$(mktemp)
-example link_watch "$ENDPOINT" 20 >"$log" 2>&1 &
+example link_watch "$ENDPOINT" 30 >"$log" 2>&1 &
 watcher=$!
 sleep 2; edit; wait "$watcher" || true
 cat "$log"
 echo "-- journal"; cat "$R/RC2/journal.log"
 grep -q "Moved and renamed" "$log" || { echo "FAIL: the catalog never showed the new name"; exit 1; }
-if grep -q HandOverCompleted "$R/RC2/journal.log"; then
-  echo "region edit: the hand-over still happened"
-else
-  echo "FINDING: no hand-over after the region edit; the performance started over (phase Idle) while REAPER kept playing"
-fi
+grep -q HandOverCompleted "$R/RC2/journal.log" || { echo "FAIL: no hand-over after the region edit; the performance started over"; exit 1; }
+grep -q "phase Playing, transport Playing, at 40" "$log" || { echo "FAIL: the hand-over did not land on the moved region (40 s)"; exit 1; }
+echo "region edit: the hand-over followed the moved region"
 
 echo "== Tick time with 1000 regions =="
 stop_reaper; start_reaper "$HUGE"

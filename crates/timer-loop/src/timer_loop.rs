@@ -199,6 +199,11 @@ impl<Port: ReaperPort> TimerLoop<Port> {
         self.performance.phase()
     }
 
+    /// The identity of the current song.
+    pub fn current_song_id(&self) -> Option<String> {
+        self.performance.current().map(|song| song.song_id.clone())
+    }
+
     /// How many times an edit or a switch of project made the performance start over.
     pub fn rebuilds(&self) -> u64 {
         self.rebuilds
@@ -223,8 +228,9 @@ impl<Port: ReaperPort> TimerLoop<Port> {
         Performance::new(songs, flags, HandOverPolicy::default())
     }
 
-    /// Re-reads regions and markers after an edit. The performance only starts over when the
-    /// songs themselves changed, so a note or an unrelated edit mid-song does not stop the show.
+    /// Re-reads regions and markers after an edit. The performance only changes when the
+    /// songs changed: it keeps its place while the current song still exists, and starts over
+    /// when that song is gone or the project switched.
     fn refresh_if_changed(&mut self) {
         let change_count = self.port.change_count();
         let project = self.port.project_token();
@@ -251,9 +257,12 @@ impl<Port: ReaperPort> TimerLoop<Port> {
             self.record(WireEvent::ProjectChanged);
         }
         if switched || songs != self.songs {
-            self.performance = Self::fresh(&self.port, songs.clone());
+            let carried_on = !switched && self.performance.replan(songs.clone());
+            if !carried_on {
+                self.performance = Self::fresh(&self.port, songs.clone());
+                self.rebuilds += 1;
+            }
             self.songs = songs;
-            self.rebuilds += 1;
         }
     }
 
