@@ -52,6 +52,22 @@ fn the_extension_has_its_own_version() -> TestResult {
 }
 
 #[test]
+fn the_app_expects_the_version_the_extension_has() -> TestResult {
+    let manifest = fs::read_to_string(root().join("crates/reaper-extension/Cargo.toml"))?;
+    let version = manifest
+        .lines()
+        .find_map(|line| line.trim().strip_prefix("version = \""))
+        .and_then(|rest| rest.strip_suffix('"'))
+        .ok_or("no version in the extension manifest")?;
+    let shell = fs::read_to_string(root().join("crates/app/src/shell.rs"))?;
+    assert!(
+        shell.contains(&format!("BUNDLED_EXTENSION_VERSION: &str = \"{version}\"")),
+        "shell.rs must expect extension version {version}"
+    );
+    Ok(())
+}
+
+#[test]
 fn the_app_window_and_the_ui_package_carry_the_same_version() -> TestResult {
     let version = workspace_version()?;
     for file in ["crates/app/tauri.conf.json", "ui/package.json"] {

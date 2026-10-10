@@ -4,6 +4,8 @@ import type { ChecklistView, Command, InstallationView, LinkProblem, LinkView, N
 
 export const dispatch = (command: Command): Promise<void> => invoke<void>("dispatch", { command });
 
+export const bundledExtensionVersion = (): Promise<string> => invoke<string>("bundled_extension_version");
+
 export const currentView = (): Promise<LinkView> => invoke<LinkView>("current_view");
 
 export const currentProblem = (): Promise<LinkProblem | null> => invoke<LinkProblem | null>("current_problem");
