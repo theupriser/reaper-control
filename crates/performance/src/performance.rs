@@ -94,18 +94,15 @@ impl Performance {
     /// Applies one input and says what to do.
     pub fn step(&mut self, input: Input) -> Output {
         let mut out = Output::default();
-        let mut bridged = false;
+        if self.pause_or_resume_the_run_on(&input) {
+            return out;
+        }
         if !matches!(input, Input::Observed { .. } | Input::Tick { .. }) {
             self.disagreeing = 0;
-            bridged = self.bridge.take().is_some();
+            self.bridge = None;
             self.held = None;
         }
         match input {
-            Input::Play if bridged && self.next_song().is_some() => {
-                if let Some(current) = self.current {
-                    self.begin_at(current + 1, &mut out);
-                }
-            }
             Input::Tick { now, position } => self.tick(now, position, &mut out),
             Input::Observed { playing } => self.observe(playing),
             Input::Play => self.play(&mut out),
@@ -119,6 +116,27 @@ impl Performance {
             Input::SetFlag { flag, enabled } => self.set_flag(flag, enabled, &mut out),
         }
         out
+    }
+
+    /// While the timeline runs on after REAPER stopped at the marker, Pause freezes it and Play
+    /// runs it on again. REAPER already stands still, so neither says anything to it. True when
+    /// the input was one of those.
+    fn pause_or_resume_the_run_on(&mut self, input: &Input) -> bool {
+        let Some(bridge) = self.bridge.as_mut() else {
+            return false;
+        };
+        match input {
+            Input::Pause if bridge.is_frozen() => {}
+            Input::Pause if self.phase == Phase::Playing => {
+                bridge.freeze();
+                self.phase = Phase::Paused;
+            }
+            Input::Play if bridge.is_frozen() => self.phase = Phase::Playing,
+            Input::Play if self.phase == Phase::Playing => {}
+            _ => return false,
+        }
+        self.disagreeing = 0;
+        true
     }
 
     fn reject(&self, why: Rejection, out: &mut Output) {
@@ -350,7 +368,11 @@ impl Performance {
     /// The position the timeline is at: REAPER's, unless REAPER stopped at the `!1008` marker and
     /// the performance has been keeping time since.
     fn follow_reaper_stop(&mut self, now: Seconds, position: Seconds) -> Seconds {
-        if let Some(bridge) = &self.bridge {
+        if let Some(bridge) = self.bridge.as_mut() {
+            if bridge.is_frozen() {
+                bridge.resume(now);
+            }
+            bridge.see(now);
             return Seconds::new(bridge.position_at(now)).unwrap_or(position);
         }
         let at_marker = self
