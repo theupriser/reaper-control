@@ -1,0 +1,7 @@
+{
+  "bundle": {
+    "targets": ["app", "dmg"],
+    "resources": { "../../dist/reaper_rc2-arm64.dylib": "reaper_rc2-arm64.dylib" },
+    "macOS": { "signingIdentity": "-" }
+  }
+}

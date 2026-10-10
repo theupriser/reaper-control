@@ -33,11 +33,11 @@ jobs:
       matrix:
         include:
           - os: macos-14
-            binary: target/release/app
-            name: reaper-control-macos-arm64
+            bundle: target/release/bundle/dmg/*.dmg
+            name: reaper-control-macos-arm64.dmg
           - os: windows-latest
-            binary: target/release/app.exe
-            name: reaper-control-windows-x64.exe
+            bundle: target/release/bundle/nsis/*-setup.exe
+            name: reaper-control-windows-x64-setup.exe
     steps:
       - uses: actions/checkout@v4
       - name: Toolchain (from rust-toolchain.toml)
@@ -60,12 +60,16 @@ jobs:
       - name: Package the extension with its checksum
         shell: bash
         run: scripts/package_extension.sh
-      - name: Build the app (release)
-        run: cargo build --release -p app --features custom-protocol
-      - name: Name the app file and checksum it
+      - name: Build the installer (macOS .dmg, Windows setup)
+        shell: bash
+        working-directory: crates/app
+        env:
+          CI: "true"
+        run: ../../ui/node_modules/.bin/tauri build --features custom-protocol
+      - name: Name the installer and checksum it
         shell: bash
         run: |
-          cp "${{ matrix.binary }}" "dist/${{ matrix.name }}"
+          cp ${{ matrix.bundle }} "dist/${{ matrix.name }}"
           cd dist
           if command -v sha256sum >/dev/null; then sha256sum "${{ matrix.name }}" > "${{ matrix.name }}.sha256"; else shasum -a 256 "${{ matrix.name }}" > "${{ matrix.name }}.sha256"; fi
       - uses: actions/upload-artifact@v4
@@ -92,4 +96,4 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --draft \
             --title "$GITHUB_REF_NAME" \
-            --notes "Draft. macOS: ad-hoc signed. Windows: unsigned (SmartScreen will warn). Verify with the .sha256 files."
+            --notes "Draft. Not code-signed: on macOS right-click the app and choose Open the first time; on Windows SmartScreen will warn (More info, Run anyway). Verify the downloads with the .sha256 files."
