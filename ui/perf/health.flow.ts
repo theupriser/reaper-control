@@ -5,18 +5,18 @@ const connected = { Connected: { extension_version: "test" } };
 const catalog = { revision: 1, setlist_revision: 1, project_id: "project", songs: [], project_songs: [], cues: [], setlists: [], active_setlist: null };
 const view = (status: unknown) => ({ status, live: null, catalog });
 
-test("a working link shows no banner", async ({ page }) => {
+test("a working link shows no alert", async ({ page }) => {
   await page.addInitScript(tauriStandIn, view(connected));
   await page.goto("/");
   await expect(page.getByRole("navigation").getByText("Connected")).toBeVisible();
   await expect(page.getByRole("alert")).toHaveCount(0);
 });
 
-test("a link that is down shows a banner and the dialog shows the numbers", async ({ page }) => {
+test("a link that is down shows only the sidebar indicator, and the dialog shows the numbers", async ({ page }) => {
   await page.addInitScript(tauriStandIn, view("NotRunning"));
   await page.goto("/");
-  await expect(page.getByRole("alert")).toContainText("REAPER not running");
-  await expect(page.getByRole("alert")).toContainText("Open REAPER");
+  await expect(page.getByRole("button", { name: "Connection details" })).toContainText("REAPER not running");
+  await expect(page.getByRole("alert")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Connection details" }).click();
   const dialog = page.getByRole("dialog", { name: "Connection and health" });
@@ -32,12 +32,24 @@ test("a link that is down shows a banner and the dialog shows the numbers", asyn
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
-test("a problem the app found replaces the banner text and clears again", async ({ page }) => {
+test("a problem the app found shows in the sidebar indicator and clears again", async ({ page }) => {
   await page.addInitScript(tauriStandIn, view(connected));
   await page.goto("/");
   await page.getByRole("navigation").waitFor();
   await page.evaluate(() => (window as any).__pushEvent("link-problem", "The extension is not loaded"));
-  await expect(page.getByRole("alert")).toContainText("The extension is not loaded");
-  await page.evaluate(() => (window as any).__pushEvent("link-problem", null));
+  const indicator = page.getByRole("button", { name: "Connection details" });
+  await expect(indicator).toContainText("The extension is not loaded");
   await expect(page.getByRole("alert")).toHaveCount(0);
+  await page.evaluate(() => (window as any).__pushEvent("link-problem", null));
+  await expect(indicator).toContainText("Connected");
+});
+
+test("a link notice stays out of the toasts while other notices still show", async ({ page }) => {
+  await page.addInitScript(tauriStandIn, view("NotRunning"));
+  await page.goto("/");
+  await page.getByRole("navigation").waitFor();
+  await page.evaluate(() => (window as any).__pushEvent("notice", { key: "link", level: "Error", title: "REAPER is not running", text: "Open REAPER." }));
+  await page.evaluate(() => (window as any).__pushEvent("notice", { key: "command", level: "Warning", title: "Refused", text: "Not now." }));
+  await expect(page.getByText("Refused")).toBeVisible();
+  await expect(page.getByText("Open REAPER.")).toHaveCount(0);
 });
