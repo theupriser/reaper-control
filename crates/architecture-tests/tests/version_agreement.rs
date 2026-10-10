@@ -1,5 +1,5 @@
 //! The app and the extension have their own versions (owner's decision, 2026-10-10: app 2.0.0,
-//! extension 1.0.0, then 1.0.1 and 1.0.2 for the hard stop fixes). Every crate takes the app version except the extension, whose version is
+//! extension 1.0.0, then 1.0.1 to 1.0.3 for the hard stop fixes). Every crate takes the app version except the extension, whose version is
 //! the one the installer's handshake check (SPEC §13.1 step 6) expects (WP 3.10).
 
 use std::fs;
@@ -45,8 +45,8 @@ fn the_extension_has_its_own_version() -> TestResult {
     let text = fs::read_to_string(root().join("crates/reaper-extension/Cargo.toml"))?;
     assert!(
         text.lines()
-            .any(|line| line.trim() == "version = \"1.0.2\""),
-        "the extension version is 1.0.2 until the extension changes"
+            .any(|line| line.trim() == "version = \"1.0.3\""),
+        "the extension version is 1.0.3 until the extension changes"
     );
     Ok(())
 }

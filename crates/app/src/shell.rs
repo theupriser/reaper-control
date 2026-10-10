@@ -60,7 +60,7 @@ const NOTICE: &str = "notice";
 const LINK_PROBLEM: &str = "link-problem";
 /// The version of the extension that ships with this app (kept equal to the extension's own
 /// version by an architecture test).
-const BUNDLED_EXTENSION_VERSION: &str = "1.0.2";
+const BUNDLED_EXTENSION_VERSION: &str = "1.0.3";
 const UNSUPPORTED_SYSTEM: &str = "the extension is not built for this system";
 
 #[tauri::command]
