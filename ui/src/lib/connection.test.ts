@@ -40,6 +40,7 @@ describe("connectionBadge", () => {
     const badge = connectionBadge("NotRunning", { message: "A new version of the extension is available", extension_outdated: true });
     expect(badge.label).toBe("A new version of the extension is available");
     expect(badge.detail).toBe("click to update it");
+    expect(badge.line).toBe("REAPER extension outdated");
   });
 
   it("shows a problem even while the connection still answers", () => {

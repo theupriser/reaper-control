@@ -7,7 +7,7 @@ export type ConnectionBadge = { label: string; detail: string; tone: "ok" | "err
 export function connectionBadge(status: LinkStatus, problem: LinkProblem | null = null, bundledVersion: string | null = null): ConnectionBadge {
   if (problem) {
     const detail = problem.extension_outdated ? strings.connection.updateExtension : strings.connection.seeMessage;
-    return { label: problem.message, detail, tone: "error", line: strings.connection.disconnectedLine };
+    return { label: problem.message, detail, tone: "error", line: problem.extension_outdated ? strings.connection.outdatedLine : strings.connection.disconnectedLine };
   }
   if (status === "NotRunning") {
     return { label: strings.connection.notRunning, detail: strings.connection.waitingForExtension, tone: "error", line: strings.connection.disconnectedLine };

@@ -15,11 +15,12 @@ test("a working link shows no alert", async ({ page }) => {
 test("a link that is down shows only the sidebar indicator, and the dialog shows the numbers", async ({ page }) => {
   await page.addInitScript(tauriStandIn, view("NotRunning"));
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "Connection details" })).toContainText("REAPER not running");
+  await expect(page.getByRole("button", { name: "Connection details" })).toContainText("REAPER disconnected");
   await expect(page.getByRole("alert")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Connection details" }).click();
   const dialog = page.getByRole("dialog", { name: "Connection and health" });
+  await expect(dialog).toContainText("REAPER not running");
   await expect(dialog).toContainText("Machine CPU");
   await expect(dialog).toContainText("12%");
   await expect(dialog).toContainText("4000 MB / 16000 MB");
@@ -38,10 +39,14 @@ test("a problem the app found shows in the sidebar indicator and clears again", 
   await page.getByRole("navigation").waitFor();
   await page.evaluate(() => (window as any).__pushEvent("link-problem", { message: "The extension is not loaded", extension_outdated: false }));
   const indicator = page.getByRole("button", { name: "Connection details" });
-  await expect(indicator).toContainText("The extension is not loaded");
+  await expect(indicator).toContainText("REAPER disconnected");
   await expect(page.getByRole("alert")).toHaveCount(0);
+  await indicator.click();
+  const dialog = page.getByRole("dialog", { name: "Connection and health" });
+  await expect(dialog).toContainText("The extension is not loaded");
+  await dialog.getByRole("button", { name: "Close" }).click();
   await page.evaluate(() => (window as any).__pushEvent("link-problem", null));
-  await expect(indicator).toContainText("Connected");
+  await expect(indicator).toContainText("REAPER connected");
 });
 
 test("a link notice stays out of the toasts while other notices still show", async ({ page }) => {
