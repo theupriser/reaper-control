@@ -162,7 +162,7 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 | WP | Task | d |
 |----|------|---|
 | ⬜ 7.1 | Soak: 2 h/40-song simulated set, random link drops/app kills; assert zero missed hand-overs | 3 |
-| 🟡 7.2 | Chaos tests: REAPER paused/unfocused, project switch mid-song, regions edited live, huge projects (1000 regions); **REAPER quit and started again with the app open, the app killed while REAPER plays (the hand-over must still happen), both several times in a row** | 3 |
+| 🟡 7.2 | Chaos tests: REAPER paused/unfocused, project switch mid-song, regions edited live, huge projects (1000 regions); **REAPER quit and started again with the app open, the app killed while REAPER plays (the hand-over must still happen), both several times in a row. Done on macOS: restarts, killed client, project switch, live markers, 1000 regions (`scripts/chaos_restarts.sh`, `scripts/chaos_project.sh`). Open: region edits, tick time at 1000 regions, Windows.** | 3 |
 | ✅ 7.8 | **State reconciliation** (owner saw the app and REAPER disagree after random song clicks, pause and play): the performance phase only follows commands, so a transport change made in REAPER itself is not seen. Follow REAPER's real transport, and keep the `random_actions` example (random commands, phase against transport, fails when it never connects) as the regression test, run on the isolated REAPER. **Done for play and pause; a song started in REAPER with no performance running (Idle) is not followed.** | S-9 | 2 |
 | ⬜ 7.3 | Real-rig rehearsals ×3 (mac + windows) with audio interface and MIDI foot controller | 3 |
 | ⬜ 7.4 | Security review: localhost-only, input validation, Tauri capability allow-list, CSP | 1.5 |
