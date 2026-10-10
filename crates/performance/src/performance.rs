@@ -7,6 +7,10 @@ use crate::{
 /// How close two song edges must be to count as contiguous.
 const CONTIGUOUS: f64 = 0.001;
 
+/// How many ticks in a row REAPER's transport must disagree with the phase before the phase gives
+/// way; one stale reading right after a command must not flip it.
+const DISAGREEING_TICKS: u8 = 3;
+
 /// The performance of one setlist: the state machine behind the stage app.
 /// Pure: it gets inputs (commands and ticks with an injected clock) and
 /// returns effects and events; it never touches REAPER.
@@ -19,6 +23,7 @@ pub struct Performance {
     policy: HandOverPolicy,
     last_hand_over: Option<Seconds>,
     count_in_target: Option<Seconds>,
+    disagreeing: u8,
 }
 
 impl Performance {
@@ -33,6 +38,7 @@ impl Performance {
             policy,
             last_hand_over: None,
             count_in_target: None,
+            disagreeing: 0,
         }
     }
 
@@ -59,8 +65,12 @@ impl Performance {
     /// Applies one input and says what to do.
     pub fn step(&mut self, input: Input) -> Output {
         let mut out = Output::default();
+        if !matches!(input, Input::Observed { .. } | Input::Tick { .. }) {
+            self.disagreeing = 0;
+        }
         match input {
             Input::Tick { now, position } => self.tick(now, position, &mut out),
+            Input::Observed { playing } => self.observe(playing),
             Input::Play => self.play(&mut out),
             Input::Pause => self.pause(&mut out),
             Input::Next => self.step_by(1, &mut out),
@@ -93,6 +103,30 @@ impl Performance {
     fn set_flag(&mut self, flag: Flag, enabled: bool, out: &mut Output) {
         if self.flags.set(flag, enabled) {
             out.events.push(Event::FlagChanged { flag, enabled });
+        }
+    }
+
+    /// Follows REAPER's real transport once it has disagreed with the phase for a few ticks. No
+    /// effect is needed: REAPER already did what the phase now admits.
+    fn observe(&mut self, playing: bool) {
+        let expected = match self.phase {
+            Phase::Playing | Phase::CountingIn | Phase::HandingOver => Some(true),
+            Phase::Paused => Some(false),
+            Phase::Idle | Phase::HardStopped | Phase::Finished => None,
+        };
+        if expected.is_none_or(|expected| expected == playing) {
+            self.disagreeing = 0;
+            return;
+        }
+        self.disagreeing += 1;
+        if self.disagreeing >= DISAGREEING_TICKS {
+            self.disagreeing = 0;
+            self.count_in_target = None;
+            self.phase = if playing {
+                Phase::Playing
+            } else {
+                Phase::Paused
+            };
         }
     }
 

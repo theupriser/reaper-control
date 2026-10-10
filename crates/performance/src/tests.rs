@@ -468,3 +468,48 @@ fn a_window_needs_an_end_after_the_start() {
         Err(InvalidValue::OutOfRange)
     );
 }
+
+fn observe(p: &mut Performance, playing: bool, times: usize) {
+    for _ in 0..times {
+        let out = p.step(Input::Observed { playing });
+        assert!(out.effects.is_empty() && out.events.is_empty());
+    }
+}
+
+#[test]
+fn a_pause_made_in_reaper_is_followed_after_a_few_ticks() {
+    let mut p = playing_at_song(1);
+    observe(&mut p, false, 2);
+    assert_eq!(p.phase(), Phase::Playing);
+    observe(&mut p, false, 1);
+    assert_eq!(p.phase(), Phase::Paused);
+}
+
+#[test]
+fn a_play_made_in_reaper_is_followed_after_a_few_ticks() {
+    let mut p = playing_at_song(1);
+    p.step(Input::Pause);
+    observe(&mut p, true, 3);
+    assert_eq!(p.phase(), Phase::Playing);
+}
+
+#[test]
+fn one_stale_reading_after_a_command_does_not_flip_the_phase() {
+    let mut p = playing_at_song(1);
+    observe(&mut p, false, 2);
+    observe(&mut p, true, 1);
+    observe(&mut p, false, 2);
+    assert_eq!(p.phase(), Phase::Playing);
+    p.step(Input::Pause);
+    observe(&mut p, true, 2);
+    p.step(Input::Play);
+    observe(&mut p, true, 2);
+    assert_eq!(p.phase(), Phase::Playing);
+}
+
+#[test]
+fn an_idle_or_hard_stopped_performance_ignores_the_transport() {
+    let mut idle = performance(Flags::default());
+    observe(&mut idle, true, 10);
+    assert_eq!(idle.phase(), Phase::Idle);
+}

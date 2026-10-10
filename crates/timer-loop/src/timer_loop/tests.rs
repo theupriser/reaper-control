@@ -126,6 +126,28 @@ fn a_link_play_starts_the_transport_and_shows_in_the_live_state() {
 }
 
 #[test]
+fn a_pause_and_a_play_made_in_reaper_itself_show_in_the_live_state() {
+    use reaper_port::ReaperPort;
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), vec![]));
+    timer_loop.link_command(protocol::Command::Play);
+    timer_loop.tick();
+    assert_eq!(timer_loop.live().phase, protocol::Phase::Playing);
+
+    timer_loop.port.pause();
+    for _ in 0..4 {
+        timer_loop.tick();
+    }
+    assert_eq!(timer_loop.live().phase, protocol::Phase::Paused);
+    assert_eq!(timer_loop.live().transport, protocol::Transport::Paused);
+
+    timer_loop.port.play();
+    for _ in 0..4 {
+        timer_loop.tick();
+    }
+    assert_eq!(timer_loop.live().phase, protocol::Phase::Playing);
+}
+
+#[test]
 fn a_link_seek_is_counted_from_the_start_of_the_current_song_and_live_shows_the_timeline() {
     let mut timer_loop = TimerLoop::new(fake(two_songs(), vec![]));
     timer_loop.command(Input::Next);

@@ -73,6 +73,9 @@ impl<Port: ReaperPort> TimerLoop<Port> {
     /// Runs one timer tick.
     pub fn tick(&mut self) {
         self.refresh_if_changed();
+        self.apply(Input::Observed {
+            playing: self.port.transport() == reaper_port::Transport::Playing,
+        });
         let input = Input::Tick {
             now: self.port.now(),
             position: self.port.position(),

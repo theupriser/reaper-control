@@ -12,6 +12,12 @@ pub enum Input {
         /// Play position on the timeline.
         position: Seconds,
     },
+    /// What REAPER's transport really does, seen once per tick before the tick itself. The phase
+    /// follows it when the two keep disagreeing, for example after a pause made in REAPER.
+    Observed {
+        /// Whether REAPER is playing.
+        playing: bool,
+    },
     /// Start or resume playing.
     Play,
     /// Pause.

@@ -27,6 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut latest: Option<Live> = None;
     let mut history: Vec<String> = Vec::new();
     let mut mismatches = 0;
+    let mut checks = 0;
     let start = Instant::now();
     let wait = |latest: &mut Option<Live>, duration: Duration| {
         let until = Instant::now() + duration;
@@ -63,6 +64,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if step % 3 == 2 {
             wait(&mut latest, Duration::from_millis(900));
             if let Some(live) = &latest {
+                checks += 1;
                 let agrees = match live.phase {
                     Phase::Playing | Phase::CountingIn | Phase::HandingOver => {
                         live.transport == Transport::Playing
@@ -93,6 +95,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
-    println!("{steps} steps, {mismatches} mismatches");
+    println!("{steps} steps, {checks} checks, {mismatches} mismatches");
+    if checks == 0 {
+        return Err(
+            "never saw REAPER's state: is the endpoint path right and REAPER running?".into(),
+        );
+    }
+    if mismatches > 0 {
+        return Err("the phase and the transport disagreed".into());
+    }
     Ok(())
 }
