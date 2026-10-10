@@ -1,5 +1,6 @@
 //! Connects to a running extension and prints what it pushes. Each extra argument is a command
 //! (`play`, `pause`, `next`, `previous`, `restart`), sent one second apart.
+//! `seek:<seconds>` moves the playhead, `seekcue:<seconds>` does it with a count-in.
 //! `goto:<index>` jumps to the song at that position (from 0).
 //! `active:<id>` (or `active:` for none) chooses the played setlist.
 //! `save:<id>:<name>:<expected revision>:<song id>,<song id>` stores a setlist.
@@ -27,6 +28,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "countin" => Command::ToggleCountInOnMarker,
             other if other.starts_with("goto:") => Command::GoToSong {
                 index: other["goto:".len()..].parse()?,
+            },
+            other if other.starts_with("seek:") => Command::Seek {
+                position: other["seek:".len()..].parse()?,
+                count_in: false,
             },
             other if other.starts_with("seekcue:") => Command::Seek {
                 position: other["seekcue:".len()..].parse()?,
