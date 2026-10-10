@@ -36,6 +36,7 @@ use crate::logging::Logging;
 use crate::metered_driver::MeteredDriver;
 use crate::midi_source::MidiSource;
 use crate::midi_switch::MidiSwitch;
+use crate::midir_anchor::MidirAnchor;
 use crate::midir_source::MidirSource;
 use crate::mirror_keeper::MirrorKeeper;
 use crate::mirror_repository::MirrorRepository;
@@ -291,6 +292,8 @@ pub fn run() {
                 events.clone(),
                 move || watched.view(),
             ));
+            // Before the MIDI thread starts: CoreMIDI wants its first client on the main thread.
+            app.manage(MidirAnchor::new());
             let midi = Arc::new(MidiSwitch::new(
                 Arc::new(MidirSource),
                 intents,
