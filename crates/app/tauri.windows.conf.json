@@ -1,7 +1,12 @@
 {
   "bundle": {
-    "targets": ["nsis"],
-    "resources": { "../../dist/reaper_rc2-x64.dll": "reaper_rc2-x64.dll" },
-    "windows": { "nsis": { "installMode": "currentUser" } }
+    "targets": [
+      "nsis"
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
   }
 }

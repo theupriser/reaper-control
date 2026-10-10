@@ -65,7 +65,7 @@ jobs:
         working-directory: crates/app
         env:
           CI: "true"
-        run: ../../ui/node_modules/.bin/tauri build --features custom-protocol
+        run: ../../ui/node_modules/.bin/tauri build --features custom-protocol --config bundle.${{ startsWith(matrix.os, 'windows') && 'windows' || 'macos' }}.json
       - name: Name the installer and checksum it
         shell: bash
         run: |
