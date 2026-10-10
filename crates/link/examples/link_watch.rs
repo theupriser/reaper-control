@@ -35,13 +35,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     live.phase, live.transport, live.position
                 );
             }
-            LinkEvent::Catalog(catalog) => println!(
-                "{at:>6.1}s catalog revision {}, project {}, {} songs, {} cues",
-                catalog.revision,
-                catalog.project_id,
-                catalog.project_songs.len(),
-                catalog.cues.len()
-            ),
+            LinkEvent::Catalog(catalog) => {
+                println!(
+                    "{at:>6.1}s catalog revision {}, project {}, {} songs, {} cues",
+                    catalog.revision,
+                    catalog.project_id,
+                    catalog.project_songs.len(),
+                    catalog.cues.len()
+                );
+                for song in catalog.project_songs.iter().take(3) {
+                    println!(
+                        "         song {}: {} {:.2} to {:.2} s",
+                        song.number, song.name, song.start, song.end
+                    );
+                }
+            }
             LinkEvent::Live(_) => {}
             other => println!("{at:>6.1}s {other:?}"),
         }

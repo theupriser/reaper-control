@@ -101,6 +101,13 @@ impl Probe {
                     log.line(&format!("probe: tempo marker added: {done}"));
                 }
             }
+            ["region-edit", number, start, end, name @ ..] => {
+                let numbers = (number.parse(), start.parse(), end.parse());
+                if let (Ok(number), Ok(start), Ok(end)) = numbers {
+                    let done = Self::edit_region(adapter, number, start, end, &name.join(" "));
+                    log.line(&format!("probe: region {number} edited: {done}"));
+                }
+            }
             ["action", id] => {
                 if let Ok(id) = id.parse() {
                     adapter.reaper().main_on_command_ex(
@@ -178,6 +185,41 @@ impl Probe {
                 false,
             )
         }
+    }
+
+    /// Moves and renames the region with this displayed number, as the owner would in the Region Manager.
+    fn edit_region(
+        adapter: &ReaperRsAdapter,
+        number: i32,
+        start: f64,
+        end: f64,
+        name: &str,
+    ) -> bool {
+        let Ok(name) = std::ffi::CString::new(name) else {
+            return false;
+        };
+        // SAFETY: the name outlives the call; a null project is the current project.
+        let done = unsafe {
+            adapter.reaper().low().SetProjectMarker4(
+                std::ptr::null_mut(),
+                number,
+                true,
+                start,
+                end,
+                name.as_ptr(),
+                0,
+                0,
+            )
+        };
+        // The Region Manager adds an undo point, which is what moves REAPER's project change count.
+        // SAFETY: a constant string that outlives the call.
+        unsafe {
+            adapter
+                .reaper()
+                .low()
+                .Undo_OnStateChange(c"Edit region".as_ptr());
+        }
+        done
     }
 
     /// REAPER's own answer for a measure, to compare the adapter's tempo map with.
