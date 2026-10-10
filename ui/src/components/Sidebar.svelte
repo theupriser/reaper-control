@@ -128,6 +128,7 @@
     margin-bottom: 16px;
     cursor: pointer;
   }
+  .midi,
   .connection {
     background: var(--panel);
     border: 1px solid var(--line);
@@ -139,14 +140,13 @@
     color: inherit;
     font: inherit;
     text-align: left;
-    cursor: pointer;
     min-height: 44px;
+    box-sizing: border-box;
+  }
+  .connection {
+    cursor: pointer;
   }
   .midi {
-    padding: 8px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
     margin-bottom: 8px;
   }
   .state {

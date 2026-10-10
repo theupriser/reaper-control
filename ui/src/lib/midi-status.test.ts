@@ -11,15 +11,15 @@ describe("midiBadge", () => {
   });
 
   it("is connected when the chosen device is present", () => {
-    expect(midiBadge(view(true, "Pad", ["Pad"]))).toEqual({ label: "MIDI controller connected", detail: "Pad", tone: "ok" });
+    expect(midiBadge(view(true, "Pad", ["Pad"]))).toEqual({ label: "MIDI connected", detail: "Pad", tone: "ok" });
   });
 
   it("names the chosen device when it is not there", () => {
-    expect(midiBadge(view(true, "Pad", []))).toEqual({ label: "MIDI controller not connected", detail: "Pad", tone: "error" });
+    expect(midiBadge(view(true, "Pad", []))).toEqual({ label: "MIDI not connected", detail: "Pad", tone: "error" });
   });
 
   it("looks at every device when none is chosen", () => {
-    expect(midiBadge(view(true, null, []))?.label).toBe("No MIDI controller found");
+    expect(midiBadge(view(true, null, []))?.label).toBe("No MIDI found");
     expect(midiBadge(view(true, null, ["A"]))?.detail).toBe("A");
     expect(midiBadge(view(true, null, ["A", "B", "C"]))?.detail).toBe("A and 2 more");
   });

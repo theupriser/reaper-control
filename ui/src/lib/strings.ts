@@ -72,9 +72,9 @@ export const strings = {
   },
 
   midiStatus: {
-    connected: "MIDI controller connected",
-    notConnected: "MIDI controller not connected",
-    noneFound: "No MIDI controller found",
+    connected: "MIDI connected",
+    notConnected: "MIDI not connected",
+    noneFound: "No MIDI found",
     connectIt: "connect it, we keep looking",
     plusMore: (name: string, more: number) => `${name} and ${more} more`,
   },
