@@ -174,8 +174,10 @@ proptest! {
                     prop_assert!(out.effects.is_empty() && out.events.is_empty());
                     prop_assert_eq!(p.phase(), before.0);
                 }
-                if let (Some(a), Some(b)) = (before.1, p.current_index()) {
-                    prop_assert!(b == a || b == a + 1);
+                // A tick moves to the next song, or to the song the playhead is in.
+                if let (Some(a), Some(b), Input::Tick { position, .. }) = (before.1, p.current_index(), input) {
+                    let under_playhead = p.current().is_some_and(|song| song.window.contains(position));
+                    prop_assert!(b == a || b == a + 1 || under_playhead);
                 }
             }
 

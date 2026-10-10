@@ -1,6 +1,7 @@
 use shared_kernel::Seconds;
 
 use crate::reaper_stop_bridge::ReaperStopBridge;
+use crate::song_at_playhead::song_at_playhead;
 use crate::{
     Effect, Event, Flag, Flags, HandOverPolicy, Input, Output, Phase, PlannedSong, Rejection,
 };
@@ -404,10 +405,43 @@ impl Performance {
             Phase::CountingIn => self.finish_count_in(position, out),
             Phase::HandingOver => self.finish_hand_over(position, out),
             Phase::Playing => {
+                let reaper_position = position;
                 let position = self.follow_reaper_stop(now, position);
                 self.watch_song_end(now, position, out);
+                // After the end check: a song that ends where the next begins hands over, and
+                // only a playhead someone moved into another song changes the song silently.
+                if self.phase == Phase::Playing
+                    && self.bridge.is_none()
+                    && !self.runs_into_the_next_song(reaper_position)
+                {
+                    self.follow_playhead(reaper_position);
+                }
             }
-            _ => {}
+            Phase::Idle | Phase::Paused => {
+                if self.bridge.is_none() {
+                    self.follow_playhead(position);
+                }
+            }
+            Phase::HardStopped | Phase::Finished => {}
+        }
+    }
+
+    /// Whether the playhead has run past the end of the current song into the next one: that is
+    /// the hand-over's to handle (it may wait for the debounce), not a move of the playhead.
+    fn runs_into_the_next_song(&self, position: Seconds) -> bool {
+        let ended = self
+            .current()
+            .is_some_and(|song| position.get() >= song.window.end().get());
+        ended
+            && self
+                .next_song()
+                .is_some_and(|song| song.window.contains(position))
+    }
+
+    /// Moves to the song REAPER's playhead is in when someone moved it into another one.
+    fn follow_playhead(&mut self, position: Seconds) {
+        if let Some(index) = song_at_playhead(&self.songs, self.current, position) {
+            self.current = Some(index);
         }
     }
 

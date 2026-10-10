@@ -727,3 +727,75 @@ fn a_timeline_seek_while_paused_without_auto_resume_stays_paused() {
     tick(&mut p, 200.0, 20.0);
     assert_eq!(p.shown_position(t(205.0), t(20.0)), t(50.0));
 }
+
+/// A 0-60 song with its marker at 4 (a short song region and a long length), a next song from 5.
+fn overlapping() -> Vec<PlannedSong> {
+    let mut first = song("A", 0.0, 60.0, true);
+    first.hard_stop_marker = Some(t(4.0));
+    vec![
+        first,
+        song("B", 5.0, 100.0, false),
+        song("C", 200.0, 210.0, false),
+    ]
+}
+
+fn current_id(performance: &Performance) -> Option<&str> {
+    performance.current().map(|song| song.song_id.as_str())
+}
+
+#[test]
+fn the_song_follows_the_playhead_while_paused() {
+    let mut p = Performance::new(setlist(), Flags::default(), HandOverPolicy::default());
+    p.step(Input::Play);
+    p.step(Input::Pause);
+    tick(&mut p, 1.0, 35.0);
+    assert_eq!(current_id(&p), Some("C"));
+    tick(&mut p, 2.0, 12.0);
+    assert_eq!(current_id(&p), Some("B"));
+}
+
+#[test]
+fn the_song_follows_the_playhead_while_idle_and_while_playing() {
+    let mut p = Performance::new(setlist(), Flags::default(), HandOverPolicy::default());
+    tick(&mut p, 1.0, 55.0);
+    assert_eq!(current_id(&p), Some("D"));
+    p.step(Input::Play);
+    tick(&mut p, 2.0, 55.0);
+    tick(&mut p, 3.0, 31.0);
+    assert_eq!(current_id(&p), Some("C"));
+}
+
+#[test]
+fn a_playhead_in_the_next_region_wins_over_a_longer_song_window() {
+    let mut p = Performance::new(overlapping(), Flags::default(), HandOverPolicy::default());
+    p.step(Input::Play);
+    p.step(Input::Pause);
+    tick(&mut p, 1.0, 4.0);
+    assert_eq!(current_id(&p), Some("A"));
+    tick(&mut p, 2.0, 50.0);
+    assert_eq!(current_id(&p), Some("B"));
+    tick(&mut p, 3.0, 2.0);
+    assert_eq!(current_id(&p), Some("A"));
+}
+
+#[test]
+fn a_gap_and_the_timeline_run_on_leave_the_song_alone() {
+    let mut p = Performance::new(overlapping(), Flags::default(), HandOverPolicy::default());
+    p.step(Input::Play);
+    tick(&mut p, 1.0, 150.0);
+    assert_eq!(current_id(&p), Some("A"));
+    observe_once(&mut p, false);
+    tick(&mut p, 2.0, 4.0);
+    p.step(Input::Seek { position: t(50.0) });
+    tick(&mut p, 3.0, 4.0);
+    assert_eq!(current_id(&p), Some("A"));
+}
+
+#[test]
+fn entries_that_share_a_song_keep_the_current_one() {
+    let songs = vec![song("A", 0.0, 10.0, false), song("A", 0.0, 10.0, false)];
+    let mut p = Performance::new(songs, Flags::default(), HandOverPolicy::default());
+    p.step(Input::Next);
+    tick(&mut p, 1.0, 5.0);
+    assert_eq!(p.current_index(), Some(1));
+}
