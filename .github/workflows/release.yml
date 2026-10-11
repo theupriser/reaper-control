@@ -84,6 +84,7 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: dist
@@ -92,8 +93,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          {
+            if [ -f "release-notes/$GITHUB_REF_NAME.md" ]; then
+              cat "release-notes/$GITHUB_REF_NAME.md"
+            else
+              echo "No release notes were written for $GITHUB_REF_NAME."
+            fi
+            echo
+            echo "### Not code-signed"
+            echo "On macOS right-click the app and choose Open the first time. On Windows SmartScreen will warn (More info, Run anyway). Verify the downloads with the .sha256 files."
+          } > notes.md
           gh release create "$GITHUB_REF_NAME" dist/* \
             --repo "$GITHUB_REPOSITORY" \
             --draft \
             --title "$GITHUB_REF_NAME" \
-            --notes "Draft. Not code-signed: on macOS right-click the app and choose Open the first time; on Windows SmartScreen will warn (More info, Run anyway). Verify the downloads with the .sha256 files."
+            --notes-file notes.md
