@@ -182,7 +182,7 @@ Rules (also in AGENTS.md "Code rules"): types stay under 128 bytes, ideally 64 o
 | ⬜ 8.9 | Installer QA matrix: clean/existing REAPER setups × (macOS arm64 REAPER, Intel REAPER under Rosetta → guidance only, Windows x64) × running/closed REAPER × admin/standard user; manual-install guide verified by a non-developer | 2.5 |
 | ⬜ 8.4 | User docs site (install, first-run, markers, MIDI, troubleshooting), manual extension install guide | 4 |
 | ⬜ 8.6 | Support process: issue templates, diagnostics bundle, FAQ | 1 |
-| ⬜ 8.7 | Licence + third-party notices, privacy statement (no telemetry by default) | 1 |
+| 🟡 8.7 | Licence + third-party notices, privacy statement (no telemetry by default) | 1 |
 | ⬜ 8.8 | v1→v2 migration guide and import test | 1 |
 
 **Gate 8:** v2.0.0 tagged.
