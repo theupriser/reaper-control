@@ -21,7 +21,7 @@ The full list is in the [release notes](release-notes/v2.0.0.md).
 
 Platforms: macOS on Apple Silicon (arm64) and Windows x64. Tested with REAPER 7.82. Intel Macs and Linux are not supported.
 
-1. Download the installer for your system from the [latest release](../../releases/latest): the `.dmg` for macOS or the `-setup.exe` for Windows. Check it against the `.sha256` file next to it.
+1. Download the installer for your system from the [latest release](../../releases/latest): the `.dmg` for macOS or the `-setup.exe` for Windows.
 2. The app is **not code-signed yet**. On macOS, right-click the app and choose Open the first time. On Windows, SmartScreen may warn: choose More info, then Run anyway.
 3. Start Reaper Control. The setup wizard finds REAPER, installs the extension into its `UserPlugins` folder and asks you to restart REAPER. When REAPER is back, the app connects by itself.
 
