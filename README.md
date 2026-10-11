@@ -41,7 +41,7 @@ scripts/build_release.sh
 
 ## Contributing
 
-Working notes for contributors and AI agents are in `AGENTS.md`. The specification, plan and decisions are in `docs/`.
+Working notes for contributors and AI agents are in `AGENTS.md`.
 
 ## Licence
 
