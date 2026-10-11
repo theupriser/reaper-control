@@ -594,6 +594,29 @@ fn pause_freezes_the_run_on_and_play_runs_it_on_again() {
 }
 
 #[test]
+fn changing_a_setting_during_the_run_on_does_not_restart_it() {
+    let mut p = stopped_by_marker();
+    observe_once(&mut p, false);
+    tick(&mut p, 100.0, 40.0);
+    tick(&mut p, 105.0, 40.0);
+    let out = p.step(Input::SetFlag {
+        flag: Flag::CountIn,
+        enabled: true,
+    });
+    assert_eq!(
+        out.events,
+        vec![Event::FlagChanged {
+            flag: Flag::CountIn,
+            enabled: true
+        }]
+    );
+    observe_once(&mut p, false);
+    tick(&mut p, 106.0, 40.0);
+    assert_eq!(p.shown_position(t(106.0), t(40.0)), t(46.0));
+    assert_eq!(p.phase(), Phase::Playing);
+}
+
+#[test]
 fn play_while_the_run_on_has_not_reached_its_end_does_not_skip_the_song() {
     let mut p = stopped_by_marker();
     observe_once(&mut p, false);
