@@ -6,7 +6,7 @@ Working notes for AI agents (and humans) on this repo. Read this first, then the
 Reaper Control v2: a stage app that controls the REAPER DAW and plays a setlist live. It is a rewrite of v1 (Electron/Svelte/TS, at `~/Projects/Reaper-Control-App`, **read-only reference, never edit it**; if the local copy is not available, the same code is at https://github.com/theupriser/Reaper-Control-App, `main`, read it with `gh api repos/theupriser/Reaper-Control-App/contents/<path> --jq .content | base64 -d` or `gh repo clone` into the scratchpad). Owner: Rick Peters (rickpeters@upriser.nl). Used on stage, so **stability beats features**.
 
 ## Source of truth (read in this order)
-The `docs/` folder is kept on the owner's machine only (git-ignored since 2026-10-11, a backup copy sits next to the repo); it is not in the repository, so STATUS and PLAN updates are edited in place and are not part of any PR.
+The `docs/` and `spikes/` folders are kept on the owner's machine only (git-ignored since 2026-10-11, backup copies sit next to the repo); it is not in the repository, so STATUS and PLAN updates are edited in place and are not part of any PR.
 0. `docs/STATUS.md` — where we are and what is next.
 1. `docs/SPEC.md` — what/how (architecture, protocol, state machine, safety, installer, DDD). Draft 2.
 2. `docs/PLAN.md` — phases, work packages (WP ids), gates, risks, estimates (~205 focused days).

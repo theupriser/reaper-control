@@ -16,5 +16,6 @@ dist
 crates/protocol/fuzz/corpus/
 crates/protocol/fuzz/artifacts/
 
-# Working documents, kept on the owner's machine only
+# Working documents and spikes, kept on the owner's machine only
 docs/
+spikes/
