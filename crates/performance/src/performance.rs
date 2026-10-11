@@ -98,7 +98,11 @@ impl Performance {
         if self.pause_or_resume_the_run_on(&input) {
             return out;
         }
-        if !matches!(input, Input::Observed { .. } | Input::Tick { .. }) {
+        // A setting changes nothing about where the performance is, so it leaves a run-on alone.
+        if !matches!(
+            input,
+            Input::Observed { .. } | Input::Tick { .. } | Input::SetFlag { .. }
+        ) {
             self.disagreeing = 0;
             self.bridge = None;
             self.held = None;
