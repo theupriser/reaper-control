@@ -2,8 +2,8 @@
 
 use protocol::{Command, LinkView};
 
-use crate::input::Intent;
-use crate::input::IntentRefusal;
+use crate::intent::Intent;
+use crate::intent::IntentRefusal;
 use crate::link::performance_runs;
 
 /// The one place an intent is checked against the current state and becomes a command. Without

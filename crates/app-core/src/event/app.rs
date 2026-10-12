@@ -4,8 +4,8 @@ use protocol::{Command, EventRecord};
 
 use crate::command::CommandRefusal;
 use crate::command::DriverError;
-use crate::input::Intent;
-use crate::input::IntentRefusal;
+use crate::intent::Intent;
+use crate::intent::IntentRefusal;
 use crate::link::LinkHealth;
 
 /// Something that happened inside the app, for anyone who listens (log, UI, tests).

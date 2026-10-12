@@ -11,7 +11,7 @@ use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
-use crate::config::ChaosSettings;
+use app_core::ChaosSettings;
 use relayed_connection::RelayedConnection;
 
 /// How often the accept loop looks for a stop request.

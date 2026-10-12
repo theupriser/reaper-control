@@ -6,7 +6,7 @@ use std::thread;
 
 use protocol::frame::{FrameDecoder, encode};
 
-use crate::config::ChaosSettings;
+use app_core::ChaosSettings;
 
 /// Bytes that no frame decoder accepts: a length far above the largest frame.
 const GARBAGE: [u8; 8] = [0xFF; 8];

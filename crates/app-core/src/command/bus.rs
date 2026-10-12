@@ -4,6 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use protocol::Command;
 
+use crate::clock::Clock;
 use crate::command::CommandQueue;
 use crate::command::DispatchError;
 use crate::command::Driver;
@@ -13,7 +14,6 @@ use crate::command::QueueSettings;
 use crate::command::check;
 use crate::event::AppEvent;
 use crate::event::EventBus;
-use crate::system::Clock;
 
 /// The one way a command leaves the app: UI, keyboard and MIDI all call `dispatch`. Commands
 /// leave in the order they arrive; rapid repeats are dropped, and a command REAPER does not

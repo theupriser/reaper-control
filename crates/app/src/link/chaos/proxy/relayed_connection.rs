@@ -6,7 +6,7 @@ use std::thread;
 use std::time::Duration;
 
 use super::frame_relay::FrameRelay;
-use crate::config::ChaosSettings;
+use app_core::ChaosSettings;
 
 /// How long a relay waits for bytes before it looks at the stop request.
 const READ_POLL: Duration = Duration::from_millis(50);

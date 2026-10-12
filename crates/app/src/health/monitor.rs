@@ -5,12 +5,12 @@ use std::time::Duration;
 
 use link::LinkEvent;
 
-use crate::event::AppEvent;
-use crate::event::EventBus;
 use crate::health::FaultCheck;
-use crate::link::LinkCause;
-use crate::link::LinkHealth;
-use crate::system::Clock;
+use app_core::AppEvent;
+use app_core::Clock;
+use app_core::EventBus;
+use app_core::LinkCause;
+use app_core::LinkHealth;
 use installer::ProcessCheck;
 
 mod state;

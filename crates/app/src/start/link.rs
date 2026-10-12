@@ -6,12 +6,12 @@ use std::time::Duration;
 
 use protocol::LinkView;
 
-use crate::command::Driver;
-use crate::event::EventBus;
 use crate::health::HealthMonitor;
 use crate::link::LinkConnection;
 use crate::link::LinkViewSource;
 use crate::simulator::{Simulator, sample_project};
+use app_core::Driver;
+use app_core::EventBus;
 
 /// How often the simulated time moves on while the app runs.
 const SIMULATOR_STEP: Duration = Duration::from_millis(50);

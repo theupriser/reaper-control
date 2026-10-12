@@ -2,9 +2,9 @@
 
 use std::path::Path;
 
-use crate::config::AppConfig;
-use crate::config::ConfigRepository;
 use crate::legacy::LegacyConfigFile;
+use app_core::AppConfig;
+use app_core::ConfigRepository;
 
 /// When the app has no config file yet and v1 left one, the MIDI settings of v1 become the first
 /// config, saved at once so this happens once. Returns that config; `None` when there was nothing

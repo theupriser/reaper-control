@@ -5,10 +5,10 @@ use std::sync::{Arc, Mutex};
 use link::LinkEvent;
 use protocol::LinkView;
 
-use crate::event::EventBus;
-use crate::event::apply_event;
 use crate::health::HealthMonitor;
 use crate::link::LinkSession;
+use crate::link::apply_event;
+use app_core::EventBus;
 
 /// Takes link events one by one, from the real link and from the simulator alike.
 pub struct LinkPipeline {

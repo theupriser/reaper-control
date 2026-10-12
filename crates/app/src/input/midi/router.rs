@@ -3,13 +3,13 @@
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use crate::event::AppEvent;
-use crate::event::EventBus;
-use crate::input::IntentDispatcher;
-use crate::input::MidiConfig;
 use crate::input::MidiDebounce;
 use crate::input::MidiMessage;
-use crate::system::Clock;
+use app_core::AppEvent;
+use app_core::Clock;
+use app_core::EventBus;
+use app_core::IntentDispatcher;
+use app_core::MidiConfig;
 
 /// Turns what MIDI devices send into commands: channel filter, global debounce, note mapping,
 /// then the one `IntentDispatcher` every other controller uses.

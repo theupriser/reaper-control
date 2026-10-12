@@ -2,8 +2,8 @@
 
 use link::LinkEvent;
 
-use crate::event::AppEvent;
 use crate::link::MessageTranslator;
+use app_core::AppEvent;
 
 /// The app's side of one run of connecting, losing and reconnecting. It announces a change of
 /// connection once, however often the link repeats it.

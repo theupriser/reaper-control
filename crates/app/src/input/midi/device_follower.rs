@@ -3,10 +3,10 @@
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
-use crate::event::AppEvent;
-use crate::event::EventBus;
 use crate::input::MidiRouter;
 use crate::input::{MidiConnection, MidiSource};
+use app_core::AppEvent;
+use app_core::EventBus;
 
 /// Opens the wanted device (every device when none is named, as v1 did) and closes what was
 /// unplugged. `poll` is one look at the device list; the listener calls it every second.

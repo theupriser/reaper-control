@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::input::Intent;
+use crate::intent::Intent;
 
 /// MIDI input settings; missing fields take the defaults v1 had.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

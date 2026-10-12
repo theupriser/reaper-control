@@ -8,7 +8,7 @@ use crate::command::CommandBus;
 use crate::config::AppConfig;
 use crate::config::ConfigError;
 use crate::config::ConfigRepository;
-use crate::input::MidiConfig;
+use crate::config::MidiConfig;
 
 /// Keeps the saved config and applies what can change while the app runs.
 pub struct SettingsService {

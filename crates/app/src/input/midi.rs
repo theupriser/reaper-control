@@ -1,6 +1,5 @@
 //! Midi.
 
-mod config;
 mod debounce;
 mod device_follower;
 mod listener;
@@ -10,7 +9,6 @@ mod router;
 mod source;
 mod switch;
 
-pub use config::MidiConfig;
 pub use debounce::MidiDebounce;
 pub use device_follower::MidiDeviceFollower;
 pub use listener::MidiListener;

@@ -2,8 +2,8 @@ use protocol::{Command, EventRecord, LinkProblem, NoticeLevel, WireEvent};
 
 use super::{link_problem, notice_for_event};
 use crate::event::AppEvent;
-use crate::input::Intent;
-use crate::input::IntentRefusal;
+use crate::intent::Intent;
+use crate::intent::IntentRefusal;
 use crate::link::LinkCause;
 use crate::link::LinkHealth;
 

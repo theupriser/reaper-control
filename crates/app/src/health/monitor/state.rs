@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::link::LinkHealth;
+use app_core::LinkHealth;
 
 /// What the monitor remembers between events.
 pub(super) struct State {
