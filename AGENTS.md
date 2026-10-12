@@ -61,7 +61,7 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 
 ## Releases
 - A release is made by pushing a tag `vX.Y.Z` that equals the workspace version. The workflow builds both installers and publishes the release by itself.
-- The run **fails at the start** unless `release-notes/vX.Y.Z.md` exists on `main`. Write it in the release PR, in the style of `release-notes/v2.0.0.md` (sections such as Playing a set, Control, Known issues), in plain words for performers, not developers.
+- The run **fails at the start** unless `.github/release-notes/vX.Y.Z.md` exists on `main`. Write it in the release PR, in the style of `.github/release-notes/v2.0.0.md` (sections such as Playing a set, Control, Known issues), in plain words for performers, not developers.
 - Put in it: new features, and bugfixes that are important and big enough to matter on stage. Leave out code cleanup, refactoring, tests, CI, docs and other internal changes. Keep the known issues list current.
 - Never publish by hand and never tag without the owner's go-ahead.
 

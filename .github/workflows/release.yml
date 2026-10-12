@@ -26,8 +26,8 @@ jobs:
       - name: The release notes exist
         shell: bash
         run: |
-          if [ ! -s "release-notes/$GITHUB_REF_NAME.md" ]; then
-            echo "release-notes/$GITHUB_REF_NAME.md is missing or empty; write it, merge it, then tag again" >&2
+          if [ ! -s ".github/release-notes/$GITHUB_REF_NAME.md" ]; then
+            echo ".github/release-notes/$GITHUB_REF_NAME.md is missing or empty; write it, merge it, then tag again" >&2
             exit 1
           fi
 
@@ -101,7 +101,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           {
-            cat "release-notes/$GITHUB_REF_NAME.md"
+            cat ".github/release-notes/$GITHUB_REF_NAME.md"
             echo
             echo "### Not code-signed"
             echo "On macOS right-click the app and choose Open the first time. On Windows SmartScreen will warn (More info, Run anyway)."
