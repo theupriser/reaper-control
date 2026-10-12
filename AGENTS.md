@@ -96,12 +96,12 @@ cd crates/app && ../../ui/node_modules/.bin/tauri dev   # run the app window
 scripts/build_release.sh    # UI + extension + dist/ + app, in order (a runnable release build)
 ```
 
-## Project commands (`.claude/commands/`)
+## Project commands (`.claude/commands/`, local only, git-ignored)
 - `/start`: orient at the start of a session (reads AGENTS.md and docs/STATUS.md, verifies against git/PRs/ADRs, proposes the next step, waits for confirmation).
 - `/next`: after finishing something: sync `main`, list open PRs, update docs/STATUS.md, propose the next work package.
 - Remind the owner to `/compact` whenever a feature, spike or bug is complete.
 
-## Project agents (`.claude/agents/`)
+## Project agents (`.claude/agents/`, local only, git-ignored)
 - `coder`: builds one work package on a branch, with tests, and opens the PR. Does not merge or touch STATUS/PLAN.
 - `reviewer`: reads a PR with `gh` against the diff, docs and these rules; reports findings, changes nothing.
 - `tester`: runs the checks and the app with the isolated REAPER, reports what it saw, changes nothing.
