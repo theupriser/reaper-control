@@ -22,8 +22,8 @@ An architecture test fails when something else sits in `testing/`.
 
 | Script | What it checks | Needs |
 |---|---|---|
-| `scripts/smoke_extension.sh` | the packaged extension loads and listens | macOS, packaged extension |
-| `scripts/security_check.sh` | where the extension listens, who can read the token, a wrong token, junk input | a running isolated REAPER |
+| `scripts/smoke_extension.sh` | the packaged extension loads and listens; runs further check scripts while REAPER is up | macOS or Windows, packaged extension (also runs in CI) |
+| `scripts/security_check.sh` | a wrong token, junk and an oversized length are closed without a reply; the port is not reachable on the network address | run by the smoke script (also in CI) |
 | `scripts/resource_audit.sh` | idle CPU and memory of the app, REAPER and the extension | macOS, release build |
 | `scripts/soak.sh` | 40 songs in a row: hand-over timing and flat memory (about 25 minutes) | isolated REAPER |
 | `scripts/chaos/*.sh` | project switch mid-song, markers inserted live, 1000 regions, restarts | macOS, unlocked screen |

@@ -179,9 +179,9 @@ jobs:
           Invoke-WebRequest -Uri https://www.reaper.fm/files/7.x/reaper782_x64-install.exe -OutFile "$env:RUNNER_TEMP\reaper-install.exe"
           Start-Process -FilePath "$env:RUNNER_TEMP\reaper-install.exe" -ArgumentList "/S", "/PORTABLE", "/D=$env:RUNNER_TEMP\REAPER" -Wait
           "REAPER_EXECUTABLE=$env:RUNNER_TEMP\REAPER\reaper.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
-      - name: The extension starts and listens inside REAPER
+      - name: The extension starts, listens and refuses strangers inside REAPER
         shell: bash
         run: |
           extension=$(ls dist/reaper_rc2-*.dylib dist/reaper_rc2-*.dll 2>/dev/null | head -1 || true)
           [ -n "$extension" ] || { echo "no packaged extension in dist/"; exit 1; }
-          testing/scripts/smoke_extension.sh "$REAPER_EXECUTABLE" "$extension"
+          testing/scripts/smoke_extension.sh "$REAPER_EXECUTABLE" "$extension" testing/scripts/security_check.sh

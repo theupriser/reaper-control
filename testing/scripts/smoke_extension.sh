@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Loads a packaged extension in an isolated REAPER (macOS or Windows) and checks that it starts and listens.
-# usage: smoke_extension.sh <REAPER executable> <packaged extension> [seconds to wait, default 60]
+# usage: smoke_extension.sh <REAPER executable> <packaged extension> [check script...]
+# Each check script runs while REAPER is up, with REAPER_RESOURCE set to the resource directory.
+# SMOKE_SECONDS (default 60) is how long to wait for the extension to listen.
 # REAPER runs with a throwaway resource directory under $RUNNER_TEMP or /tmp; your own REAPER is never touched.
 # On a CI runner REAPER is installed first by the workflow; locally pass /Applications/REAPER.app/Contents/MacOS/REAPER.
 set -euo pipefail
@@ -8,7 +10,8 @@ cd "$(dirname "$0")/../.."
 
 reaper=$1
 extension=$2
-seconds=${3:-60}
+seconds=${SMOKE_SECONDS:-60}
+shift 2
 version=$(sed -n 's/^version = "\(.*\)"/\1/p' crates/reaper-extension/Cargo.toml | head -1)
 
 resource=$(mktemp -d "${RUNNER_TEMP:-/tmp}/reaper-smoke.XXXXXX")
@@ -43,3 +46,8 @@ fi
 report
 grep -q "started, version $version," "$resource/RC2/extension.log" || { echo "FAIL: the log does not name version $version"; exit 1; }
 echo "OK: extension $version started and is listening"
+
+for check in "$@"; do
+  echo "== $check"
+  REAPER_RESOURCE=$resource "$check"
+done
