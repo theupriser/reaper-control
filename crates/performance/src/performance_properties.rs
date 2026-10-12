@@ -7,6 +7,7 @@ use proptest::prelude::*;
 use shared_kernel::Seconds;
 
 use super::*;
+use crate::song::START_TOLERANCE;
 
 fn t(value: f64) -> Seconds {
     Seconds::new(value).unwrap()
@@ -176,7 +177,11 @@ proptest! {
                 }
                 // A tick moves to the next song, or to the song the playhead is in.
                 if let (Some(a), Some(b), Input::Tick { position, .. }) = (before.1, p.current_index(), input) {
-                    let under_playhead = p.current().is_some_and(|song| song.window.contains(position));
+                    // A playhead a hair before a start counts as inside that song (`START_TOLERANCE`).
+                    let nudged = Seconds::new(position.get() + START_TOLERANCE).unwrap_or(position);
+                    let under_playhead = p
+                        .current()
+                        .is_some_and(|song| song.window.contains(position) || song.window.contains(nudged));
                     prop_assert!(b == a || b == a + 1 || under_playhead);
                 }
             }

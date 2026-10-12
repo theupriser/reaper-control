@@ -822,3 +822,25 @@ fn entries_that_share_a_song_keep_the_current_one() {
     tick(&mut p, 1.0, 5.0);
     assert_eq!(p.current_index(), Some(1));
 }
+
+/// REAPER snaps a seek to a sample, so the playhead can read a hair before the start that was asked
+/// for. When the song before ends exactly there, a click on song B must not fall back into song A.
+#[test]
+fn a_playhead_a_hair_before_the_start_stays_in_the_clicked_song() {
+    let mut paused = performance(Flags::default());
+    paused.step(Input::Play);
+    paused.step(Input::Pause);
+    paused.step(Input::GoToSong { index: 1 });
+    tick(&mut paused, 5.0, 10.0 - 0.0005);
+    assert_eq!(paused.current_index(), Some(1));
+}
+
+#[test]
+fn a_playhead_clearly_before_the_start_is_still_the_song_before() {
+    let mut paused = performance(Flags::default());
+    paused.step(Input::Play);
+    paused.step(Input::Pause);
+    paused.step(Input::GoToSong { index: 1 });
+    tick(&mut paused, 5.0, 9.9);
+    assert_eq!(paused.current_index(), Some(0));
+}
