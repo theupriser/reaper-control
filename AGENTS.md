@@ -25,6 +25,22 @@ If code and docs disagree, stop and reconcile (fix the doc or the code, and say 
 - Parity first: **no new performance features** until parity is reached (SPEC §0 lists the allowed additions).
 - The **Performer screen keeps the v1 look**; other screens follow the new canvas design.
 
+## Repository layout
+```
+crates/                 one crate per bounded context (see "Architecture" and "Code rules")
+ui/                     Svelte 5 UI; copy in ui/src/lib/strings.ts, generated types in ui/src/lib/generated/
+testing/
+  data/scenarios/       performance scenarios (JSON), read by the reaper-port tests
+  data/vectors/         protocol and marker test vectors (JSON)
+  scripts/              scripts that run against an isolated REAPER (soak, security, resource audit, chaos/)
+.github/
+  workflows/            CI and the release workflow
+  scripts/              packaging and the release build, used by the workflows
+  release-notes/        one file per release, vX.Y.Z.md (see "Releases")
+docs/, spikes/, .claude/  local only, git-ignored
+```
+`testing/README.md` explains the testing folder; an architecture test (`testing_layout.rs`) keeps it in that shape. Put new fixtures in `testing/data/`, new manual scripts in `testing/scripts/`, and anything a workflow calls in `.github/scripts/`. The checks on a pull request have a target of 5 minutes and a limit of 10; longer runs belong in a nightly or manual job.
+
 ## Architecture in one screen
 ```
 REAPER ── reaper-extension (Rust cdylib) ──loopback socket (push)── App (Tauri 2: Rust core + Svelte 5 UI)
@@ -50,7 +66,7 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 - **No abbreviations (owner's rule, 2026-10-08):** write names out in full in identifiers, file names, modules, fields and wire names: `directory`, `sequence`, `timestamp`, `revision`, `error`, `foreign_interface`. Exceptions: fixed domain terms (`Bpm`, `Id`, and the marker syntax `!bpm`, `!length`, `!1008`) and acronyms that are the normal name (`Json`, `Tcp`, `Uuid`). Single letters only for a closure over one obvious value.
 - **Memory and layout (owner's rule, 2026-10-09; enforced from Phase 4b, PLAN §7b):** structs and enums stay under 128 bytes, ideally 64 or less; no large arrays or heavy values by value; a heavy type or variant goes behind `Box`/`Vec`/`Rc` with a one-line comment; heed `clippy::large_enum_variant`; check `size_of` before adding fields. Module and file names are `lower_snake_case` and singular; use `x.rs` next to `x/`, never `mod.rs`; keep internals private (`mod` without `pub`) and expose the API with `pub use`.
 - **Small units:** files < ~300 lines, functions < ~40, Svelte components < ~200 lines of script. Presentational components take props only; no business logic in `.svelte`.
-- **Types are generated** from Rust to TS (no hand-copied interfaces): types in `crates/protocol`, output `ui/src/lib/generated/protocol.ts`, refresh with `UPDATE_TYPES=1 cargo test -p protocol`. Marker test vectors live in `testing/vectors/`.
+- **Types are generated** from Rust to TS (no hand-copied interfaces): types in `crates/protocol`, output `ui/src/lib/generated/protocol.ts`, refresh with `UPDATE_TYPES=1 cargo test -p protocol`. Marker test vectors live in `testing/data/vectors/`.
 - Match surrounding style; no comment noise; no abstractions without a second implementation or a test double (SPEC anti-goals). No event sourcing, no plugin system, no DI container.
 
 ## Git workflow (owner's rule)

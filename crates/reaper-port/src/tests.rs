@@ -70,7 +70,7 @@ fn ext_state_and_count_in_are_remembered() {
 }
 
 fn scenario_files() -> Vec<PathBuf> {
-    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../testing/scenarios");
+    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../testing/data/scenarios");
     let mut files: Vec<PathBuf> = std::fs::read_dir(dir)
         .unwrap()
         .map(|entry| entry.unwrap().path())

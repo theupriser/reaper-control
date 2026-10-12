@@ -39,7 +39,8 @@ fn error_name(e: Option<FrameError>) -> Option<&'static str> {
 
 #[test]
 fn vectors_decode_the_same_whole_and_byte_by_byte() -> Result<(), Box<dyn std::error::Error>> {
-    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../testing/vectors/frames.json");
+    let path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../testing/data/vectors/frames.json");
     let vectors: Vec<Vector> = serde_json::from_str(&std::fs::read_to_string(path)?)?;
     assert!(!vectors.is_empty());
     for v in vectors {

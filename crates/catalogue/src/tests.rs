@@ -22,7 +22,8 @@ fn render(directive: &Directive) -> String {
 
 #[test]
 fn shared_vectors_parse_as_written() -> Result<(), Box<dyn std::error::Error>> {
-    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../testing/vectors/markers.json");
+    let path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../testing/data/vectors/markers.json");
     let vectors: Vec<Vector> = serde_json::from_str(&std::fs::read_to_string(path)?)?;
     assert!(vectors.len() > 40);
     for vector in vectors {
