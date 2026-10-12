@@ -2,9 +2,9 @@
 # Chaos test (WP 7.2): regions edited while a song plays, and the tick time with 1000 regions.
 # Uses only the isolated REAPER in .dev/reaper-test and the probe build of the extension, which
 # moves and renames a region the way the Region Manager does (`region-edit` in probe-command).
-# Needs .dev/projects/regions-1000.rpp (written by scripts/chaos_project.sh) and the screen unlocked.
+# Needs .dev/projects/regions-1000.rpp (written by testing/scripts/chaos_project.sh) and the screen unlocked.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 source ~/.cargo/env
 R="$PWD/.dev/reaper-test"
 SAMPLE="$PWD/.dev/projects/large-set-sample.rpp"
