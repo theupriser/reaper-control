@@ -105,6 +105,7 @@ const RULES: &[Rule] = &[
         krate: "app",
         may_use_workspace: &[
             "shared-kernel",
+            "catalogue",
             "performance",
             "protocol",
             "link",

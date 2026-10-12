@@ -38,6 +38,7 @@ flowchart TD
     app --> legacy[legacy-import]
     app --> installer
     app --> protocol
+    app --> catalogue
     app --> performance
     app --> timer
     app --> link

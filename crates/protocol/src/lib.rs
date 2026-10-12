@@ -38,7 +38,7 @@ pub use setlist::SetlistInfo;
 pub use setlist::SetlistTransferView;
 pub use song::Catalog;
 pub use song::CueInfo;
-pub use song::SongInfo;
+pub use song::{MarkerReading, SongInfo};
 pub use state::EventRecord;
 pub use state::Live;
 pub use state::Notice;

@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import type { ChecklistView, Command, InstallationView, LinkProblem, LinkView, Notice, SetlistTransferView, Settings, SettingsView, SystemStats } from "./generated/protocol";
+import type { ChecklistView, Command, InstallationView, LinkProblem, LinkView, MarkerReading, Notice, SetlistTransferView, Settings, SettingsView, SystemStats } from "./generated/protocol";
 
 export const dispatch = (command: Command): Promise<void> => invoke<void>("dispatch", { command });
 
@@ -20,6 +20,8 @@ export const onLinkProblem = (handler: (problem: LinkProblem | null) => void): P
   listen<LinkProblem | null>("link-problem", (event) => handler(event.payload));
 
 export const currentSystemStats = (): Promise<SystemStats> => invoke<SystemStats>("current_system_stats");
+
+export const markerReading = (name: string): Promise<MarkerReading> => invoke<MarkerReading>("marker_reading", { name });
 
 export const currentSettings = (): Promise<SettingsView> => invoke<SettingsView>("current_settings");
 

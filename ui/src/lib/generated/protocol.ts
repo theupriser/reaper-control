@@ -532,6 +532,27 @@ app_memory_megabytes: number,
 reaper_memory_megabytes: number | null, };
 
 /**
+ * What the app makes of a marker or region name: the answer the Help screen shows while you type.
+ */
+export type MarkerReading = { 
+/**
+ * The name holds `!1008` or `!hardstop`.
+ */
+hard_stop: boolean, 
+/**
+ * The song length from `!length:N`, in seconds.
+ */
+length_seconds: number | null, 
+/**
+ * The tempo from `!bpm:N`.
+ */
+tempo_bpm: number | null, 
+/**
+ * The name holds only commands, so the timeline does not draw it.
+ */
+hidden: boolean, };
+
+/**
  * The four steps of the first-run wizard, in order.
  */
 export type WizardStepId = "FindReaper" | "InstallExtension" | "RestartReaper" | "Connect";

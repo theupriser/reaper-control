@@ -136,6 +136,19 @@ export const strings = {
     title: "Help",
     intro: "How to set up REAPER for this app, and how to mark your songs.",
     topics: "Help topics",
+    helper: {
+      title: "Try a marker name",
+      intro: "Type the name of a marker or region and see how the app reads it.",
+      label: "Marker or region name",
+      placeholder: "Song A !length:45 !1008",
+      empty: "Nothing typed yet.",
+      plain: "No special tokens: this is just a name.",
+      failed: "The name could not be read.",
+      hardStop: "Hard stop: the show stops at the end of the song.",
+      length: (seconds: number) => `The song counts as ${seconds} seconds.`,
+      tempo: (bpm: number) => `The tempo shown for the song is ${bpm} BPM.`,
+      hidden: "Only tokens, no name: this marker is not shown on the timeline.",
+    },
     sections: [
       {
         id: "connect",

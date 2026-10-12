@@ -3,6 +3,7 @@
 mod fake;
 mod health;
 mod link;
+mod marker;
 mod mirror;
 mod shell;
 mod simulator;
@@ -78,6 +79,7 @@ pub use link::LinkSession;
 pub use link::LinkViewSource;
 pub use link::MessageTranslator;
 pub use link::apply_event;
+pub use marker::read_marker_name;
 pub use midi::{
     FakeMidiSource, MidiConnection, MidiDebounce, MidiDeviceFollower, MidiListener, MidiMessage,
     MidiRouter, MidiSource, MidiSwitch, MidirAnchor, MidirSource,
