@@ -143,3 +143,45 @@ jobs:
           path: |
             target/release/bundle/dmg/*.dmg
             target/release/bundle/nsis/*-setup.exe
+
+  reaper-smoke:
+    name: REAPER smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain (from rust-toolchain.toml)
+        run: rustup show
+      - uses: Swatinem/rust-cache@v2
+      - name: Build the extension (release)
+        run: cargo build --release -p reaper-extension
+      - name: Package the extension
+        shell: bash
+        run: .github/scripts/package_extension.sh
+      - name: Install REAPER (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/reaper.dmg" https://www.reaper.fm/files/7.x/reaper782_universal.dmg
+          # the dmg opens with REAPER's licence agreement; installing it means accepting that
+          echo Y | hdiutil attach "$RUNNER_TEMP/reaper.dmg" -nobrowse -mountpoint "$RUNNER_TEMP/reaper-volume" > /dev/null
+          cp -R "$RUNNER_TEMP/reaper-volume/REAPER.app" "$RUNNER_TEMP/REAPER.app"
+          hdiutil detach "$RUNNER_TEMP/reaper-volume"
+          echo "REAPER_EXECUTABLE=$RUNNER_TEMP/REAPER.app/Contents/MacOS/REAPER" >> "$GITHUB_ENV"
+      - name: Install REAPER (Windows, portable)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri https://www.reaper.fm/files/7.x/reaper782_x64-install.exe -OutFile "$env:RUNNER_TEMP\reaper-install.exe"
+          Start-Process -FilePath "$env:RUNNER_TEMP\reaper-install.exe" -ArgumentList "/S", "/PORTABLE", "/D=$env:RUNNER_TEMP\REAPER" -Wait
+          "REAPER_EXECUTABLE=$env:RUNNER_TEMP\REAPER\reaper.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
+      - name: The extension starts and listens inside REAPER
+        shell: bash
+        run: |
+          extension=$(ls dist/reaper_rc2-*.dylib dist/reaper_rc2-*.dll 2>/dev/null | head -1 || true)
+          [ -n "$extension" ] || { echo "no packaged extension in dist/"; exit 1; }
+          testing/scripts/smoke_extension.sh "$REAPER_EXECUTABLE" "$extension"

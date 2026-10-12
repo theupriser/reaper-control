@@ -1,27 +1,45 @@
 #!/usr/bin/env bash
-# macOS: loads a packaged extension in an isolated REAPER and checks that it starts and listens.
-# usage: smoke_extension.sh <packaged .dylib> <resource directory with reaper.ini> <project>
-# The resource directory is a throwaway copy (git-ignored .dev/); this never touches the real REAPER.
+# Loads a packaged extension in an isolated REAPER (macOS or Windows) and checks that it starts and listens.
+# usage: smoke_extension.sh <REAPER executable> <packaged extension> [seconds to wait, default 60]
+# REAPER runs with a throwaway resource directory under $RUNNER_TEMP or /tmp; your own REAPER is never touched.
+# On a CI runner REAPER is installed first by the workflow; locally pass /Applications/REAPER.app/Contents/MacOS/REAPER.
 set -euo pipefail
+cd "$(dirname "$0")/../.."
 
-extension=$1
-resource=$(cd "$2" && pwd)   # REAPER resolves -cfgfile from its own working directory
-project=$(cd "$(dirname "$3")" && pwd)/$(basename "$3")
-version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+reaper=$1
+extension=$2
+seconds=${3:-60}
+version=$(sed -n 's/^version = "\(.*\)"/\1/p' crates/reaper-extension/Cargo.toml | head -1)
 
+resource=$(mktemp -d "${RUNNER_TEMP:-/tmp}/reaper-smoke.XXXXXX")
 mkdir -p "$resource/UserPlugins"
-cp "$extension" "$resource/UserPlugins/reaper_rc2-arm64.dylib"
-rm -f "$resource/RC2/running" "$resource/RC2/faulted" "$resource/RC2/endpoint.json" "$resource/RC2/extension.log"
+cp "$extension" "$resource/UserPlugins/$(basename "$extension")"
+: > "$resource/reaper.ini"
 
-open -n -a /Applications/REAPER.app --args -cfgfile "$resource/reaper.ini" "$project"
-trap 'pkill -f "$resource/reaper.ini" || true; rm -f "$resource/RC2/running" "$resource/RC2/faulted"' EXIT
+configuration=$resource/reaper.ini
+case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) configuration=$(cygpath -w "$configuration") ;; esac
 
-for _ in $(seq 1 60); do
+"$reaper" -cfgfile "$configuration" -newinst -nosplash > "$resource/reaper.out" 2>&1 &
+pid=$!
+trap 'kill "$pid" 2>/dev/null || true; sleep 1; kill -9 "$pid" 2>/dev/null || true' EXIT
+
+for _ in $(seq 1 $((seconds * 2))); do
   [ -f "$resource/RC2/endpoint.json" ] && break
+  kill -0 "$pid" 2>/dev/null || break
   sleep 0.5
 done
-[ -f "$resource/RC2/endpoint.json" ] || { echo "FAIL: no endpoint.json after 30 s"; cat "$resource/RC2/extension.log" 2>/dev/null; exit 1; }
 
-cat "$resource/RC2/extension.log"
-grep -q "started, version $version," "$resource/RC2/extension.log" || { echo "FAIL: log does not name version $version"; exit 1; }
+report() {
+  echo "--- resource directory"; ls -la "$resource" "$resource/RC2" 2>&1 || true
+  echo "--- extension.log"; cat "$resource/RC2/extension.log" 2>&1 || true
+  echo "--- REAPER output"; cat "$resource/reaper.out" 2>&1 || true
+}
+
+if [ ! -f "$resource/RC2/endpoint.json" ]; then
+  echo "FAIL: no endpoint.json after $seconds s (REAPER running: $(kill -0 "$pid" 2>/dev/null && echo yes || echo no))"
+  report
+  exit 1
+fi
+report
+grep -q "started, version $version," "$resource/RC2/extension.log" || { echo "FAIL: the log does not name version $version"; exit 1; }
 echo "OK: extension $version started and is listening"
