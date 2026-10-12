@@ -25,6 +25,22 @@ If code and docs disagree, stop and reconcile (fix the doc or the code, and say 
 - Parity first: **no new performance features** until parity is reached (SPEC §0 lists the allowed additions).
 - The **Performer screen keeps the v1 look**; other screens follow the new canvas design.
 
+## Repository layout
+```
+crates/                 one crate per bounded context (see "Architecture" and "Code rules")
+ui/                     Svelte 5 UI; copy in ui/src/lib/strings.ts, generated types in ui/src/lib/generated/
+testing/
+  data/scenarios/       performance scenarios (JSON), read by the reaper-port tests
+  data/vectors/         protocol and marker test vectors (JSON)
+  scripts/              scripts that run against an isolated REAPER (soak, security, resource audit, chaos/)
+.github/
+  workflows/            CI and the release workflow
+  scripts/              packaging and the release build, used by the workflows
+  release-notes/        one file per release, vX.Y.Z.md (see "Releases")
+docs/, spikes/, .claude/  local only, git-ignored
+```
+`testing/README.md` explains the testing folder; an architecture test (`testing_layout.rs`) keeps it in that shape. Put new fixtures in `testing/data/`, new manual scripts in `testing/scripts/`, and anything a workflow calls in `.github/scripts/`. The checks on a pull request have a target of 5 minutes and a limit of 10; longer runs belong in a nightly or manual job.
+
 ## Architecture in one screen
 ```
 REAPER ── reaper-extension (Rust cdylib) ──loopback socket (push)── App (Tauri 2: Rust core + Svelte 5 UI)

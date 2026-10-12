@@ -39,6 +39,13 @@ cargo test --workspace
 
 `.github/scripts/build_release.sh` builds the UI, the extension and the app in order. See `AGENTS.md` for the code rules and the project layout.
 
+## Layout
+
+- `crates/`: the Rust code, one crate per area (the REAPER extension, the app, the performance rules, the protocol).
+- `ui/`: the Svelte user interface.
+- `testing/`: test data and the scripts that run against a real REAPER (see `testing/README.md`).
+- `.github/`: the workflows, the packaging scripts and the release notes.
+
 ## Contributing
 
 Working notes for contributors and AI agents are in `AGENTS.md`.
