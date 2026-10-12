@@ -238,6 +238,30 @@ jobs:
               if (target != IntPtr.Zero) { SendMessage(target, 0xF5, IntPtr.Zero, IntPtr.Zero); report.Add("clicked " + label); }
               return string.Join("\n", report);
             }
+            [DllImport("user32.dll", CharSet=CharSet.Auto)] static extern IntPtr SendMessage(IntPtr h, int m, IntPtr w, StringBuilder l);
+            [DllImport("user32.dll")] static extern int GetDlgCtrlID(IntPtr h);
+            [DllImport("user32.dll")] static extern IntPtr GetParent(IntPtr h);
+            public static string Combos(uint pid, string choose) {
+              var report = new List<string>(); var combos = new List<IntPtr>();
+              EnumWindows((h, l) => {
+                uint p; GetWindowThreadProcessId(h, out p);
+                if (p != pid || !IsWindowVisible(h)) return true;
+                EnumChildWindows(h, (c, m) => { if (Class(c) == "ComboBox") combos.Add(c); return true; }, IntPtr.Zero);
+                return true; }, IntPtr.Zero);
+              foreach (var combo in combos) {
+                int count = (int)SendMessage(combo, 0x146, IntPtr.Zero, IntPtr.Zero);
+                var items = new List<string>();
+                for (int i = 0; i < count; i++) { var t = new StringBuilder(256); SendMessage(combo, 0x148, (IntPtr)i, t); items.Add(t.ToString()); }
+                report.Add("combo id " + GetDlgCtrlID(combo) + ": " + string.Join(" | ", items));
+                int index = items.IndexOf(choose);
+                if (index >= 0) {
+                  SendMessage(combo, 0x14E, (IntPtr)index, IntPtr.Zero);
+                  SendMessage(GetParent(combo), 0x111, (IntPtr)((1 << 16) | GetDlgCtrlID(combo)), combo);
+                  report.Add("   chose " + choose);
+                }
+              }
+              return string.Join("\n", report);
+            }
           }
           "@
           function Shot($name) {
@@ -254,6 +278,12 @@ jobs:
           Write-Host ([W]::Click([uint32]$reaper.Id, "Yes"))
           Start-Sleep 4
           Shot "2-after-yes"
+          Write-Host ([W]::Combos([uint32]$reaper.Id, "Dummy Audio"))
+          Start-Sleep 2
+          Shot "3-after-choose"
+          Write-Host ([W]::Click([uint32]$reaper.Id, "OK"))
+          Start-Sleep 4
+          Shot "4-after-ok"
           Get-Process reaper | Select-Object ProcessName, MainWindowTitle | Format-Table | Out-String | Write-Host
           Get-Content "$env:RUNNER_TEMP\cfg\reaper.ini" | Write-Host
       - uses: actions/upload-artifact@v4
