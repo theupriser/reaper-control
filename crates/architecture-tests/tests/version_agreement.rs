@@ -85,8 +85,8 @@ fn the_release_workflow_checks_the_tag_against_the_version() -> TestResult {
     let workflow = fs::read_to_string(root().join(".github/workflows/release.yml"))?;
     assert!(workflow.contains("tags: [\"v*\"]"));
     assert!(
-        workflow.contains("--draft"),
-        "a release must open as a draft"
+        workflow.contains("needs: build"),
+        "a release is only published after both builds pass"
     );
     Ok(())
 }
