@@ -15,12 +15,12 @@ use incoming_commands::IncomingCommands;
 pub use sample_project::sample_project;
 use simulator_state::{STEP_SECONDS, SimulatorState};
 
-use crate::command::Driver;
-use crate::command::DriverError;
-use crate::event::EventBus;
 use crate::health::HealthMonitor;
 use crate::link::LinkPipeline;
 use crate::link::LinkViewSource;
+use app_core::Driver;
+use app_core::DriverError;
+use app_core::EventBus;
 
 /// Plays a project in memory and reports like the link would, so the whole app can be run and
 /// tested without REAPER. `advance` moves its time and carries out the commands sent since the

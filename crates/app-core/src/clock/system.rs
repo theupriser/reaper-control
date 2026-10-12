@@ -2,7 +2,7 @@
 
 use std::time::{Duration, Instant};
 
-use crate::system::Clock;
+use crate::clock::Clock;
 
 /// Time since the clock was made, read from the operating system.
 #[derive(Debug)]

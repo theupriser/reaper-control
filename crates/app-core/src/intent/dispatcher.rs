@@ -7,9 +7,9 @@ use protocol::LinkView;
 use crate::command::CommandBus;
 use crate::event::AppEvent;
 use crate::event::EventBus;
-use crate::input::Intent;
-use crate::input::IntentError;
-use crate::input::IntentTranslator;
+use crate::intent::Intent;
+use crate::intent::IntentError;
+use crate::intent::IntentTranslator;
 
 /// Keyboard, MIDI and remote controllers all call `dispatch`: the intent is judged against the
 /// current state, then sent through the same `CommandBus` as the UI's commands.

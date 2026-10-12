@@ -82,6 +82,7 @@ checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 name = "app"
 version = "2.0.0"
 dependencies = [
+ "app-core",
  "catalogue",
  "installer",
  "link",
@@ -104,6 +105,18 @@ dependencies = [
  "tracing-appender",
  "tracing-subscriber",
  "zip",
+]
+
+[[package]]
+name = "app-core"
+version = "2.0.0"
+dependencies = [
+ "performance",
+ "protocol",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "tracing",
 ]
 
 [[package]]

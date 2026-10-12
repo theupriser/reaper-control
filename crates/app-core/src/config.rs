@@ -6,6 +6,7 @@ mod chaos;
 mod error;
 mod location;
 mod log;
+mod midi;
 mod migration;
 mod repository;
 mod settings;
@@ -20,6 +21,7 @@ pub use location::{
     log_directory, mirror_directory,
 };
 pub use log::{LEVELS, LogConfig};
+pub use midi::MidiConfig;
 pub use migration::migrate;
 pub use repository::ConfigRepository;
 pub use settings::SettingsService;

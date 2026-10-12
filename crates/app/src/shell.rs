@@ -10,23 +10,8 @@ use protocol::{
     SetlistTransferView, Settings, SettingsView, SystemStats,
 };
 
-use crate::command::CommandBus;
-use crate::command::MeteredDriver;
-use crate::config::ConfigRepository;
-use crate::config::ConfigStore;
-use crate::config::SettingsService;
-use crate::config::{
-    config_file, diagnostics_directory, legacy_config_file, legacy_setlists_directory,
-    log_directory, mirror_directory,
-};
-use crate::event::AppEvent;
-use crate::event::AppFault;
-use crate::event::EventBus;
-use crate::event::log_event;
-use crate::event::{link_problem, notice_for_event};
 use crate::health::FaultFileCheck;
 use crate::health::HealthMonitor;
-use crate::input::IntentDispatcher;
 use crate::input::MidiSource;
 use crate::input::MidiSwitch;
 use crate::input::MidirAnchor;
@@ -45,9 +30,24 @@ use crate::system::Logging;
 use crate::system::PeriodicThread;
 use crate::system::ShutdownSequence;
 use crate::system::SysinfoStatsSource;
-use crate::system::SystemClock;
 use crate::system::SystemStatsService;
 use crate::system::install_panic_hook;
+use app_core::AppEvent;
+use app_core::AppFault;
+use app_core::CommandBus;
+use app_core::ConfigRepository;
+use app_core::ConfigStore;
+use app_core::EventBus;
+use app_core::IntentDispatcher;
+use app_core::MeteredDriver;
+use app_core::SettingsService;
+use app_core::SystemClock;
+use app_core::log_event;
+use app_core::{
+    config_file, diagnostics_directory, legacy_config_file, legacy_setlists_directory,
+    log_directory, mirror_directory,
+};
+use app_core::{link_problem, notice_for_event};
 use installer::FakeProcessCheck;
 use installer::InstallationService;
 use installer::ProcessCheck;

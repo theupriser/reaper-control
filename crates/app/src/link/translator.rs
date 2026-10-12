@@ -3,7 +3,7 @@
 use link::LinkEvent;
 use protocol::message::Outcome;
 
-use crate::event::AppEvent;
+use app_core::AppEvent;
 
 /// The one place that knows the link's vocabulary; the rest of the app only sees `AppEvent`.
 pub struct MessageTranslator;

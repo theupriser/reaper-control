@@ -2,13 +2,13 @@
 
 use std::sync::{Arc, Mutex};
 
-use crate::event::EventBus;
-use crate::input::IntentDispatcher;
-use crate::input::MidiConfig;
 use crate::input::MidiListener;
 use crate::input::MidiRouter;
 use crate::input::MidiSource;
-use crate::system::Clock;
+use app_core::Clock;
+use app_core::EventBus;
+use app_core::IntentDispatcher;
+use app_core::MidiConfig;
 
 /// Owns the one running `MidiListener` and replaces it when the MIDI settings change.
 pub struct MidiSwitch {

@@ -13,8 +13,8 @@ use std::time::Duration;
 
 use protocol::Command;
 
+use crate::clock::Clock;
 use crate::command::PendingCommand;
-use crate::system::Clock;
 
 /// Remembers what was sent and is still unanswered. It decides; the bus acts.
 pub struct CommandQueue {

@@ -1,20 +1,16 @@
 //! Link.
 
-mod cause;
+mod apply;
 mod chaos;
 mod connection;
-mod health;
-mod performance_runs;
 mod pipeline;
 mod session;
 mod translator;
 mod view_source;
 
-pub use cause::LinkCause;
+pub use apply::apply_event;
 pub use chaos::ChaosProxy;
 pub use connection::LinkConnection;
-pub use health::LinkHealth;
-pub use performance_runs::performance_runs;
 pub use pipeline::LinkPipeline;
 pub use session::LinkSession;
 pub use translator::MessageTranslator;

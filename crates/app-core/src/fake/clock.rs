@@ -3,7 +3,7 @@
 use std::sync::Mutex;
 use std::time::Duration;
 
-use crate::system::Clock;
+use crate::clock::Clock;
 
 /// A clock for tests: it stands still until `advance` is called.
 #[derive(Debug, Default)]

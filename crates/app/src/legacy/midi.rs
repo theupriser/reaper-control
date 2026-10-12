@@ -5,8 +5,8 @@ use std::collections::BTreeMap;
 use serde::Deserialize;
 use serde_json::Value;
 
-use crate::input::Intent;
-use crate::input::MidiConfig;
+use app_core::Intent;
+use app_core::MidiConfig;
 
 /// What v1 stored about MIDI; v1 named notes and actions as text. Values are read loosely so one
 /// odd entry is reported instead of failing the whole import.

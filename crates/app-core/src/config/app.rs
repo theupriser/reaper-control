@@ -10,8 +10,8 @@ use crate::command::QueueConfig;
 use crate::config::AppearanceConfig;
 use crate::config::ConfigError;
 use crate::config::LogConfig;
-use crate::input::Intent;
-use crate::input::MidiConfig;
+use crate::config::MidiConfig;
+use crate::intent::Intent;
 
 /// The schema version this build writes and understands.
 pub const SCHEMA_VERSION: u32 = 1;

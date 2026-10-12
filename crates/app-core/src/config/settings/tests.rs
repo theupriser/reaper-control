@@ -84,7 +84,7 @@ fn a_changed_note_table_is_saved_and_applies() -> Result<(), ConfigError> {
     let loaded = ConfigStore::new(rig.directory.join("config.json")).load()?;
     assert_eq!(
         loaded.midi.notes.get(&60),
-        Some(&crate::input::Intent::Next)
+        Some(&crate::intent::Intent::Next)
     );
     assert_eq!(loaded.midi.notes.len(), 2);
     assert_eq!(*rig.service.view(Vec::new()).settings, settings);

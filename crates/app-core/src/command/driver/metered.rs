@@ -6,12 +6,12 @@ use std::time::Duration;
 
 use protocol::Command;
 
+use crate::clock::Clock;
 use crate::command::Driver;
 use crate::command::DriverError;
 use crate::command::LatencyStats;
 use crate::event::AppEvent;
 use crate::event::EventBus;
-use crate::system::Clock;
 
 #[derive(Default)]
 struct Measured {

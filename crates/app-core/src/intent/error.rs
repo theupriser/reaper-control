@@ -1,7 +1,7 @@
 //! Why an intent did not go out.
 
 use crate::command::DispatchError;
-use crate::input::IntentRefusal;
+use crate::intent::IntentRefusal;
 
 /// Why `IntentDispatcher::dispatch` did not send anything.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]

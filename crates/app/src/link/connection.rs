@@ -7,12 +7,12 @@ use std::thread;
 use link::{ClientConfig, Endpoint, LinkClient, SendError};
 use protocol::{Command, LinkView};
 
-use crate::command::Driver;
-use crate::command::DriverError;
-use crate::event::EventBus;
 use crate::health::HealthMonitor;
 use crate::link::LinkPipeline;
 use crate::link::LinkViewSource;
+use app_core::Driver;
+use app_core::DriverError;
+use app_core::EventBus;
 
 /// The app's one connection to the extension, and what the UI shows about it.
 pub struct LinkConnection {
