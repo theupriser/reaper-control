@@ -25,6 +25,44 @@ here too (a test checks that).
 | `app` | The Tauri app: composition root (`shell.rs`), the link to the extension, health, setlist mirror, diagnostics, simulator. | everything above except `reaper-extension` |
 | `architecture-tests` | Tests only: dependency rules, layout rules, version agreement, `testing/` shape. | - |
 
+## How they depend on each other
+
+An arrow means "may use". Everything also uses `shared-kernel` (left out of the picture).
+Read it from the top: the app and the extension are the two programs; everything below is shared.
+
+```mermaid
+flowchart TD
+    app[app<br/>Tauri app]
+    extension[reaper-extension<br/>loaded by REAPER]
+    app --> appcore[app-core]
+    app --> midi
+    app --> legacy[legacy-import]
+    app --> installer
+    app --> protocol
+    app --> performance
+    app --> timer
+    app --> link
+    app --> reaperport[reaper-port]
+    midi --> appcore
+    legacy --> appcore
+    legacy --> protocol
+    installer --> protocol
+    appcore --> protocol
+    appcore --> performance
+    extension --> timer[timer-loop]
+    extension --> link
+    extension --> reaperport
+    timer --> link
+    timer --> reaperport
+    timer --> protocol
+    timer --> performance
+    link --> protocol
+    reaperport --> performance
+    projections --> performance
+    projections --> catalogue
+    projections --> setlists
+```
+
 ## Folder structure
 
 Every crate keeps the same shape (`layout_rules.rs`): one type per file, `x.rs` next to a folder
