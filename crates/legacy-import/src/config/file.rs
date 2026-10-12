@@ -4,8 +4,8 @@ use std::path::Path;
 
 use serde::Deserialize;
 
-use crate::legacy::ImportError;
-use crate::legacy::LegacyMidi;
+use crate::ImportError;
+use crate::LegacyMidi;
 
 /// The parts of the v1 `config.json` that v2 has a counterpart for. The rest (host, port,
 /// polling and reconnect settings) disappeared because the extension runs the timing itself.

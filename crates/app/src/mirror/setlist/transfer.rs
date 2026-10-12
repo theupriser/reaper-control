@@ -5,11 +5,11 @@ use std::sync::Arc;
 
 use protocol::{Command, ImportOffer, LinkView, SetlistInfo, SetlistTransferView};
 
-use crate::legacy::ImportError;
-use crate::legacy::LegacyFile;
-use crate::legacy::resolve;
 use crate::mirror::MirrorRepository;
 use app_core::CommandBus;
+use legacy_import::ImportError;
+use legacy_import::LegacyFile;
+use legacy_import::resolve;
 
 /// Offers and carries out a restore or an import. Both end in `SaveSetlist` through the
 /// command bus, so the project is only ever changed the way an edit changes it.

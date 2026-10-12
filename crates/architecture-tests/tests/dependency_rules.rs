@@ -65,6 +65,11 @@ const RULES: &[Rule] = &[
         must_not_use_external: HEAVY,
     },
     Rule {
+        krate: "legacy-import",
+        may_use_workspace: &["app-core", "protocol"],
+        must_not_use_external: HEAVY,
+    },
+    Rule {
         krate: "installer",
         may_use_workspace: &["protocol"],
         must_not_use_external: HEAVY,
@@ -112,6 +117,7 @@ const RULES: &[Rule] = &[
             "installer",
             "app-core",
             "midi",
+            "legacy-import",
             "reaper-port",
             "timer-loop",
         ],

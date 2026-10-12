@@ -20,8 +20,9 @@ here too (a test checks that).
 | `reaper-extension` | The native extension REAPER loads: plugin entry, panic guard, safe mode, journal, the bridge to `link`. | the domain crates, `protocol`, `link`, `reaper-port`, `timer-loop` |
 | `app-core` | What the app shares: commands and their bus, app events, configuration, intents, the clock, and fakes for them. No Tauri, no devices. | `performance`, `protocol` |
 | `midi` | MIDI input: device list and hot-plug, listener, debounce, router to intents. | `app-core` |
+| `legacy-import` | Importing what v1 left behind: its config, setlists and journal. | `app-core`, `protocol` |
 | `installer` | Installing the extension: plan, items, wizard checks, bundled extension location, process check. | `protocol` |
-| `app` | The Tauri app: composition root (`shell.rs`), the link to the extension, health, legacy v1 import, setlist mirror, diagnostics, simulator. | everything above except `reaper-extension` |
+| `app` | The Tauri app: composition root (`shell.rs`), the link to the extension, health, setlist mirror, diagnostics, simulator. | everything above except `reaper-extension` |
 | `architecture-tests` | Tests only: dependency rules, layout rules, version agreement, `testing/` shape. | - |
 
 ## Folder structure
@@ -30,10 +31,11 @@ Every crate keeps the same shape (`layout_rules.rs`): one type per file, `x.rs` 
 `x/` for a type with helpers, singular `lower_snake_case` names, no `mod.rs`.
 
 - `app-core/src`: `command/` (bus, queue, checks, driver), `event/`, `config/`, `intent/`, `clock/`, `link/` (cause, health), `fake/`.
-- `app/src`: `link/` (session, pipeline, chaos proxy), `health/`, `legacy/` (v1 import), `mirror/`, `system/` (logging, diagnostics, stats, shutdown), `start/`, `simulator/`, `fake/`, `shell.rs`.
+- `app/src`: `link/` (session, pipeline, chaos proxy), `health/`, `mirror/`, `system/` (logging, diagnostics, stats, shutdown), `start/`, `simulator/`, `fake/`, `shell.rs`.
 - `protocol/src`: `installation/`, `configuration/`, `link/`, `state/`, `song/`, `setlist/`, plus `frame/` and `message/` (the wire format) and `command.rs`.
 - `performance/src`: the state machine files at the top; `tempo/` and `song/` beside them.
 - `link/src`: `server/`, `client/`, `wire/`, `endpoint/`, `event_log/`.
 - `reaper-extension/src`: `foreign_interface/` (the one unsafe FFI module), `fault/`, `fault_file/`, `safe_mode_marker/`, `tick_watchdog/`, `link_bridge/`, `journal.rs`, `start_up.rs`.
 - `installer/src`: `extension/`, `reaper/`, `wizard/`, `item/`, `process/`, plus the plan, report and status types.
+- `legacy-import/src`: `config/` (the v1 config file and its import), the v1 setlist, item and MIDI readers, the resolver and the journal import.
 - `midi/src`: the listener, router, debounce, device follower and switch; `midir/` is the real-device backend.

@@ -2,7 +2,7 @@
 
 use serde::Deserialize;
 
-use crate::legacy::LegacyItem;
+use crate::LegacyItem;
 
 /// A v1 setlist. Items come in playing order (v1 also stored a position; the list order wins).
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
