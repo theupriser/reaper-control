@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Chaos test (WP 7.2): project switch mid-song, markers inserted live, and a 1000-region project.
 # Uses only the isolated REAPER in .dev/reaper-test, driven through its own menus (System Events).
-# Needs: cargo build --release -p reaper-extension && scripts/package_extension.sh, and the screen unlocked.
+# Needs: cargo build --release -p reaper-extension && .github/scripts/package_extension.sh, and the screen unlocked.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 source ~/.cargo/env
 R="$PWD/.dev/reaper-test"
 SAMPLE="$PWD/.dev/projects/large-set-sample.rpp"

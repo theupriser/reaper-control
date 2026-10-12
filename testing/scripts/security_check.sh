@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Looks at the running extension from outside, the way another program on the machine would:
 # where it listens, who can read the token, and what it does with a wrong token and with junk.
-# Needs the isolated REAPER to be running with the extension (see scripts/soak.sh for the start).
+# Needs the isolated REAPER to be running with the extension (see testing/scripts/soak.sh for the start).
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 R="$PWD/.dev/reaper-test"
 ENDPOINT=$R/RC2/endpoint.json
 [ -f "$ENDPOINT" ] || { echo "no $ENDPOINT: start the isolated REAPER first"; exit 1; }

@@ -59,7 +59,7 @@ jobs:
         run: cargo build --release -p reaper-extension
       - name: Package the extension with its checksum
         shell: bash
-        run: scripts/package_extension.sh
+        run: .github/scripts/package_extension.sh
       - name: Build the installer (macOS .dmg, Windows setup)
         shell: bash
         working-directory: crates/app

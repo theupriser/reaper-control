@@ -6,7 +6,7 @@ use crate::install_platform::InstallPlatform;
 
 /// The bundled extension for `platform`: `RC2_EXTENSION_FILE` when set, else next to the app's
 /// executable, in a macOS bundle's `Resources`, or in the repository's `dist` folder (development,
-/// filled by `scripts/package_extension.sh`). The first that exists wins; when none does, the
+/// filled by `.github/scripts/package_extension.sh`). The first that exists wins; when none does, the
 /// executable's folder is returned so the error names a sensible place.
 #[must_use]
 pub fn bundled_extension(platform: InstallPlatform) -> PathBuf {

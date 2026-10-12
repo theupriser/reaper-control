@@ -34,10 +34,10 @@ You need Rust (stable), Node 22 and pnpm 10.
 ```
 pnpm --dir ui install && pnpm --dir ui build
 cargo test --workspace
-scripts/build_release.sh
+.github/scripts/build_release.sh
 ```
 
-`scripts/build_release.sh` builds the UI, the extension and the app in order. See `AGENTS.md` for the code rules and the project layout.
+`.github/scripts/build_release.sh` builds the UI, the extension and the app in order. See `AGENTS.md` for the code rules and the project layout.
 
 ## Contributing
 

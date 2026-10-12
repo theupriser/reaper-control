@@ -3,9 +3,9 @@
 # isolated REAPER with a client connected and nobody touching it. A hand-over skips the 5 s gap, so
 # hand-over N must complete 30 s * N after the play command. Also checks that REAPER's memory stays
 # flat. About 25 minutes.
-# Needs: cargo build --release -p reaper-extension && scripts/package_extension.sh
+# Needs: cargo build --release -p reaper-extension && .github/scripts/package_extension.sh
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 source ~/.cargo/env
 tolerance="${1:-0.25}"
 R="$PWD/.dev/reaper-test"
