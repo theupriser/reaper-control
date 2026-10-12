@@ -248,7 +248,7 @@ jobs:
           }
           New-Item -ItemType Directory -Force "$env:RUNNER_TEMP\cfg" | Out-Null
           "[reaper]`nvst_scan=2`nundomaxmem=0`n" | Out-File -Encoding ascii "$env:RUNNER_TEMP\cfg\reaper.ini"
-          Start-Process "$env:RUNNER_TEMP\REAPER\reaper.exe" -ArgumentList "-cfgfile", "$env:RUNNER_TEMP\cfg\reaper.ini", "-newinst", "-nosplash"
+          $reaper = Start-Process "$env:RUNNER_TEMP\REAPER\reaper.exe" -ArgumentList "-cfgfile", "$env:RUNNER_TEMP\cfg\reaper.ini", "-newinst", "-nosplash" -PassThru
           Start-Sleep 15
           Shot "1-start"
           Write-Host ([W]::Click([uint32]$reaper.Id, "Yes"))
