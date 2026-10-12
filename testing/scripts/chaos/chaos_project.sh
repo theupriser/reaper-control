@@ -3,7 +3,7 @@
 # Uses only the isolated REAPER in .dev/reaper-test, driven through its own menus (System Events).
 # Needs: cargo build --release -p reaper-extension && .github/scripts/package_extension.sh, and the screen unlocked.
 set -euo pipefail
-cd "$(dirname "$0")/../.."
+cd "$(dirname "$0")/../../.."
 source ~/.cargo/env
 R="$PWD/.dev/reaper-test"
 SAMPLE="$PWD/.dev/projects/large-set-sample.rpp"

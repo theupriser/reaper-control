@@ -3,7 +3,7 @@
 # while REAPER plays. Uses only the isolated REAPER in .dev/reaper-test, never the real one.
 # Needs: cargo build --release -p reaper-extension && .github/scripts/package_extension.sh
 set -euo pipefail
-cd "$(dirname "$0")/../.."
+cd "$(dirname "$0")/../../.."
 source ~/.cargo/env
 cycles="${1:-3}"
 R="$PWD/.dev/reaper-test"

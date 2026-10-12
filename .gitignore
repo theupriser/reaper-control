@@ -19,3 +19,6 @@ crates/protocol/fuzz/artifacts/
 # Working documents and spikes, kept on the owner's machine only
 docs/
 spikes/
+
+# Sample projects for trying things in REAPER, kept on the owner's machine only
+testing/projects/
