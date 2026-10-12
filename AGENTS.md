@@ -59,6 +59,12 @@ User-facing copy follows v1 wording where it exists (e.g. "Count-in when pressin
 - Commit messages: plain, imperative, no `Co-Authored-By` lines and no tool/AI attribution (owner's explicit instruction).
 - The repo is public (`github.com/theupriser/reaper-control`): no secrets, tokens, personal data, or private paths in commits.
 
+## Releases
+- A release is made by pushing a tag `vX.Y.Z` that equals the workspace version. The workflow builds both installers and publishes the release by itself.
+- The run **fails at the start** unless `release-notes/vX.Y.Z.md` exists on `main`. Write it in the release PR, in the style of `release-notes/v2.0.0.md` (sections such as Playing a set, Control, Known issues), in plain words for performers, not developers.
+- Put in it: new features, and bugfixes that are important and big enough to matter on stage. Leave out code cleanup, refactoring, tests, CI, docs and other internal changes. Keep the known issues list current.
+- Never publish by hand and never tag without the owner's go-ahead.
+
 ## Working agreements
 - **Test visibly.** Show the real terminal output of builds, linters and tests (not filtered through grep/tail, not summarised). For anything with a screen (UI, app window, REAPER), run it and show the screen (screenshot or opened window). Say what was run and what was seen.
 - **Spikes before commitments** (PLAN Phase 1): S1 extension loads, S2 timing, S3 socket, S4 installer, S5 webview, S6 identity, S7 crash containment. Record outcomes as ADRs in `docs/adr/`. Gate 1 is the go/no-go on the extension.
