@@ -32,6 +32,8 @@ ui/                     Svelte 5 UI; copy in ui/src/lib/strings.ts, generated ty
 testing/
   data/scenarios/       performance scenarios (JSON), read by the reaper-port tests
   data/vectors/         protocol and marker test vectors (JSON)
+  data/projects/        sample REAPER projects (markers and regions, no audio)
+  data/reaper/          starting reaper.ini for the isolated REAPER in tests
   scripts/              scripts that run against an isolated REAPER (soak, security, resource audit, chaos/)
 .github/
   workflows/            CI and the release workflow

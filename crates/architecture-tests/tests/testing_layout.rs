@@ -20,11 +20,10 @@ fn names(directory: &Path) -> Result<Vec<String>, Box<dyn std::error::Error>> {
 }
 
 #[test]
-fn testing_holds_only_the_readme_data_scripts_and_local_projects() -> TestResult {
+fn testing_holds_only_the_readme_data_and_scripts() -> TestResult {
     for name in names(&testing())? {
-        // `projects` is a git-ignored local folder of sample projects.
         assert!(
-            ["README.md", "data", "scripts", "projects"].contains(&name.as_str()),
+            ["README.md", "data", "scripts"].contains(&name.as_str()),
             "testing/{name} does not belong here; see testing/README.md"
         );
     }
@@ -32,8 +31,11 @@ fn testing_holds_only_the_readme_data_scripts_and_local_projects() -> TestResult
 }
 
 #[test]
-fn data_holds_only_scenarios_and_vectors() -> TestResult {
-    assert_eq!(names(&testing().join("data"))?, ["scenarios", "vectors"]);
+fn data_holds_only_projects_reaper_scenarios_and_vectors() -> TestResult {
+    assert_eq!(
+        names(&testing().join("data"))?,
+        ["projects", "reaper", "scenarios", "vectors"]
+    );
     Ok(())
 }
 
