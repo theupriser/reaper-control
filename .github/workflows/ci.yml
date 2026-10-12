@@ -162,6 +162,8 @@ jobs:
       - name: Package the extension
         shell: bash
         run: .github/scripts/package_extension.sh
+      - name: Build the link client examples (send_command, link_watch)
+        run: cargo build --release -p link --examples
       - name: Install REAPER (macOS)
         if: runner.os == 'macOS'
         shell: bash
@@ -179,9 +181,17 @@ jobs:
           Invoke-WebRequest -Uri https://www.reaper.fm/files/7.x/reaper782_x64-install.exe -OutFile "$env:RUNNER_TEMP\reaper-install.exe"
           Start-Process -FilePath "$env:RUNNER_TEMP\reaper-install.exe" -ArgumentList "/S", "/PORTABLE", "/D=$env:RUNNER_TEMP\REAPER" -Wait
           "REAPER_EXECUTABLE=$env:RUNNER_TEMP\REAPER\reaper.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
-      - name: The extension starts, listens and refuses strangers inside REAPER
+      - name: The extension starts, refuses strangers and keeps time inside REAPER
         shell: bash
         run: |
           extension=$(ls dist/reaper_rc2-*.dylib dist/reaper_rc2-*.dll 2>/dev/null | head -1 || true)
           [ -n "$extension" ] || { echo "no packaged extension in dist/"; exit 1; }
-          testing/scripts/smoke_extension.sh "$REAPER_EXECUTABLE" "$extension" testing/scripts/security_check.sh
+          testing/scripts/soak_short_project.sh "$PWD/soak-short.rpp"
+          SMOKE_PROJECT="$PWD/soak-short.rpp" testing/scripts/smoke_extension.sh "$REAPER_EXECUTABLE" "$extension" \
+            testing/scripts/security_check.sh testing/scripts/soak_short.sh
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: reaper-smoke-screen-${{ matrix.os }}
+          path: screen.png
+          if-no-files-found: ignore
