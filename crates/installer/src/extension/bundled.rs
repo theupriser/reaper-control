@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-use crate::install::InstallPlatform;
+use crate::InstallPlatform;
 
 /// The bundled extension for `platform`: `RC2_EXTENSION_FILE` when set, else next to the app's
 /// executable, in a macOS bundle's `Resources`, or in the repository's `dist` folder (development,

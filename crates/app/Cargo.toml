@@ -12,6 +12,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 protocol.workspace = true
 link.workspace = true
+installer.workspace = true
 performance.workspace = true
 reaper-port.workspace = true
 timer-loop.workspace = true

@@ -27,7 +27,7 @@ If code and docs disagree, stop and reconcile (fix the doc or the code, and say 
 
 ## Repository layout
 ```
-crates/                 one crate per bounded context (see "Architecture" and "Code rules")
+crates/                 one crate per bounded context; `installer` holds the extension install and the setup wizard checks (see "Architecture" and "Code rules")
 ui/                     Svelte 5 UI; copy in ui/src/lib/strings.ts, generated types in ui/src/lib/generated/
 testing/
   data/scenarios/       performance scenarios (JSON), read by the reaper-port tests
@@ -47,13 +47,13 @@ command/   a command leaving the app: bus, queue, checks, driver (to REAPER) and
 event/     app events, applying them to the view, the event bus, logging, notices for the user
 config/    app, appearance, chaos and log settings; where config files live; load, save, migrate
 input/     intents (keyboard and UI actions) and their translation to commands; MIDI (listener, router, midir)
-install/   the extension installer and the setup wizard (plan, items, report, bundled extension, REAPER folders)
 legacy/    import of v1 config, setlists and journals
 mirror/    the restore-only mirror of setlists
 link/      the connection to the extension: session, pipeline, health, chaos proxy
-health/    faults, process checks and the health monitor
+health/    faults and the health monitor
 system/    clock, stats, diagnostics bundle, logging setup, panic hook, periodic thread, shutdown
 fake/      test doubles for the traits above
+start/     starting the installation service and the link
 shell.rs   the composition root; simulator/ the app without REAPER
 ```
 `testing/README.md` explains the testing folder; an architecture test (`testing_layout.rs`) keeps it in that shape. Put new fixtures in `testing/data/`, new manual scripts in `testing/scripts/`, and anything a workflow calls in `.github/scripts/`. The checks on a pull request have a target of 5 minutes and a limit of 10; longer runs belong in a nightly or manual job.

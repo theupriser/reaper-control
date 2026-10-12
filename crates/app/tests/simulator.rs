@@ -9,11 +9,11 @@ use app::Driver;
 use app::EventBus;
 use app::FakeClock;
 use app::FakeFaultCheck;
-use app::FakeProcessCheck;
 use app::HealthMonitor;
 use app::LinkViewSource;
 use app::QueueSettings;
 use app::{Simulator, sample_project};
+use installer::FakeProcessCheck;
 use protocol::{Command, LinkStatus, Phase, WireEvent};
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;

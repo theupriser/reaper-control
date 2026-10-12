@@ -2,7 +2,7 @@ use std::sync::Mutex;
 
 use crate::fake::FakeClock;
 use crate::fake::FakeFaultCheck;
-use crate::fake::FakeProcessCheck;
+use installer::FakeProcessCheck;
 
 use super::*;
 

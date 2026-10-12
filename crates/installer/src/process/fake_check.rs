@@ -2,7 +2,7 @@
 
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use crate::health::ProcessCheck;
+use crate::ProcessCheck;
 
 /// Answers whatever the test last set; REAPER is not running at first.
 #[derive(Debug, Default)]

@@ -4,7 +4,7 @@
 use std::path::Path;
 use std::process::Command;
 
-use crate::install::ExtensionPreparer;
+use crate::ExtensionPreparer;
 
 /// Prepares the extension for macOS.
 #[derive(Clone, Copy, Debug, Default)]

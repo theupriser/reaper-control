@@ -2,7 +2,7 @@
 
 use std::path::{Path, PathBuf};
 
-use crate::install::BinaryArchitecture;
+use crate::BinaryArchitecture;
 
 /// macOS on Apple Silicon or Windows on x64 (decision D8).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

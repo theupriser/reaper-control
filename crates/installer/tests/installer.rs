@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use app::{
+use installer::{
     BinaryArchitecture, ExtensionInstaller, ExtensionPreparer, FakeProcessCheck, InstallAction,
     InstallError, InstallItemKind, InstallPlatform, InstallStatus, InstallVerification,
     PlainExtensionPreparer, ReaperInstall, reaper_folder_argument,
@@ -427,7 +427,7 @@ fn on_macos_the_copy_is_signed_and_not_quarantined() -> TestResult {
         PLATFORM,
         library,
         Arc::new(FakeProcessCheck::default()),
-        Box::new(app::MacExtensionPreparer),
+        Box::new(installer::MacExtensionPreparer),
     );
     let install = ReaperInstall {
         resource_folder: resource,
@@ -452,7 +452,7 @@ fn on_macos_the_copy_is_signed_and_not_quarantined() -> TestResult {
 
 #[test]
 fn the_endpoint_file_follows_the_isolated_directory_then_the_chosen_reaper_then_the_default() {
-    use app::endpoint_file_from;
+    use installer::endpoint_file_from;
     let some = |text: &str| Some(PathBuf::from(text));
     assert_eq!(
         endpoint_file_from(some("/iso"), some("/portable"), some("/default")),

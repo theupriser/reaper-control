@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-use crate::install::BinaryArchitecture;
+use crate::BinaryArchitecture;
 
 /// Why an installation step did not happen.
 #[derive(Debug, thiserror::Error)]

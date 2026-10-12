@@ -1,6 +1,7 @@
 //! The pre-show checklist: every check fails on its own and the rest stay as they were (WP 6.7).
 
-use app::{AppConfig, check_list};
+use app::AppConfig;
+use installer::check_list;
 use protocol::{
     Catalog, CheckId, CheckStatus, ChecklistView, EntryInfo, InstallationView, LinkStatus,
     LinkView, SetlistInfo, Settings, SongInfo, WizardStep, WizardStepId, WizardStepStatus,

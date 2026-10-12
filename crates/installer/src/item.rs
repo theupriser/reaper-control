@@ -4,7 +4,7 @@ mod kind;
 
 pub use kind::InstallItemKind;
 
-use crate::install::InstallStatus;
+use crate::InstallStatus;
 
 /// One line of an installation report.
 #[derive(Clone, Debug, PartialEq, Eq)]

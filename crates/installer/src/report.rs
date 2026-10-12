@@ -2,9 +2,9 @@
 
 use std::fmt;
 
-use crate::install::InstallItem;
-use crate::install::InstallItemKind;
-use crate::install::InstallStatus;
+use crate::InstallItem;
+use crate::InstallItemKind;
+use crate::InstallStatus;
 
 /// What the installer found when it looked at a REAPER.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
