@@ -14,6 +14,7 @@ protocol.workspace = true
 link.workspace = true
 installer.workspace = true
 app-core.workspace = true
+midi.workspace = true
 performance.workspace = true
 reaper-port.workspace = true
 timer-loop.workspace = true
@@ -21,7 +22,6 @@ serde.workspace = true
 thiserror.workspace = true
 shared-kernel.workspace = true
 serde_json.workspace = true
-midir.workspace = true
 sysinfo.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
@@ -30,6 +30,8 @@ zip = { version = "8.6.0", default-features = false, features = ["deflate", "tim
 time = { version = "0.3", default-features = false, features = ["std"] }
 
 [dev-dependencies]
+# The midi test plays a virtual MIDI device.
+midir.workspace = true
 # Only for tests/size_audit.rs, which sizes every public type of the workspace.
 catalogue.workspace = true
 projections.workspace = true

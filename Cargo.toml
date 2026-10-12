@@ -10,6 +10,7 @@ members = [
   "crates/link",
   "crates/installer",
   "crates/app-core",
+  "crates/midi",
   "crates/reaper-port",
   "crates/timer-loop",
   "crates/reaper-extension",
@@ -42,6 +43,7 @@ protocol = { path = "crates/protocol" }
 link = { path = "crates/link" }
 installer = { path = "crates/installer" }
 app-core = { path = "crates/app-core" }
+midi = { path = "crates/midi" }
 reaper-port = { path = "crates/reaper-port" }
 timer-loop = { path = "crates/timer-loop" }
 

@@ -27,7 +27,7 @@ If code and docs disagree, stop and reconcile (fix the doc or the code, and say 
 
 ## Repository layout
 ```
-crates/                 one crate per bounded context; `installer` holds the extension install and the setup wizard checks, `app-core` the shared app types (commands and the bus, events, config, intents, clock) (see "Architecture" and "Code rules")
+crates/                 one crate per area; `crates/README.md` says what each crate does, what it may use and how it is laid out; `installer` holds the extension install and the setup wizard checks, `app-core` the shared app types (commands and the bus, events, config, intents, clock), `midi` the MIDI input (see "Architecture" and "Code rules")
 ui/                     Svelte 5 UI; copy in ui/src/lib/strings.ts, generated types in ui/src/lib/generated/
 testing/
   data/scenarios/       performance scenarios (JSON), read by the reaper-port tests
@@ -44,7 +44,6 @@ docs/, spikes/, .claude/  local only, git-ignored
 Where to look in `crates/app/src` (one folder per topic; a name with an underscore becomes a sub-folder, e.g. `input/midi/router.rs`; the crate root still re-exports the public API flat, so `app::Type` paths do not change):
 ```
 (command, event, config, intent and clock now live in the `app-core` crate, same folder names)
-input/     MIDI (listener, router, midir)
 legacy/    import of v1 config, setlists and journals
 mirror/    the restore-only mirror of setlists
 link/      the connection to the extension: session, pipeline, health, chaos proxy

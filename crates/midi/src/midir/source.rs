@@ -4,8 +4,8 @@ use std::sync::Arc;
 
 use midir::MidiInput;
 
-use crate::input::MidiRouter;
-use crate::input::{MidiConnection, MidiSource};
+use crate::MidiRouter;
+use crate::{MidiConnection, MidiSource};
 
 const CLIENT_NAME: &str = "Reaper Control";
 

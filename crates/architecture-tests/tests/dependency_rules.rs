@@ -60,6 +60,11 @@ const RULES: &[Rule] = &[
         must_not_use_external: HEAVY,
     },
     Rule {
+        krate: "midi",
+        may_use_workspace: &["app-core"],
+        must_not_use_external: HEAVY,
+    },
+    Rule {
         krate: "installer",
         may_use_workspace: &["protocol"],
         must_not_use_external: HEAVY,
@@ -106,6 +111,7 @@ const RULES: &[Rule] = &[
             "link",
             "installer",
             "app-core",
+            "midi",
             "reaper-port",
             "timer-loop",
         ],

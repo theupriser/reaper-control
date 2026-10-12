@@ -2,7 +2,6 @@
 
 mod fake;
 mod health;
-mod input;
 mod legacy;
 mod link;
 mod mirror;
@@ -58,21 +57,11 @@ pub use app_core::{
 pub use app_core::{link_problem, notice_for_event};
 pub use fake::FakeExtension;
 pub use fake::FakeFaultCheck;
-pub use fake::FakeMidiSource;
 pub use fake::FakeMirrorRepository;
 pub use fake::FakeStatsSource;
 pub use health::FaultCheck;
 pub use health::FaultFileCheck;
 pub use health::HealthMonitor;
-pub use input::MidiDebounce;
-pub use input::MidiDeviceFollower;
-pub use input::MidiListener;
-pub use input::MidiMessage;
-pub use input::MidiRouter;
-pub use input::MidiSwitch;
-pub use input::MidirAnchor;
-pub use input::MidirSource;
-pub use input::{MidiConnection, MidiSource};
 pub use legacy::ImportError;
 pub use legacy::JournalImport;
 pub use legacy::LegacyConfigFile;
@@ -90,6 +79,10 @@ pub use link::LinkSession;
 pub use link::LinkViewSource;
 pub use link::MessageTranslator;
 pub use link::apply_event;
+pub use midi::{
+    FakeMidiSource, MidiConnection, MidiDebounce, MidiDeviceFollower, MidiListener, MidiMessage,
+    MidiRouter, MidiSource, MidiSwitch, MidirAnchor, MidirSource,
+};
 pub use mirror::MirrorError;
 pub use mirror::MirrorFile;
 pub use mirror::MirrorKeeper;

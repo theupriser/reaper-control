@@ -2,9 +2,9 @@
 
 use std::sync::{Arc, Mutex};
 
-use crate::input::MidiListener;
-use crate::input::MidiRouter;
-use crate::input::MidiSource;
+use crate::MidiListener;
+use crate::MidiRouter;
+use crate::MidiSource;
 use app_core::Clock;
 use app_core::EventBus;
 use app_core::IntentDispatcher;

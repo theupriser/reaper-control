@@ -3,8 +3,8 @@
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use crate::input::MidiDebounce;
-use crate::input::MidiMessage;
+use crate::MidiDebounce;
+use crate::MidiMessage;
 use app_core::AppEvent;
 use app_core::Clock;
 use app_core::EventBus;

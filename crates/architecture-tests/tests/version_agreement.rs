@@ -25,7 +25,7 @@ fn workspace_version() -> Result<String, Box<dyn std::error::Error>> {
 fn every_crate_takes_the_workspace_version() -> TestResult {
     for entry in fs::read_dir(root().join("crates"))? {
         let directory = entry?.path();
-        if directory.ends_with("reaper-extension") {
+        if !directory.is_dir() || directory.ends_with("reaper-extension") {
             continue;
         }
         let manifest = directory.join("Cargo.toml");

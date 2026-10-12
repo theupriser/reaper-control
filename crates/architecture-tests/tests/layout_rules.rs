@@ -219,3 +219,20 @@ fn only_the_named_groups_are_public_modules() -> TestResult {
     );
     Ok(())
 }
+
+#[test]
+fn every_crate_is_described_in_the_crates_readme() -> TestResult {
+    let readme =
+        std::fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("../README.md"))?;
+    let missing: Vec<String> = crates()?
+        .iter()
+        .filter_map(|directory| directory.file_name()?.to_str().map(str::to_owned))
+        .filter(|name| !readme.contains(&format!("| `{name}` |")))
+        .collect();
+    assert!(
+        missing.is_empty(),
+        "crates/README.md has no table row for: {}",
+        missing.join(", ")
+    );
+    Ok(())
+}
