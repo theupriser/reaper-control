@@ -22,3 +22,6 @@ spikes/
 
 # Sample projects for trying things in REAPER, kept on the owner's machine only
 testing/projects/
+
+# Claude Code setup (agents, commands, settings), kept on the owner's machine only
+.claude/

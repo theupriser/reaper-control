@@ -15,7 +15,7 @@ A native REAPER extension runs the show inside REAPER. The app is a remote contr
 - **Setup wizard** that finds REAPER, installs the extension and waits until it is connected.
 - **Diagnostics**: logs, a journal of every performance event and an export for bug reports.
 
-The full list is in the [release notes](release-notes/v2.0.0.md).
+The full list is in the [release notes](.github/release-notes/v2.0.0.md).
 
 ## Install
 
