@@ -40,11 +40,6 @@ const RULES: &[Rule] = &[
         must_not_use_external: HEAVY,
     },
     Rule {
-        krate: "projections",
-        may_use_workspace: &["shared-kernel", "performance", "catalogue", "setlists"],
-        must_not_use_external: HEAVY,
-    },
-    Rule {
         krate: "protocol",
         may_use_workspace: &["shared-kernel"],
         must_not_use_external: HEAVY,
@@ -99,7 +94,6 @@ const RULES: &[Rule] = &[
             "performance",
             "catalogue",
             "setlists",
-            "projections",
             "protocol",
             "link",
             "reaper-port",

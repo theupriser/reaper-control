@@ -12,7 +12,6 @@ here too (a test checks that).
 | `performance` | The state machine that plays a setlist: hand-overs, hard stops, count-in. Pure: no I/O, no clock. | `shared-kernel` |
 | `catalogue` | Songs, cues and directives as found in the REAPER project. Pure. | `shared-kernel` |
 | `setlists` | Creating, editing and validating setlists. Pure. | `shared-kernel` |
-| `projections` | Read models the UI renders, built from the state of the crates above. | `shared-kernel`, `performance`, `catalogue`, `setlists` |
 | `protocol` | The wire protocol between the extension and the app, and the types the UI gets (also generated to TypeScript). | `shared-kernel` |
 | `link` | The loopback connection (server in the extension, client in the app): framing, handshake, event log. | `shared-kernel`, `protocol` |
 | `reaper-port` | The `ReaperPort` trait, the fake REAPER and the scenario runner. Everything REAPER-specific hides behind this trait. | `shared-kernel`, `performance` |
@@ -56,11 +55,10 @@ flowchart TD
     timer --> reaperport
     timer --> protocol
     timer --> performance
+    timer --> catalogue
+    timer --> setlists
     link --> protocol
     reaperport --> performance
-    projections --> performance
-    projections --> catalogue
-    projections --> setlists
 ```
 
 ## Folder structure
