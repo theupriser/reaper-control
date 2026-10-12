@@ -11,7 +11,7 @@ env:
 
 jobs:
   version:
-    name: Tag matches version
+    name: Tag matches version and notes exist
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,6 +21,13 @@ jobs:
           version=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -1)
           if [ "v$version" != "$GITHUB_REF_NAME" ]; then
             echo "tag $GITHUB_REF_NAME does not match Cargo.toml version $version" >&2
+            exit 1
+          fi
+      - name: The release notes exist
+        shell: bash
+        run: |
+          if [ ! -s ".github/release-notes/$GITHUB_REF_NAME.md" ]; then
+            echo ".github/release-notes/$GITHUB_REF_NAME.md is missing or empty; write it, merge it, then tag again" >&2
             exit 1
           fi
 
@@ -94,11 +101,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           {
-            if [ -f "release-notes/$GITHUB_REF_NAME.md" ]; then
-              cat "release-notes/$GITHUB_REF_NAME.md"
-            else
-              echo "No release notes were written for $GITHUB_REF_NAME."
-            fi
+            cat ".github/release-notes/$GITHUB_REF_NAME.md"
             echo
             echo "### Not code-signed"
             echo "On macOS right-click the app and choose Open the first time. On Windows SmartScreen will warn (More info, Run anyway)."

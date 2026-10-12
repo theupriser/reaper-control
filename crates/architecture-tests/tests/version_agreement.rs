@@ -88,5 +88,9 @@ fn the_release_workflow_checks_the_tag_against_the_version() -> TestResult {
         workflow.contains("needs: build"),
         "a release is only published after both builds pass"
     );
+    assert!(
+        workflow.contains("The release notes exist"),
+        "a release without notes must fail before the builds start"
+    );
     Ok(())
 }
