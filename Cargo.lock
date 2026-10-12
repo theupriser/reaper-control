@@ -86,6 +86,7 @@ dependencies = [
  "catalogue",
  "installer",
  "link",
+ "midi",
  "midir",
  "performance",
  "projections",
@@ -2094,6 +2095,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "488016bfae457b036d996092f6cb448677611ce4449e970ceaf42695203f218a"
 dependencies = [
  "autocfg",
+]
+
+[[package]]
+name = "midi"
+version = "2.0.0"
+dependencies = [
+ "app-core",
+ "midir",
+ "tracing",
 ]
 
 [[package]]

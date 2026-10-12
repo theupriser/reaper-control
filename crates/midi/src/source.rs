@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use crate::input::MidiRouter;
+use crate::MidiRouter;
 
 /// What keeps a device open; dropping it closes the device.
 pub type MidiConnection = Box<dyn Send>;

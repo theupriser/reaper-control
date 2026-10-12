@@ -3,8 +3,8 @@
 use std::collections::BTreeMap;
 use std::sync::{Arc, Mutex};
 
-use crate::input::MidiRouter;
-use crate::input::{MidiConnection, MidiSource};
+use crate::MidiRouter;
+use crate::{MidiConnection, MidiSource};
 
 /// For tests: a list of device names, and the routers of the devices that are open.
 #[derive(Debug, Default)]

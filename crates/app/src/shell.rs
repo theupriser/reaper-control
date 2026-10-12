@@ -12,10 +12,6 @@ use protocol::{
 
 use crate::health::FaultFileCheck;
 use crate::health::HealthMonitor;
-use crate::input::MidiSource;
-use crate::input::MidiSwitch;
-use crate::input::MidirAnchor;
-use crate::input::MidirSource;
 use crate::legacy::JournalImport;
 use crate::legacy::import_legacy_config;
 use crate::link::LinkViewSource;
@@ -54,6 +50,10 @@ use installer::ProcessCheck;
 use installer::SystemProcessCheck;
 use installer::check_list;
 use installer::{endpoint_file, extension_directory, fault_file};
+use midi::MidiSource;
+use midi::MidiSwitch;
+use midi::MidirAnchor;
+use midi::MidirSource;
 
 const VIEW_CHANGED: &str = "link-view";
 const NOTICE: &str = "notice";

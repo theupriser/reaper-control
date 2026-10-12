@@ -3,8 +3,8 @@
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
-use crate::input::MidiRouter;
-use crate::input::{MidiConnection, MidiSource};
+use crate::MidiRouter;
+use crate::{MidiConnection, MidiSource};
 use app_core::AppEvent;
 use app_core::EventBus;
 

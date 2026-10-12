@@ -5,9 +5,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread::JoinHandle;
 use std::time::Duration;
 
-use crate::input::MidiDeviceFollower;
-use crate::input::MidiRouter;
-use crate::input::MidiSource;
+use crate::MidiDeviceFollower;
+use crate::MidiRouter;
+use crate::MidiSource;
 use app_core::EventBus;
 
 /// `midir` reports no hotplug, so a thread looks at the device list every second. Dropping the
