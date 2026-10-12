@@ -3,16 +3,16 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use crate::health::ProcessCheck;
-use crate::install::ExtensionInstaller;
-use crate::install::ExtensionPreparer;
-use crate::install::InstallPlatform;
-use crate::install::InstallationService;
-use crate::install::MacExtensionPreparer;
-use crate::install::PlainExtensionPreparer;
-use crate::install::ReaperInstall;
-use crate::install::bundled_extension;
-use crate::install::reaper_folder_argument;
+use installer::ExtensionInstaller;
+use installer::ExtensionPreparer;
+use installer::InstallPlatform;
+use installer::InstallationService;
+use installer::MacExtensionPreparer;
+use installer::PlainExtensionPreparer;
+use installer::ProcessCheck;
+use installer::ReaperInstall;
+use installer::bundled_extension;
+use installer::reaper_folder_argument;
 
 /// The service for the REAPER named by `--reaper-folder`, else the normal one; `None` on a system
 /// the extension is not built for.

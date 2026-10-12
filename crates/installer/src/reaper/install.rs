@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-use crate::install::InstallPlatform;
+use crate::InstallPlatform;
 
 /// A REAPER resource folder, and the program that goes with it when it is known.
 #[derive(Clone, Debug, PartialEq, Eq)]

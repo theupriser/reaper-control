@@ -4,10 +4,10 @@ use std::sync::Arc;
 
 use protocol::{InstallationView, WizardStepStatus};
 
-use crate::health::ProcessCheck;
-use crate::install::ExtensionInstaller;
-use crate::install::ReaperInstall;
-use crate::install::wizard_step_list;
+use crate::ExtensionInstaller;
+use crate::ProcessCheck;
+use crate::ReaperInstall;
+use crate::wizard_step_list;
 
 /// Looks at one REAPER and installs the bundled extension into it.
 pub struct InstallationService {

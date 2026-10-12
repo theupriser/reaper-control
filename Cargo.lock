@@ -83,6 +83,7 @@ name = "app"
 version = "2.0.0"
 dependencies = [
  "catalogue",
+ "installer",
  "link",
  "midir",
  "performance",
@@ -1712,6 +1713,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4200d433cbd5178df7797c9c2e75b348b728e39631cf14520d1e2fc424201f4"
 dependencies = [
  "cfb",
+]
+
+[[package]]
+name = "installer"
+version = "2.0.0"
+dependencies = [
+ "protocol",
+ "thiserror 2.0.21",
 ]
 
 [[package]]

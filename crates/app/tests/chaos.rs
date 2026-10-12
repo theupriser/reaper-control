@@ -12,12 +12,12 @@ use app::EventBus;
 use app::FakeClock;
 use app::FakeExtension;
 use app::FakeFaultCheck;
-use app::FakeProcessCheck;
 use app::HealthMonitor;
 use app::LinkConnection;
 use app::LinkHealth;
 use app::LinkViewSource;
 use app::sample_project;
+use installer::FakeProcessCheck;
 use link::Endpoint;
 use protocol::{Command, LinkStatus, LinkView, Phase};
 

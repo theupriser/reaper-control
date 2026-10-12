@@ -1,7 +1,7 @@
 //! What an install would change; empty when the extension is already current. This is the
 //! dry-run result, and what `apply` carries out.
 
-use crate::install::InstallAction;
+use crate::InstallAction;
 
 /// The steps an install would take, in order.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]

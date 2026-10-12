@@ -2,9 +2,9 @@
 
 use protocol::{WizardStep, WizardStepId, WizardStepStatus};
 
-use crate::install::InstallItemKind;
-use crate::install::InstallReport;
-use crate::install::InstallStatus;
+use crate::InstallItemKind;
+use crate::InstallReport;
+use crate::InstallStatus;
 
 /// The steps for `report`, given whether REAPER runs and whether the extension has answered.
 #[must_use]

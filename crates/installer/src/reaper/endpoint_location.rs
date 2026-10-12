@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-use crate::install::reaper_folder_argument;
+use crate::reaper_folder_argument;
 
 /// Where the extension writes `endpoint.json`: `RC2_DIRECTORY` when set (an isolated REAPER),
 /// else the `RC2` folder of the REAPER named by `--reaper-folder <path>` (one shortcut per

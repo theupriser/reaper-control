@@ -8,10 +8,10 @@ use link::LinkEvent;
 use crate::event::AppEvent;
 use crate::event::EventBus;
 use crate::health::FaultCheck;
-use crate::health::ProcessCheck;
 use crate::link::LinkCause;
 use crate::link::LinkHealth;
 use crate::system::Clock;
+use installer::ProcessCheck;
 
 mod state;
 use state::State;

@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use crate::install::ExtensionPreparer;
+use crate::ExtensionPreparer;
 
 /// Does nothing to the copied file.
 #[derive(Clone, Copy, Debug, Default)]

@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use app::{
+use installer::{
     ExtensionInstaller, FakeProcessCheck, InstallPlatform, InstallationService,
     PlainExtensionPreparer, ReaperInstall,
 };

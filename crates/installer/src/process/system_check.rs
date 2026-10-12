@@ -2,7 +2,7 @@
 
 use std::process::Command;
 
-use crate::health::ProcessCheck;
+use crate::ProcessCheck;
 
 /// Asks the operating system with `pgrep` (macOS) or `tasklist` (Windows). When the question
 /// cannot be asked it answers "not running".
