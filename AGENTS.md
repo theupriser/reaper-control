@@ -56,6 +56,7 @@ fake/      test doubles for the traits above
 start/     starting the installation service and the link
 shell.rs   the composition root; simulator/ the app without REAPER
 ```
+Other crates follow the same shape: `protocol/src` groups its types by topic (`installation/`, `configuration/`, `link/`, `state/`, `song/`, `setlist/`; `frame/` and `message/` are the wire format), `performance/src` keeps the state machine at the top with `tempo/` and `song/` beside it.
 `testing/README.md` explains the testing folder; an architecture test (`testing_layout.rs`) keeps it in that shape. Put new fixtures in `testing/data/`, new manual scripts in `testing/scripts/`, and anything a workflow calls in `.github/scripts/`. The checks on a pull request have a target of 5 minutes and a limit of 10; longer runs belong in a nightly or manual job.
 
 ## Architecture in one screen

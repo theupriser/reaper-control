@@ -1,7 +1,7 @@
 use shared_kernel::Seconds;
 
 use crate::reaper_stop_bridge::ReaperStopBridge;
-use crate::song_at_playhead::song_at_playhead;
+use crate::song::song_at_playhead;
 use crate::{
     Effect, Event, Flag, Flags, HandOverPolicy, Input, Output, Phase, PlannedSong, Rejection,
 };
