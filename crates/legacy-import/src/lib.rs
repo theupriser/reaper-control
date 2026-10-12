@@ -1,4 +1,5 @@
-//! Legacy.
+//! Importing what v1 left behind: its config file, setlists and journal. Reads the old files and
+//! produces app-core and protocol values; writes only through the repositories it is given.
 
 mod config;
 mod error;

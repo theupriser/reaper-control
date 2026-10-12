@@ -5,8 +5,8 @@ use std::path::Path;
 use serde::Deserialize;
 use serde_json::Value;
 
-use crate::legacy::ImportError;
-use crate::legacy::LegacySetlist;
+use crate::ImportError;
+use crate::LegacySetlist;
 
 /// What a v1 setlist file holds.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]

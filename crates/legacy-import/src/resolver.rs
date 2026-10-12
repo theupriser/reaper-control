@@ -2,8 +2,8 @@
 
 use protocol::{EntryInfo, SetlistInfo, SongInfo};
 
-use crate::legacy::LegacySetlist;
-use crate::legacy::ResolvedSetlist;
+use crate::LegacySetlist;
+use crate::ResolvedSetlist;
 
 /// Finds the song for every item: first a song with the same name and region number, then one with
 /// the same name. When several songs share a name they are used in timeline order, one per item,

@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use crate::legacy::LegacyConfigFile;
+use crate::LegacyConfigFile;
 use app_core::AppConfig;
 use app_core::ConfigRepository;
 

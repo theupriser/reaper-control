@@ -2,7 +2,7 @@
 
 use protocol::SetlistInfo;
 
-use crate::legacy::LegacyItem;
+use crate::LegacyItem;
 
 /// The outcome of mapping one v1 setlist.
 #[derive(Debug, Clone, PartialEq)]
