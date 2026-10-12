@@ -1,0 +1,30 @@
+//! One line of an installation report.
+
+mod kind;
+
+pub use kind::InstallItemKind;
+
+use crate::install::InstallStatus;
+
+/// One line of an installation report.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct InstallItem {
+    /// What was checked.
+    pub kind: InstallItemKind,
+    /// How it stands.
+    pub status: InstallStatus,
+    /// Plain words for the user: what was found and, unless all is well, what to do.
+    pub advice: String,
+}
+
+impl InstallItem {
+    /// An item with its advice text.
+    #[must_use]
+    pub fn new(kind: InstallItemKind, status: InstallStatus, advice: impl Into<String>) -> Self {
+        Self {
+            kind,
+            status,
+            advice: advice.into(),
+        }
+    }
+}
