@@ -19,6 +19,7 @@ resource=$(mktemp -d "${RUNNER_TEMP:-/tmp}/reaper-smoke.XXXXXX")
 mkdir -p "$resource/UserPlugins"
 cp "$extension" "$resource/UserPlugins/$(basename "$extension")"
 cp testing/data/reaper/reaper.ini "$resource/reaper.ini"
+case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) cat testing/data/reaper/windows.ini >> "$resource/reaper.ini" ;; esac
 
 configuration=$resource/reaper.ini
 case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) configuration=$(cygpath -w "$configuration") ;; esac

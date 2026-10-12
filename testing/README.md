@@ -7,7 +7,7 @@ testing/
   README.md
   data/
     projects/    sample REAPER projects (markers and regions, no audio) for trying things by hand and for the soak scripts
-    reaper/      the starting config (reaper.ini) of the isolated REAPER: no VST scan, default audio device
+    reaper/      the starting config of the isolated REAPER: reaper.ini (no VST scan, default audio device, no save prompt) and windows.ini (Dummy Audio, added on Windows)
     scenarios/   performance scenarios (JSON), read by the reaper-port tests
     vectors/     protocol and marker test vectors (JSON), read by the protocol and catalogue tests
   scripts/       scripts that run against a real REAPER
