@@ -27,7 +27,7 @@ If code and docs disagree, stop and reconcile (fix the doc or the code, and say 
 
 ## Repository layout
 ```
-crates/                 one crate per bounded context; `installer` holds the extension install and the setup wizard checks, `app-core` the shared app types (commands and the bus, events, config, intents, clock), `midi` the MIDI input (see "Architecture" and "Code rules")
+crates/                 one crate per area; `crates/README.md` says what each crate does, what it may use and how it is laid out; `installer` holds the extension install and the setup wizard checks, `app-core` the shared app types (commands and the bus, events, config, intents, clock), `midi` the MIDI input (see "Architecture" and "Code rules")
 ui/                     Svelte 5 UI; copy in ui/src/lib/strings.ts, generated types in ui/src/lib/generated/
 testing/
   data/scenarios/       performance scenarios (JSON), read by the reaper-port tests
