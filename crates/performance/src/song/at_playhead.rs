@@ -5,7 +5,7 @@ use shared_kernel::Seconds;
 use crate::PlannedSong;
 
 /// REAPER snaps a seek to a sample, so a playhead sent to a song's start can read a hair before it.
-const START_TOLERANCE: f64 = 0.001;
+pub(crate) const START_TOLERANCE: f64 = 0.001;
 
 /// The song whose window holds `position`. Where windows overlap, the song that starts last wins
 /// (the playhead is in its region; a song with a custom length reaches into the next one), and
