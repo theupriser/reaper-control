@@ -7,18 +7,13 @@ mod flag;
 mod flags;
 mod hand_over_policy;
 mod input;
-mod invalid_tempo_map;
 mod output;
 mod performance;
 mod phase;
-mod planned_song;
 mod reaper_stop_bridge;
 mod rejection;
-mod song_at_playhead;
-mod song_window;
-mod tempo_map;
-mod tempo_segment;
-mod time_signature;
+mod song;
+mod tempo;
 
 pub use effect::Effect;
 pub use event::Event;
@@ -26,20 +21,18 @@ pub use flag::Flag;
 pub use flags::Flags;
 pub use hand_over_policy::HandOverPolicy;
 pub use input::Input;
-pub use invalid_tempo_map::InvalidTempoMap;
 pub use output::Output;
 pub use performance::Performance;
 pub use phase::Phase;
-pub use planned_song::PlannedSong;
 pub use rejection::Rejection;
-pub use song_window::SongWindow;
-pub use tempo_map::TempoMap;
-pub use tempo_segment::TempoSegment;
-pub use time_signature::TimeSignature;
+pub use song::PlannedSong;
+pub use song::SongWindow;
+pub use tempo::InvalidTempoMap;
+pub use tempo::TempoMap;
+pub use tempo::TempoSegment;
+pub use tempo::TimeSignature;
 
 #[cfg(test)]
 mod performance_properties;
-#[cfg(test)]
-mod tempo_map_tests;
 #[cfg(test)]
 mod tests;

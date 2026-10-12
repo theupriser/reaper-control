@@ -1,7 +1,8 @@
+mod level;
+
+pub use level::NoticeLevel;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
-
-use crate::NoticeLevel;
 
 /// A short message for the screen. A newer notice with the same `key` replaces the older one.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]

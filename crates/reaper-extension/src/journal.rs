@@ -12,13 +12,13 @@ const LARGEST_BYTES: u64 = 1_000_000;
 /// The hand-over journal (SPEC S-8): one line per event, written by the extension because the app
 /// may be gone during a show. The app reads it afterwards.
 #[derive(Debug)]
-pub struct Journal {
+pub(crate) struct Journal {
     log: Log,
 }
 
 impl Journal {
     /// A journal that appends to `path`; an oversized earlier journal is set aside first.
-    pub fn new(path: PathBuf) -> Self {
+    pub(crate) fn new(path: PathBuf) -> Self {
         if std::fs::metadata(&path).is_ok_and(|metadata| metadata.len() > LARGEST_BYTES) {
             let _ = std::fs::rename(&path, path.with_file_name("journal.previous.log"));
         }
@@ -28,7 +28,7 @@ impl Journal {
     }
 
     /// Appends one line: the wall clock in seconds and the event, as JSON.
-    pub fn record(&self, event: &WireEvent) {
+    pub(crate) fn record(&self, event: &WireEvent) {
         let seconds = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_or(0.0, |elapsed| elapsed.as_secs_f64());
