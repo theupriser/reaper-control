@@ -289,7 +289,6 @@ jobs:
           Shot "5-after-close"
           Write-Host "reaper still running: $(-not $reaper.HasExited)"
           Get-Process reaper -ErrorAction SilentlyContinue | Select-Object ProcessName, MainWindowTitle | Format-Table | Out-String | Write-Host
-          Get-Process reaper | Select-Object ProcessName, MainWindowTitle | Format-Table | Out-String | Write-Host
           Get-Content "$env:RUNNER_TEMP\cfg\reaper.ini" | Write-Host
       - uses: actions/upload-artifact@v4
         if: always()
