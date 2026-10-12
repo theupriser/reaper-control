@@ -55,7 +55,18 @@ report
 grep -q "started, version $version," "$resource/RC2/extension.log" || { echo "FAIL: the log does not name version $version"; exit 1; }
 echo "OK: extension $version started and is listening"
 
+# On a failure, show what is on the screen (a dialog that blocks REAPER, for instance).
+show_screen() {
+  echo "--- reaper.ini after the run"; cat "$resource/reaper.ini" 2>&1 || true
+  case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*)
+      powershell.exe -NoProfile -Command "Get-Process | Where-Object { \$_.MainWindowTitle } | Select-Object ProcessName, MainWindowTitle | Format-Table -AutoSize | Out-String -Width 200" 2>&1 || true
+      powershell.exe -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms,System.Drawing; \$b=[System.Windows.Forms.Screen]::PrimaryScreen.Bounds; \$i=New-Object System.Drawing.Bitmap \$b.Width,\$b.Height; [System.Drawing.Graphics]::FromImage(\$i).CopyFromScreen(\$b.Location,[System.Drawing.Point]::Empty,\$b.Size); \$i.Save('$(cygpath -w "$PWD")\\screen.png')" 2>&1 || true ;;
+    Darwin) screencapture -x "$PWD/screen.png" 2>&1 || true ;;
+  esac
+}
+
 for check in "$@"; do
   echo "== $check"
-  REAPER_RESOURCE=$resource "$check"
+  REAPER_RESOURCE=$resource "$check" || { show_screen; exit 1; }
 done

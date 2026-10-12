@@ -189,3 +189,9 @@ jobs:
           testing/scripts/soak_short_project.sh "$PWD/soak-short.rpp"
           SMOKE_PROJECT="$PWD/soak-short.rpp" testing/scripts/smoke_extension.sh "$REAPER_EXECUTABLE" "$extension" \
             testing/scripts/security_check.sh testing/scripts/soak_short.sh
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: reaper-smoke-screen-${{ matrix.os }}
+          path: screen.png
+          if-no-files-found: ignore
