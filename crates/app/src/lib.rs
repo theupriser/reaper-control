@@ -20,6 +20,8 @@ pub use app_core::CommandRefusal;
 pub use app_core::ConfigError;
 pub use app_core::ConfigRepository;
 pub use app_core::ConfigStore;
+pub use app_core::ControlBinding;
+pub use app_core::ControlSource;
 pub use app_core::DispatchError;
 pub use app_core::Driver;
 pub use app_core::DriverError;

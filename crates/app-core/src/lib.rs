@@ -4,6 +4,7 @@
 mod clock;
 mod command;
 mod config;
+mod control;
 mod event;
 mod fake;
 mod intent;
@@ -20,6 +21,7 @@ pub use config::{
     config_file, diagnostics_directory, legacy_config_file, legacy_setlists_directory,
     log_directory, migrate, mirror_directory,
 };
+pub use control::{ControlBinding, ControlSource};
 pub use event::{AppEvent, AppFault, EventBus, link_problem, log_event, notice_for_event};
 pub use fake::{FakeClock, FakeConfigRepository, FakeDriver};
 pub use intent::{Intent, IntentDispatcher, IntentError, IntentRefusal, IntentTranslator};

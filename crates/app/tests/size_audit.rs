@@ -81,6 +81,8 @@ fn all_sizes() -> Vec<(String, usize)> {
         app::FaultFileCheck,
         app::HealthMonitor,
         app::ImportError,
+        app::ControlBinding,
+        app::ControlSource,
         app::IntentDispatcher,
         app::IntentError,
         app::IntentRefusal,

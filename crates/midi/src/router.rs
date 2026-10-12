@@ -7,6 +7,8 @@ use crate::MidiDebounce;
 use crate::MidiMessage;
 use app_core::AppEvent;
 use app_core::Clock;
+use app_core::ControlBinding;
+use app_core::ControlSource;
 use app_core::EventBus;
 use app_core::IntentDispatcher;
 use app_core::MidiConfig;
@@ -14,7 +16,8 @@ use app_core::MidiConfig;
 /// Turns what MIDI devices send into commands: channel filter, global debounce, note mapping,
 /// then the one `IntentDispatcher` every other controller uses.
 pub struct MidiRouter {
-    config: MidiConfig,
+    channel: Option<u8>,
+    bindings: Vec<ControlBinding>,
     intents: Arc<IntentDispatcher>,
     events: Arc<EventBus>,
     clock: Arc<dyn Clock>,
@@ -33,7 +36,8 @@ impl MidiRouter {
     ) -> Self {
         let debounce = MidiDebounce::new(Duration::from_millis(config.debounce_milliseconds));
         Self {
-            config,
+            bindings: config.bindings(),
+            channel: config.channel,
             intents,
             events,
             clock,
@@ -53,7 +57,7 @@ impl MidiRouter {
         else {
             return;
         };
-        if velocity == 0 || self.config.channel.is_some_and(|only| only != channel) {
+        if velocity == 0 || self.channel.is_some_and(|only| only != channel) {
             return;
         }
         self.events.publish(&AppEvent::MidiActivity {
@@ -61,7 +65,9 @@ impl MidiRouter {
             note,
             velocity,
         });
-        let Some(intent) = self.config.notes.get(&note) else {
+        let Some(intent) =
+            ControlBinding::intent_for(&self.bindings, ControlSource::MidiNote { note })
+        else {
             return;
         };
         // The debounce holds nothing that a panic could leave half done, so a poisoned lock is used as is.
@@ -72,7 +78,7 @@ impl MidiRouter {
             .allows(note, self.clock.now());
         if counts {
             // The bus and the dispatcher announce a refusal on the event bus; a note has nobody to return it to.
-            let _ = self.intents.dispatch(*intent);
+            let _ = self.intents.dispatch(intent);
         }
     }
 }
