@@ -9,16 +9,18 @@ type TestResult = Result<(), Box<dyn std::error::Error>>;
 /// Files and folders that end in "s" on purpose: they are named after the type, function or
 /// constant they hold (`Directives`, `plan_songs`, `Seconds`), or they hold test cases.
 const PLURAL_ALLOWED: &[&str] = &[
-    "chaos_settings",
+    "bus",
+    "chaos",
+    "diagnostics",
+    "latency_stats",
+    "process",
+    "stats",
+    "status",
     "check_status",
-    "command_bus",
     "directives",
-    "event_bus",
     "flags",
     "freshness",
     "incoming_commands",
-    "install_status",
-    "latency_stats",
     "link_status",
     "missing_functions",
     "performance_properties",

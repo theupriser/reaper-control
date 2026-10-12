@@ -1,0 +1,44 @@
+//! A recording driver for tests.
+
+use std::sync::Mutex;
+
+use protocol::Command;
+
+use crate::command::Driver;
+use crate::command::DriverError;
+
+/// A driver that records commands, for tests; it can be told to be disconnected.
+#[derive(Debug, Default)]
+pub struct FakeDriver {
+    sent: Mutex<Vec<Command>>,
+    disconnected: Mutex<bool>,
+}
+
+impl FakeDriver {
+    /// Makes every following `send` fail (or work again).
+    pub fn set_disconnected(&self, disconnected: bool) {
+        if let Ok(mut flag) = self.disconnected.lock() {
+            *flag = disconnected;
+        }
+    }
+
+    /// The commands sent so far, oldest first.
+    #[must_use]
+    pub fn sent(&self) -> Vec<Command> {
+        self.sent
+            .lock()
+            .map(|sent| sent.clone())
+            .unwrap_or_default()
+    }
+}
+
+impl Driver for FakeDriver {
+    fn send(&self, command: Command) -> Result<u64, DriverError> {
+        if self.disconnected.lock().is_ok_and(|flag| *flag) {
+            return Err(DriverError::NotConnected);
+        }
+        let mut sent = self.sent.lock().map_err(|_| DriverError::NotConnected)?;
+        sent.push(command);
+        Ok(sent.len() as u64)
+    }
+}

@@ -7,7 +7,7 @@ use reaper_port::FakeReaper;
 use shared_kernel::Seconds;
 use timer_loop::TimerLoop;
 
-use crate::link_pipeline::LinkPipeline;
+use crate::link::LinkPipeline;
 
 /// The simulated REAPER moves in steps of this many seconds, like the extension's timer.
 pub(super) const STEP_SECONDS: f64 = 0.05;
