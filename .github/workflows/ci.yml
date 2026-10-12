@@ -211,13 +211,33 @@ jobs:
         run: |
           Add-Type -AssemblyName System.Windows.Forms,System.Drawing
           Add-Type @"
-          using System; using System.Runtime.InteropServices; using System.Text;
+          using System; using System.Collections.Generic; using System.Runtime.InteropServices; using System.Text;
           public class W {
-            [DllImport("user32.dll")] public static extern IntPtr FindWindow(string c, string t);
-            [DllImport("user32.dll")] public static extern IntPtr FindWindowEx(IntPtr p, IntPtr a, string c, string t);
-            [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr h, int m, IntPtr w, IntPtr l);
-            [DllImport("user32.dll", CharSet=CharSet.Auto)] public static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
-            [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+            public delegate bool EnumProc(IntPtr h, IntPtr l);
+            [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc p, IntPtr l);
+            [DllImport("user32.dll")] static extern bool EnumChildWindows(IntPtr h, EnumProc p, IntPtr l);
+            [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+            [DllImport("user32.dll", CharSet=CharSet.Auto)] static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
+            [DllImport("user32.dll", CharSet=CharSet.Auto)] static extern int GetClassName(IntPtr h, StringBuilder s, int n);
+            [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
+            [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr h, int m, IntPtr w, IntPtr l);
+            static string Text(IntPtr h) { var s = new StringBuilder(256); GetWindowText(h, s, 256); return s.ToString(); }
+            static string Class(IntPtr h) { var s = new StringBuilder(256); GetClassName(h, s, 256); return s.ToString(); }
+            public static string Click(uint pid, string label) {
+              var report = new List<string>(); IntPtr target = IntPtr.Zero;
+              EnumWindows((h, l) => {
+                uint p; GetWindowThreadProcessId(h, out p);
+                if (p != pid || !IsWindowVisible(h)) return true;
+                report.Add("window '" + Text(h) + "' class " + Class(h));
+                EnumChildWindows(h, (c, m) => {
+                  var t = Text(c).Replace("&", "");
+                  if (Class(c) == "Button") report.Add("   button '" + t + "'");
+                  if (Class(c) == "Button" && t == label) target = c;
+                  return true; }, IntPtr.Zero);
+                return true; }, IntPtr.Zero);
+              if (target != IntPtr.Zero) { SendMessage(target, 0xF5, IntPtr.Zero, IntPtr.Zero); report.Add("clicked " + label); }
+              return string.Join("\n", report);
+            }
           }
           "@
           function Shot($name) {
@@ -226,23 +246,12 @@ jobs:
             [System.Drawing.Graphics]::FromImage($i).CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
             $i.Save("$PWD\$name.png")
           }
-          function ClickButton($title, $label) {
-            $dialog = [W]::FindWindow($null, $title)
-            if ($dialog -eq [IntPtr]::Zero) { Write-Host "no window $title"; return }
-            $child = [IntPtr]::Zero
-            while (($child = [W]::FindWindowEx($dialog, $child, "Button", $null)) -ne [IntPtr]::Zero) {
-              $text = New-Object System.Text.StringBuilder 64
-              [void][W]::GetWindowText($child, $text, 64)
-              Write-Host "button: $($text.ToString())"
-              if ($text.ToString().Replace("&", "") -eq $label) { [void][W]::SendMessage($child, 0xF5, [IntPtr]::Zero, [IntPtr]::Zero); return }
-            }
-          }
           New-Item -ItemType Directory -Force "$env:RUNNER_TEMP\cfg" | Out-Null
           "[reaper]`nvst_scan=2`nundomaxmem=0`n" | Out-File -Encoding ascii "$env:RUNNER_TEMP\cfg\reaper.ini"
           Start-Process "$env:RUNNER_TEMP\REAPER\reaper.exe" -ArgumentList "-cfgfile", "$env:RUNNER_TEMP\cfg\reaper.ini", "-newinst", "-nosplash"
           Start-Sleep 15
           Shot "1-start"
-          ClickButton "REAPER" "Yes"
+          Write-Host ([W]::Click([uint32]$reaper.Id, "Yes"))
           Start-Sleep 4
           Shot "2-after-yes"
           Get-Process reaper | Select-Object ProcessName, MainWindowTitle | Format-Table | Out-String | Write-Host
