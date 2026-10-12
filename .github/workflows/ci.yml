@@ -167,7 +167,8 @@ jobs:
         shell: bash
         run: |
           curl -fsSL -o "$RUNNER_TEMP/reaper.dmg" https://www.reaper.fm/files/7.x/reaper782_universal.dmg
-          hdiutil attach "$RUNNER_TEMP/reaper.dmg" -nobrowse -mountpoint "$RUNNER_TEMP/reaper-volume"
+          # the dmg opens with REAPER's licence agreement; installing it means accepting that
+          echo Y | hdiutil attach "$RUNNER_TEMP/reaper.dmg" -nobrowse -mountpoint "$RUNNER_TEMP/reaper-volume" > /dev/null
           cp -R "$RUNNER_TEMP/reaper-volume/REAPER.app" "$RUNNER_TEMP/REAPER.app"
           hdiutil detach "$RUNNER_TEMP/reaper-volume"
           echo "REAPER_EXECUTABLE=$RUNNER_TEMP/REAPER.app/Contents/MacOS/REAPER" >> "$GITHUB_ENV"
@@ -181,5 +182,6 @@ jobs:
       - name: The extension starts and listens inside REAPER
         shell: bash
         run: |
-          extension=$(ls dist/reaper_rc2-*.dylib dist/reaper_rc2-*.dll 2>/dev/null | head -1)
+          extension=$(ls dist/reaper_rc2-*.dylib dist/reaper_rc2-*.dll 2>/dev/null | head -1 || true)
+          [ -n "$extension" ] || { echo "no packaged extension in dist/"; exit 1; }
           testing/scripts/smoke_extension.sh "$REAPER_EXECUTABLE" "$extension"
