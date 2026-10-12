@@ -55,11 +55,10 @@ flowchart TD
     timer --> reaperport
     timer --> protocol
     timer --> performance
+    timer --> catalogue
+    timer --> setlists
     link --> protocol
     reaperport --> performance
-    projections --> performance
-    projections --> catalogue
-    projections --> setlists
 ```
 
 ## Folder structure
