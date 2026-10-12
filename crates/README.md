@@ -17,7 +17,7 @@ here too (a test checks that).
 | `reaper-port` | The `ReaperPort` trait, the fake REAPER and the scenario runner. Everything REAPER-specific hides behind this trait. | `shared-kernel`, `performance` |
 | `timer-loop` | One step of REAPER's timer, generic over the port: runs a performance, publishes state, takes commands. | the domain crates, `protocol`, `link`, `reaper-port` |
 | `reaper-extension` | The native extension REAPER loads: plugin entry, panic guard, safe mode, journal, the bridge to `link`. | the domain crates, `protocol`, `link`, `reaper-port`, `timer-loop` |
-| `app-core` | What the app shares: commands and their bus, app events, configuration, intents, the clock, and fakes for them. No Tauri, no devices. | `performance`, `protocol` |
+| `app-core` | What the app shares: commands and their bus, control bindings, app events, configuration, intents, the clock, and fakes for them. No Tauri, no devices. | `performance`, `protocol` |
 | `midi` | MIDI input: device list and hot-plug, listener, debounce, router to intents. | `app-core` |
 | `legacy-import` | Importing what v1 left behind: its config, setlists and journal. | `app-core`, `protocol` |
 | `installer` | Installing the extension: plan, items, wizard checks, bundled extension location, process check. | `protocol` |
@@ -67,7 +67,7 @@ flowchart TD
 Every crate keeps the same shape (`layout_rules.rs`): one type per file, `x.rs` next to a folder
 `x/` for a type with helpers, singular `lower_snake_case` names, no `mod.rs`.
 
-- `app-core/src`: `command/` (bus, queue, checks, driver), `event/`, `config/`, `intent/`, `clock/`, `link/` (cause, health), `fake/`.
+- `app-core/src`: `command/` (bus, queue, checks, driver), `control/` (what a control is bound to), `event/`, `config/`, `intent/`, `clock/`, `link/` (cause, health), `fake/`.
 - `app/src`: `link/` (session, pipeline, chaos proxy), `health/`, `mirror/`, `system/` (logging, diagnostics, stats, shutdown), `start/`, `simulator/`, `fake/`, `shell.rs`.
 - `protocol/src`: `installation/`, `configuration/`, `link/`, `state/`, `song/`, `setlist/`, plus `frame/` and `message/` (the wire format) and `command.rs`.
 - `performance/src`: the state machine files at the top; `tempo/` and `song/` beside them.

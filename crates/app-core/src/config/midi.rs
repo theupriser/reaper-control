@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
+use crate::control::{ControlBinding, ControlSource};
 use crate::intent::Intent;
 
 /// MIDI input settings; missing fields take the defaults v1 had.
@@ -44,6 +45,18 @@ impl Default for MidiConfig {
 }
 
 impl MidiConfig {
+    /// The notes as bindings, the form every controller's presses are looked up in.
+    #[must_use]
+    pub fn bindings(&self) -> Vec<ControlBinding> {
+        self.notes
+            .iter()
+            .map(|(note, intent)| ControlBinding {
+                source: ControlSource::MidiNote { note: *note },
+                intent: *intent,
+            })
+            .collect()
+    }
+
     /// The first value outside its allowed range, as a message.
     #[must_use]
     pub fn problem(&self) -> Option<String> {
