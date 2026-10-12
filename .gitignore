@@ -19,3 +19,6 @@ crates/protocol/fuzz/artifacts/
 # Working documents and spikes, kept on the owner's machine only
 docs/
 spikes/
+
+# Claude Code setup (agents, commands, settings), kept on the owner's machine only
+.claude/
