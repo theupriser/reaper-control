@@ -284,6 +284,11 @@ jobs:
           Write-Host ([W]::Click([uint32]$reaper.Id, "OK"))
           Start-Sleep 4
           Shot "4-after-ok"
+          $reaper.CloseMainWindow() | Out-Null
+          Start-Sleep 5
+          Shot "5-after-close"
+          Write-Host "reaper still running: $(-not $reaper.HasExited)"
+          Get-Process reaper -ErrorAction SilentlyContinue | Select-Object ProcessName, MainWindowTitle | Format-Table | Out-String | Write-Host
           Get-Process reaper | Select-Object ProcessName, MainWindowTitle | Format-Table | Out-String | Write-Host
           Get-Content "$env:RUNNER_TEMP\cfg\reaper.ini" | Write-Host
       - uses: actions/upload-artifact@v4
