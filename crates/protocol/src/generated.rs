@@ -9,9 +9,9 @@ use ts_rs::{Config, TS};
 use crate::{
     ActionChoice, AppearanceChoice, Catalog, CheckId, CheckItem, CheckStatus, ChecklistView,
     Command, CueInfo, EntryInfo, EventRecord, ImportOffer, InstallationView, LinkProblem,
-    LinkStatus, LinkView, Live, NoteMapping, Notice, NoticeLevel, Phase, SetlistInfo,
-    SetlistTransferView, Setting, Settings, SettingsView, SongInfo, SystemStats, Transport,
-    WireEvent, WizardStep, WizardStepId, WizardStepStatus,
+    LinkStatus, LinkView, Live, MarkerReading, NoteMapping, Notice, NoticeLevel, Phase,
+    SetlistInfo, SetlistTransferView, Setting, Settings, SettingsView, SongInfo, SystemStats,
+    Transport, WireEvent, WizardStep, WizardStepId, WizardStepStatus,
 };
 
 const HEADER: &str =
@@ -46,6 +46,7 @@ fn render() -> Result<String, ts_rs::ExportError> {
         ImportOffer::export_to_string(&config)?,
         SetlistTransferView::export_to_string(&config)?,
         SystemStats::export_to_string(&config)?,
+        MarkerReading::export_to_string(&config)?,
         WizardStepId::export_to_string(&config)?,
         WizardStepStatus::export_to_string(&config)?,
         WizardStep::export_to_string(&config)?,

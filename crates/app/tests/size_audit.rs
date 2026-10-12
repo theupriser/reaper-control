@@ -197,6 +197,7 @@ fn all_sizes() -> Vec<(String, usize)> {
         protocol::Setting,
         protocol::SettingsView,
         protocol::Settings,
+        protocol::MarkerReading,
         protocol::SongInfo,
         protocol::SystemStats,
         protocol::Transport,

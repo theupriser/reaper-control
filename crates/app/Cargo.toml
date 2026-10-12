@@ -11,6 +11,7 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 tauri = { version = "2", features = [] }
 protocol.workspace = true
+catalogue.workspace = true
 link.workspace = true
 installer.workspace = true
 app-core.workspace = true
@@ -34,7 +35,6 @@ time = { version = "0.3", default-features = false, features = ["std"] }
 # The midi test plays a virtual MIDI device.
 midir.workspace = true
 # Only for tests/size_audit.rs, which sizes every public type of the workspace.
-catalogue.workspace = true
 setlists.workspace = true
 
 [features]

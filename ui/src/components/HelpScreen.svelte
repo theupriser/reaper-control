@@ -1,5 +1,6 @@
 <script lang="ts">
   import HelpSection from "./HelpSection.svelte";
+  import MarkerHelper from "./MarkerHelper.svelte";
   import { strings } from "../lib/strings";
 
   const text = strings.help;
@@ -17,6 +18,7 @@
     <p class="intro">{text.intro}</p>
     {#each text.sections as section (section.id)}
       <HelpSection {...section} />
+      {#if section.id === "markers"}<MarkerHelper />{/if}
     {/each}
   </div>
 </section>

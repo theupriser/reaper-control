@@ -6,13 +6,14 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use protocol::{
-    ChecklistView, Command, InstallationView, LinkProblem, LinkStatus, LinkView,
+    ChecklistView, Command, InstallationView, LinkProblem, LinkStatus, LinkView, MarkerReading,
     SetlistTransferView, Settings, SettingsView, SystemStats,
 };
 
 use crate::health::FaultFileCheck;
 use crate::health::HealthMonitor;
 use crate::link::LinkViewSource;
+use crate::marker::read_marker_name;
 use crate::mirror::MirrorKeeper;
 use crate::mirror::MirrorRepository;
 use crate::mirror::SetlistMirror;
@@ -91,6 +92,11 @@ fn current_problem(
 fn current_system_stats(stats: State<'_, Arc<SystemStatsService>>) -> SystemStats {
     stats.refresh();
     stats.latest()
+}
+
+#[tauri::command]
+fn marker_reading(name: String) -> MarkerReading {
+    read_marker_name(&name)
 }
 
 #[tauri::command]
@@ -338,6 +344,7 @@ pub fn run() {
             current_view,
             current_problem,
             current_system_stats,
+            marker_reading,
             current_settings,
             current_installation,
             install_extension,
