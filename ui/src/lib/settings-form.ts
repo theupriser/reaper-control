@@ -17,6 +17,7 @@ export interface SettingsDraft {
   debounce: string;
   notes: NoteRow[];
   logLevel: string;
+  closeWithReaper: boolean;
   theme: string;
   density: string;
   touch: string;
@@ -36,6 +37,7 @@ export const toDraft = (settings: Settings): SettingsDraft => ({
   debounce: String(settings.midi_debounce_milliseconds),
   notes: settings.midi_notes.map((mapping) => ({ note: String(mapping.note), action: mapping.action })),
   logLevel: settings.log_level,
+  closeWithReaper: settings.close_with_reaper,
   theme: settings.appearance.theme,
   density: settings.appearance.density,
   touch: settings.appearance.touch,
@@ -83,6 +85,7 @@ export function toSettings(draft: SettingsDraft): Settings | string {
     midi_debounce_milliseconds: debounce as number,
     midi_notes: notes as NoteMapping[],
     log_level: draft.logLevel,
+    close_with_reaper: draft.closeWithReaper,
     appearance: { theme: draft.theme, density: draft.density, touch: draft.touch },
   };
 }

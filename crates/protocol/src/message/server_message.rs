@@ -42,4 +42,7 @@ pub enum ServerMessage {
     },
     /// Answer to a Ping.
     Pong,
+    /// REAPER is quitting cleanly and the link goes away with it. Sent once, last; a crash or a
+    /// kill never sends it.
+    Closing,
 }

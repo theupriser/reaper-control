@@ -416,6 +416,10 @@ midi_notes: Array<NoteMapping>,
  */
 log_level: string, 
 /**
+ * Whether the app closes itself when REAPER quits cleanly. Applies at once.
+ */
+close_with_reaper: boolean, 
+/**
  * Theme, density and touch size. Applies at once.
  */
 appearance: AppearanceChoice, };

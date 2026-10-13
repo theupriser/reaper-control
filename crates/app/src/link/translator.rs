@@ -36,6 +36,7 @@ impl MessageTranslator {
             | LinkEvent::Catalog(_)
             | LinkEvent::Outdated { .. }
             | LinkEvent::Quiet
+            | LinkEvent::Closing
             | LinkEvent::Recovered => None,
         }
     }

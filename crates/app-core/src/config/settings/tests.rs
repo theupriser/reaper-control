@@ -1,3 +1,4 @@
+use std::sync::atomic::AtomicBool;
 use std::time::Duration;
 
 use protocol::{Command, NoteMapping};
@@ -15,6 +16,7 @@ struct Rig {
     clock: Arc<FakeClock>,
     bus: Arc<CommandBus>,
     service: SettingsService,
+    close_with_reaper: Arc<AtomicBool>,
 }
 
 fn rig(name: &str) -> Rig {
@@ -29,11 +31,13 @@ fn rig(name: &str) -> Rig {
         clock.clone(),
         QueueSettings::default(),
     ));
+    let close_with_reaper = Arc::new(AtomicBool::new(false));
     let service = SettingsService::new(
         Arc::new(ConfigStore::new(directory.join("config.json"))),
         AppConfig::default(),
         bus.clone(),
         Arc::new(|_| {}),
+        close_with_reaper.clone(),
     );
     Rig {
         directory,
@@ -41,6 +45,7 @@ fn rig(name: &str) -> Rig {
         clock,
         bus,
         service,
+        close_with_reaper,
     }
 }
 
@@ -209,6 +214,7 @@ fn a_refused_write_changes_neither_the_values_nor_the_queue() {
         AppConfig::default(),
         bus,
         Arc::new(|_| {}),
+        Arc::default(),
     );
     let mut settings = service.view(Vec::new()).settings;
     settings.queue_capacity = 10;
@@ -241,6 +247,7 @@ fn only_a_change_in_the_midi_settings_is_passed_on() -> Result<(), ConfigError> 
                 told.push(midi.clone());
             }
         }),
+        Arc::default(),
     );
     let mut settings = service.view(Vec::new()).settings;
     settings.queue_capacity = 10;
@@ -251,5 +258,20 @@ fn only_a_change_in_the_midi_settings_is_passed_on() -> Result<(), ConfigError> 
     let told = told.lock().map(|told| told.clone()).unwrap_or_default();
     assert_eq!(told.len(), 1);
     assert_eq!(told.first().and_then(|midi| midi.channel), Some(3));
+    Ok(())
+}
+
+#[test]
+fn closing_with_reaper_is_off_until_chosen_and_applies_at_once() -> Result<(), ConfigError> {
+    let rig = rig("close-with-reaper");
+    let mut settings = rig.service.view(Vec::new()).settings;
+    assert!(!settings.close_with_reaper);
+    settings.close_with_reaper = true;
+    rig.service.save(&settings)?;
+    assert!(rig.service.view(Vec::new()).settings.close_with_reaper);
+    assert!(
+        rig.close_with_reaper
+            .load(std::sync::atomic::Ordering::Relaxed)
+    );
     Ok(())
 }

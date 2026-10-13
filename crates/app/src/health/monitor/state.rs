@@ -7,4 +7,5 @@ pub(super) struct State {
     pub(super) health: LinkHealth,
     pub(super) lost_since: Duration,
     pub(super) last_process_check: Option<Duration>,
+    pub(super) closing: bool,
 }

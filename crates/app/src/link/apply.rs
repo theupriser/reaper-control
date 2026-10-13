@@ -32,6 +32,7 @@ pub fn apply_event(view: LinkView, event: LinkEvent) -> LinkView {
         | LinkEvent::EventsLost { .. }
         | LinkEvent::Outdated { .. }
         | LinkEvent::Quiet
+        | LinkEvent::Closing
         | LinkEvent::Recovered => view,
     }
 }

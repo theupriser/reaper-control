@@ -52,3 +52,16 @@ test("a person picks a light theme and large touch targets and they apply at onc
   expect(saved[0].appearance).toEqual({ theme: "light", density: "comfortable", touch: "large" });
   await page.screenshot({ path: "perf-results/appearance.png" });
 });
+
+test("closing with REAPER is off until a person switches it on and saves", async ({ page }) => {
+  await page.addInitScript(tauriStandIn, view);
+  await page.goto("/");
+  await page.getByRole("navigation").getByRole("button", { name: "Settings" }).click();
+  const choice = page.getByRole("switch", { name: "Close Reaper Control when REAPER quits" });
+  await expect(choice).not.toBeChecked();
+  await choice.click();
+  await page.screenshot({ path: "perf-results/settings-close-with-reaper.png" });
+  await page.getByRole("button", { name: "Save" }).click();
+  const saved = await page.evaluate(() => (window as any).__saved);
+  expect(saved[0].close_with_reaper).toBe(true);
+});

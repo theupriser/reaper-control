@@ -2,6 +2,7 @@
 
 use tauri::{Emitter, Manager, State};
 
+use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -10,6 +11,7 @@ use protocol::{
     SetlistTransferView, Settings, SettingsView, SystemStats,
 };
 
+use crate::health::CloseWithReaper;
 use crate::health::FaultFileCheck;
 use crate::health::HealthMonitor;
 use crate::link::LinkViewSource;
@@ -61,7 +63,7 @@ const NOTICE: &str = "notice";
 const LINK_PROBLEM: &str = "link-problem";
 /// The version of the extension that ships with this app (kept equal to the extension's own
 /// version by an architecture test).
-const BUNDLED_EXTENSION_VERSION: &str = "1.0.7";
+const BUNDLED_EXTENSION_VERSION: &str = "1.0.8";
 const UNSUPPORTED_SYSTEM: &str = "the extension is not built for this system";
 
 #[tauri::command]
@@ -293,6 +295,20 @@ pub fn run() {
                     fault_file().ok_or("the home folder is unknown")?,
                 )),
             ));
+            let close_with_reaper = Arc::new(AtomicBool::new(config.close_with_reaper));
+            let closer = CloseWithReaper::new(
+                close_with_reaper.clone(),
+                health.clone(),
+                Box::new({
+                    let handle = handle.clone();
+                    move || handle.exit(0)
+                }),
+            );
+            events.subscribe(move |event| {
+                if let AppEvent::LinkHealthChanged { health } = event {
+                    closer.observe(health);
+                }
+            });
             let mirror: Arc<dyn MirrorRepository> = Arc::new(SetlistMirror::new(
                 mirror_directory().ok_or("the home folder is unknown")?,
             ));
@@ -335,6 +351,7 @@ pub fn run() {
                 config.clone(),
                 bus.clone(),
                 Arc::new(move |changed| midi.apply(changed)),
+                close_with_reaper,
             )));
             app.manage(Arc::new(SetlistTransfer::new(
                 mirror,

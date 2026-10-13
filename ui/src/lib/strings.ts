@@ -85,6 +85,12 @@ export const strings = {
     needsReaper: "Connect to REAPER to change this.",
   },
 
+  closeWithReaper: {
+    title: "Close with REAPER",
+    hint: "Close Reaper Control after REAPER quits on its own. When REAPER crashes or is stopped from outside, Reaper Control stays open, so you can see what happened. It only closes an app that was connected to REAPER. This applies to every project.",
+    switchLabel: "Close Reaper Control when REAPER quits",
+  },
+
   connection: {
     notRunning: "REAPER not running",
     waitingForExtension: "waiting for the extension",

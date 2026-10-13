@@ -24,7 +24,8 @@ const PROCESS_CHECK_EVERY: Duration = Duration::from_secs(5);
 
 /// Turns link events and the passing of time into `LinkHealth`.
 pub struct HealthMonitor {
-    state: Mutex<State>,
+    // Boxed to keep the monitor under 128 bytes.
+    state: Mutex<Box<State>>,
     events: Arc<EventBus>,
     clock: Arc<dyn Clock>,
     processes: Arc<dyn ProcessCheck>,
@@ -42,11 +43,12 @@ impl HealthMonitor {
     ) -> Self {
         let lost_since = clock.now();
         Self {
-            state: Mutex::new(State {
+            state: Mutex::new(Box::new(State {
                 health: LinkHealth::Lost,
                 lost_since,
                 last_process_check: None,
-            }),
+                closing: false,
+            })),
             events,
             clock,
             processes,
@@ -63,6 +65,12 @@ impl HealthMonitor {
             .unwrap_or(LinkHealth::Lost)
     }
 
+    /// Whether REAPER said it is quitting cleanly. Cleared when the link connects again.
+    #[must_use]
+    pub fn reaper_is_closing(&self) -> bool {
+        self.state.lock().is_ok_and(|state| state.closing)
+    }
+
     /// Takes in what the link reported.
     pub fn observe(&self, event: &LinkEvent) {
         let now = self.clock.now();
@@ -71,7 +79,14 @@ impl HealthMonitor {
                 return;
             };
             let next = match (event, &state.health) {
-                (LinkEvent::Connected { .. } | LinkEvent::Recovered, _) => LinkHealth::Connected,
+                (LinkEvent::Closing, _) => {
+                    state.closing = true;
+                    return;
+                }
+                (LinkEvent::Connected { .. } | LinkEvent::Recovered, _) => {
+                    state.closing = false;
+                    LinkHealth::Connected
+                }
                 (LinkEvent::Quiet, LinkHealth::Connected) => LinkHealth::Degraded,
                 (LinkEvent::Outdated { found }, _) => {
                     LinkHealth::Dead(LinkCause::ExtensionOutdated { found: *found })

@@ -2,13 +2,17 @@
 //! operation runs on its own thread, so a slow or broken client never holds up the caller.
 
 mod acceptor;
+mod closing_frame;
 mod command_handler;
 mod connection;
+mod exit_registry;
 mod hub;
 mod server_error;
 mod shared;
 
+pub use closing_frame::closing_frame;
 pub use command_handler::CommandHandler;
+pub use exit_registry::{EXIT_REGISTRY, EXIT_REGISTRY_SLOTS, ExitRegistry};
 pub use server_error::ServerError;
 
 use std::net::{Ipv4Addr, SocketAddr, TcpListener};

@@ -198,6 +198,15 @@ jobs:
             testing/scripts/autostart_check.sh
           AUTOSTART_EXPECT=none SMOKE_PROJECT="$PWD/testing/data/projects/s1-sample.rpp" testing/scripts/smoke_extension.sh "$REAPER_EXECUTABLE" "$extension" \
             testing/scripts/autostart_check.sh
+      - name: A clean quit says goodbye to the app; a kill does not
+        shell: bash
+        run: |
+          extension=$(ls dist/reaper_rc2-*.dylib dist/reaper_rc2-*.dll 2>/dev/null | head -1 || true)
+          [ -n "$extension" ] || { echo "no packaged extension in dist/"; exit 1; }
+          for mode in quit kill; do
+            CLOSING_MODE=$mode SMOKE_PROJECT="$PWD/testing/data/projects/s1-sample.rpp" testing/scripts/smoke_extension.sh "$REAPER_EXECUTABLE" "$extension" \
+              testing/scripts/closing_check.sh
+          done
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

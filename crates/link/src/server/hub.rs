@@ -70,11 +70,11 @@ impl Hub {
                 .map_err(|_| ReadError::Closed)?;
         }
         self.next_id += 1;
-        self.clients.push(ConnectedClient {
-            id: self.next_id,
-            outbox: outbox.clone(),
-            stream: stream.try_clone()?,
-        });
+        self.clients.push(ConnectedClient::new(
+            self.next_id,
+            outbox.clone(),
+            stream.try_clone()?,
+        ));
         Ok(self.next_id)
     }
 

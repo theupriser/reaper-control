@@ -3,6 +3,7 @@
 #[cfg(windows)]
 mod dll_main;
 mod exit_file;
+mod exit_notice;
 mod missing_functions;
 #[cfg(feature = "probe")]
 mod probe;
@@ -13,6 +14,7 @@ mod surface;
 use std::error::Error;
 use std::path::PathBuf;
 use std::sync::OnceLock;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use reaper_low::PluginContext;
 use reaper_medium::ReaperSession;
@@ -31,17 +33,40 @@ static FAULT: Fault = Fault::new();
 static LOG: OnceLock<Log> = OnceLock::new();
 static FAULTS: OnceLock<FaultFile> = OnceLock::new();
 static EXIT_FILE: OnceLock<ExitFile> = OnceLock::new();
+static CLOSING_FRAME: OnceLock<Vec<u8>> = OnceLock::new();
+static SAID_GOODBYE: AtomicBool = AtomicBool::new(false);
 
 unsafe extern "C" {
     fn atexit(callback: extern "C" fn()) -> i32;
 }
 
-/// REAPER does not call `close_no_reset` or drop the surface at a clean quit (ADR-009), but the C
-/// runtime runs this at exit. A crash, a kill or SIGTERM never gets here, so the marker stays.
-extern "C" fn on_exit() {
+/// Tells the connected apps that REAPER is quitting, once. Called from the entry point when
+/// REAPER calls it with no plugin record at exit (Windows), and from `leave` (macOS, where the C
+/// runtime's exit hook is the only call). A crash, a kill or SIGTERM never gets here.
+fn say_goodbye() {
+    if let Some(frame) = CLOSING_FRAME.get()
+        && !SAID_GOODBYE.swap(true, Ordering::SeqCst)
+    {
+        exit_notice::tell_clients(frame);
+    }
+}
+
+/// What REAPER's exit does for us at the very end, from the C runtime's exit hook on macOS and from
+/// `DllMain` when the DLL unloads on Windows (ADR-009): the goodbye if it has not gone yet, then
+/// removes the safe-mode marker. A crash, a kill or SIGTERM never gets here, so the marker stays.
+/// Only atomics, raw operating system calls and prepared data are used, as at this point threads
+/// and Rust's thread-locals may be gone and Winsock no longer works.
+fn leave() {
+    say_goodbye();
     if let Some(file) = EXIT_FILE.get() {
         file.remove();
     }
+}
+
+/// REAPER does not call `close_no_reset` or drop the surface at a clean quit (ADR-009), but the C
+/// runtime runs this at exit on macOS.
+extern "C" fn on_exit() {
+    leave();
 }
 
 reaper_low::swell_dll_main!();
@@ -53,6 +78,11 @@ unsafe extern "C" fn ReaperPluginEntry(
     h_instance: reaper_low::raw::HINSTANCE,
     rec: *mut reaper_low::raw::reaper_plugin_info_t,
 ) -> std::os::raw::c_int {
+    if rec.is_null() {
+        // REAPER's call at exit (seen on Windows; macOS has the exit hook): every thread and
+        // Winsock are still alive, which they are not by the time the DLL unloads.
+        say_goodbye();
+    }
     let static_context = reaper_low::static_plugin_context();
     // SAFETY: REAPER passes the handle and the plugin info record it owns, as the macro assumes.
     unsafe { reaper_low::bootstrap_extension_plugin(h_instance, rec, static_context, plugin_main) }
@@ -100,7 +130,8 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
             }
         }
     }
-    // SAFETY: registers a plain `extern "C" fn` that only removes a file.
+    let _ = CLOSING_FRAME.set(link::closing_frame());
+    // SAFETY: registers a plain `extern "C" fn` that removes a file and writes one prepared frame.
     let registered = unsafe { atexit(on_exit) };
     log.line(&format!(
         "started, version {}, atexit registered: {registered}",
