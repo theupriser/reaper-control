@@ -10,4 +10,11 @@ describe("statRows", () => {
     expect(rows[1].value).toBe("4000 MB / 16000 MB");
     expect(rows[3].value).toBe("not found");
   });
+
+  it("fills each bar with the share of the machine, and leaves REAPER's empty when it was not found", () => {
+    const rows = statRows({ ...stats, memory_used_megabytes: 8000, app_memory_megabytes: 160 });
+    expect(rows.map((row) => row.percent)).toEqual([12.4, 50, 1, null]);
+    expect(statRows({ ...stats, machine_cpu_percent: 250 })[0].percent).toBe(100);
+    expect(statRows({ ...stats, memory_total_megabytes: 0 })[1].percent).toBe(0);
+  });
 });

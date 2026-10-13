@@ -71,4 +71,11 @@ test("the numbers in the health dialog keep updating while it is open", async ({
   );
   await expect(dialog).toContainText("57%");
   await expect(dialog).toContainText("700 MB");
+  await expect(dialog.locator(".bar")).toHaveCount(4);
+  await page.evaluate(() =>
+    (window as any).__answer("current_system_stats", { machine_cpu_percent: 86, memory_used_megabytes: 9000, memory_total_megabytes: 16000, app_memory_megabytes: 240, reaper_memory_megabytes: 2400 }),
+  );
+  await expect(dialog.locator(".bar.high")).toHaveCount(1);
+  await expect(dialog.locator(".bar.medium")).toHaveCount(1);
+  await page.screenshot({ path: "perf-results/health-bars.png" });
 });
