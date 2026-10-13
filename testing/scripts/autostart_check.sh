@@ -37,13 +37,14 @@ PLIST
   *) echo "autostart_check.sh runs on macOS and Windows"; exit 1 ;;
 esac
 printf '%s\n' "$location" > "$directory/application"
+begun=$(date +%s)
 
 started() { [ -f "$marker" ] && wc -l < "$marker" | tr -d ' ' || echo 0; }
 
 if [ "$expect" = started ]; then
   for _ in $(seq 1 60); do [ "$(started)" -ge 1 ] && break; sleep 0.5; done
   [ "$(started)" -ge 1 ] || { echo "FAIL: the app was not started"; cat "$directory/extension.log"; exit 1; }
-  echo "the app was started after about $(( $(date +%s) - $(stat -f %m "$directory/application" 2>/dev/null || stat -c %Y "$directory/application") )) s"
+  echo "the app was started $(( $(date +%s) - begun )) s after the location was written"
   sleep 12
   [ "$(started)" -eq 1 ] || { echo "FAIL: the app was started $(started) times, not once"; exit 1; }
   grep -q "autostart: started" "$directory/extension.log" || { echo "FAIL: the log does not say the app was started"; exit 1; }
