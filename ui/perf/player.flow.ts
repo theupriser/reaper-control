@@ -55,3 +55,41 @@ test("the Player layout fits wide and narrow windows without sideways scrolling"
     await page.screenshot({ path: `perf-results/player-${width}.png` });
   }
 });
+
+test("a long song name stays on one line and slides, so the Player does not change height", async ({ page }) => {
+  const long = "A very long song name that goes on and on and on and on until it cannot possibly fit next to the time";
+  const crowded = { ...view, catalog: { ...view.catalog, songs: [song(1, 0), song(2, 200, { name: long }), song(3, 400)] } };
+  await page.addInitScript(tauriStandIn, crowded);
+  await page.goto("/");
+  const title = page.getByRole("heading", { level: 2, name: long });
+  await expect(title).toBeVisible();
+  const box = await title.boundingBox();
+  expect(box?.height).toBeLessThan(50);
+  const line = title.locator(".line");
+  const offset = () => line.evaluate((node) => new DOMMatrix(getComputedStyle(node).transform).m41);
+  expect(await offset()).toBe(0);
+  await expect.poll(offset, { timeout: 8000 }).toBeLessThan(-100);
+
+  await page.addInitScript(tauriStandIn, view);
+  await page.goto("/");
+  const short = await page.getByRole("heading", { level: 2, name: "Song 2" }).boundingBox();
+  expect(short?.height).toBe(box?.height);
+  await page.waitForTimeout(3500);
+  expect(await page.getByRole("heading", { level: 2, name: "Song 2" }).locator(".line").evaluate((node) => new DOMMatrix(getComputedStyle(node).transform).m41)).toBe(0);
+});
+
+test("in Performer mode a long title and a long next song stay on one line and slide", async ({ page }) => {
+  const long = "A very long song name that goes on and on and on and on until it cannot possibly fit on the screen at all, not even a little";
+  const crowded = { ...view, live: { ...view.live, current_song: 0, next_song: 1 }, catalog: { ...view.catalog, songs: [song(1, 0, { name: long }), song(2, 200, { name: long }), song(3, 400)] } };
+  await page.addInitScript(tauriStandIn, crowded);
+  await page.goto("/");
+  await page.getByRole("button", { name: "Performer mode" }).click();
+
+  for (const level of [1, 2]) {
+    const title = page.getByRole("heading", { level, name: new RegExp(long) });
+    const box = await title.boundingBox();
+    expect(box?.height).toBeLessThan(level === 1 ? 100 : 70);
+    const offset = () => title.locator(".line").evaluate((node) => new DOMMatrix(getComputedStyle(node).transform).m41);
+    await expect.poll(offset, { timeout: 8000 }).toBeLessThan(-100);
+  }
+});

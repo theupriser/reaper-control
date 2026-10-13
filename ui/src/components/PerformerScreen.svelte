@@ -1,6 +1,7 @@
 <script lang="ts">
   import { strings } from "../lib/strings";
   import Clock from "./Clock.svelte";
+  import Marquee from "./Marquee.svelte";
   import PerformerControls from "./PerformerControls.svelte";
   import PerformerToggles from "./PerformerToggles.svelte";
   import RecordDot from "./RecordDot.svelte";
@@ -63,7 +64,7 @@
   </header>
 
   <div class="content">
-    <h1>{view.song?.name ?? strings.performer.noSong}</h1>
+    <h1><Marquee text={view.song?.name ?? strings.performer.noSong} /></h1>
     <div class="times">
       <div>
         <span class="label">{strings.performer.songTime}</span>
@@ -80,7 +81,7 @@
     {#if view.phase === "CountingIn"}<p class="count-in">{strings.performer.countIn}</p>{/if}
 
     <div class="next">
-      <h2>{view.nextSong ? strings.performer.next(view.nextSong.name) : strings.performer.endOfSetlist}</h2>
+      <h2><Marquee text={view.nextSong ? strings.performer.next(view.nextSong.name) : strings.performer.endOfSetlist} /></h2>
       <div class="duration">{view.nextSong ? strings.performer.duration(formatTime(view.nextSong.duration)) : " "}</div>
       {#if waiting}<div class="hold">{strings.performer.pressPlay}</div>{/if}
     </div>

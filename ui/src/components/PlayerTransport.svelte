@@ -1,6 +1,7 @@
 <script lang="ts">
   import { formatTime, type PerformerView, type SeekTarget } from "../lib/performer";
   import { strings } from "../lib/strings";
+  import Marquee from "./Marquee.svelte";
   import PlayerControls from "./PlayerControls.svelte";
   import PlayerOptions from "./PlayerOptions.svelte";
   import SongProgress from "./SongProgress.svelte";
@@ -41,7 +42,7 @@
   <div class="head">
     <div class="title">
       <div class="label">{position > 0 ? strings.player.nowPlaying(position, count) : strings.player.ready(count)}</div>
-      <h2>{view.song?.name ?? strings.performer.noSong}</h2>
+      <h2><Marquee text={view.song?.name ?? strings.performer.noSong} /></h2>
     </div>
     <div class="figures">
       {#if tempo !== null}
@@ -70,7 +71,7 @@
   .head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-5); }
   .title { min-width: 0; }
   .label { font-size: 13px; font-weight: 700; letter-spacing: 1px; color: var(--green); }
-  h2 { margin: 4px 0 0; font-size: 34px; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }
+  h2 { margin: 4px 0 0; font-size: 34px; font-weight: 800; line-height: 1.15; }
   .figures { display: flex; align-items: flex-end; gap: 28px; flex-shrink: 0; }
   .figure { display: flex; flex-direction: column; align-items: flex-end; }
   .caption { font-size: 13px; font-weight: 600; color: var(--muted); }
