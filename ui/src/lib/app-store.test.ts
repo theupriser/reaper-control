@@ -53,7 +53,7 @@ describe("app store", () => {
     const store = createAppStore(backend, () => 0);
     const stop = store.start();
     await Promise.resolve();
-    handlers.problem?.({ message: "Wrong token", extension_outdated: false });
+    handlers.problem?.({ message: "Wrong token", extension_outdated: false, extension_faulted: false });
     handlers.notice?.({ key: "a", level: "Info", title: "Hi", text: "There" });
     expect(get(store).problem?.message).toBe("Wrong token");
     expect(get(store).notices).toHaveLength(1);

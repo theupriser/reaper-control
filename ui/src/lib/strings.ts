@@ -235,6 +235,9 @@ export const strings = {
     notFound: "not found",
     megabytes: (value: number) => `${value} MB`,
     loadFailed: "The numbers could not be read.",
+    reenable: "Switch the extension back on",
+    reenabled: "The extension is switched on again. Restart REAPER to use it.",
+    reenableFailed: "The extension could not be switched on again.",
   },
 
   performer: {

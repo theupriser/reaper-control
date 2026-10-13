@@ -11,18 +11,34 @@
     connection,
     stats,
     failed,
+    faulted,
+    reenable,
+    onReenable,
     onclose,
   }: {
     open: boolean;
     connection: { label: string; detail: string; tone: "ok" | "error" };
     stats: SystemStats | null;
     failed: boolean;
+    faulted: boolean;
+    reenable: "idle" | "done" | "failed";
+    onReenable: () => void;
     onclose: () => void;
   } = $props();
 </script>
 
 <Dialog {open} title={strings.health.title} {onclose}>
   <p class="state {connection.tone}"><strong>{connection.label}</strong> <span>{connection.detail}</span></p>
+  {#if faulted}
+    <div class="reenable">
+      {#if reenable === "done"}
+        <p role="status">{strings.health.reenabled}</p>
+      {:else}
+        <Button kind="primary" onclick={onReenable}>{strings.health.reenable}</Button>
+        {#if reenable === "failed"}<p role="status">{strings.health.reenableFailed}</p>{/if}
+      {/if}
+    </div>
+  {/if}
   {#if stats}
     <ul class="stats">
       {#each statRows(stats) as row (row.label)}
@@ -45,6 +61,8 @@
   .state { margin: 0 0 var(--space-3) 0; }
   .state.ok strong { color: var(--green); }
   .state.error strong { color: var(--red); }
+  .reenable { margin: 0 0 var(--space-3) 0; }
+  .reenable p { margin: var(--space-2) 0 0 0; }
   span { color: var(--muted); }
   .stats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); min-width: 20rem; }
   li { display: grid; grid-template-columns: 1fr auto; gap: 4px var(--space-5); }

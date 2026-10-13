@@ -87,7 +87,7 @@ test("an outdated extension says a new version is available and the indicator op
   }, outdated);
   await page.goto("/");
   await page.getByRole("button", { name: "Skip for now" }).click();
-  await page.evaluate(() => (window as any).__pushEvent("link-problem", { message: "A new version of the extension is available", extension_outdated: true }));
+  await page.evaluate(() => (window as any).__pushEvent("link-problem", { message: "A new version of the extension is available", extension_outdated: true, extension_faulted: false }));
 
   const indicator = page.getByRole("button", { name: "Connection details" });
   await expect(indicator).toContainText("REAPER extension outdated");
