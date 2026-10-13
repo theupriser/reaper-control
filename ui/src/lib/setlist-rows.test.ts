@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { SetlistInfo, SongInfo } from "./generated/protocol";
 import { draftOf } from "./setlist-edit";
-import { entryRows, matchingSongs, totalDuration } from "./setlist-rows";
+import { cardSummary, entryRows, matchingSongs, totalDuration } from "./setlist-rows";
 
 const song = (id: string, name: string, start: number, end: number): SongInfo => ({ id, number: 1, name, start, end, colour: null, hard_stop: false, length: null, bpm: null });
 const songs = [song("a", "Opener", 0, 100), song("b", "Ballad", 100, 280), song("c", "Closer", 280, 300)];
@@ -23,5 +23,15 @@ describe("setlist rows", () => {
   it("finds songs by part of the name", () => {
     expect(matchingSongs(songs, " ball ").map((found) => found.id)).toEqual(["b"]);
     expect(matchingSongs(songs, "")).toHaveLength(3);
+  });
+
+  it("summarises a card by the first names and the songs that are gone", () => {
+    const long: SetlistInfo = { ...saved, entries: [1, 2, 3, 4, 5].map((id) => ({ id, song_id: id === 4 ? "gone" : "a" })) };
+    expect(cardSummary(long, songs)).toEqual({ count: 5, duration: 400, preview: ["Opener", "Opener", "Opener"], more: 2, missing: 1 });
+  });
+
+  it("does not count project songs the setlist leaves out as a problem", () => {
+    const short: SetlistInfo = { ...saved, entries: [{ id: 1, song_id: "a" }] };
+    expect(cardSummary(short, songs)).toMatchObject({ count: 1, missing: 0, more: 0 });
   });
 });

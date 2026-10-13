@@ -30,7 +30,7 @@ test(`a project of ${songCount} songs stays inside the budget`, async ({ page })
 
   for (const screen of ["Player", "Setlists"]) {
     await page.getByRole("navigation").getByRole("button", { name: screen }).click();
-    if (screen === "Setlists") await page.getByText("Set", { exact: true }).first().click();
+    if (screen === "Setlists") await page.getByRole("button", { name: "Edit songs" }).click();
     await page.waitForTimeout(200);
     for (let push = 0; push < 30; push++) {
       await page.evaluate(([pushed, label]) => {
@@ -43,6 +43,7 @@ test(`a project of ${songCount} songs stays inside the budget`, async ({ page })
   }
   const rows = await page.getByRole("list", { name: "Songs in this setlist" }).getByRole("listitem").count();
   console.log(`list items on the setlists screen: ${rows}`);
+  expect(rows).toBe(songCount);
 
   const all = await samples(page);
   const failures: string[] = [];

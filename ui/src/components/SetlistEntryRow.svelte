@@ -1,7 +1,8 @@
 <script lang="ts">
   import Button from "../kit/Button.svelte";
-  import ListRow from "../kit/ListRow.svelte";
+  import DragGrip from "./DragGrip.svelte";
   import StatusBadge from "../kit/StatusBadge.svelte";
+  import type { DragHandlers } from "../lib/drag-drop";
   import { formatTime } from "../lib/performer";
   import type { EntryRow } from "../lib/setlist-rows";
   import { strings } from "../lib/strings";
@@ -10,26 +11,47 @@
     row,
     first,
     last,
+    lifted,
+    dropBefore,
+    drag,
     onUp,
     onDown,
     onRemove,
-  }: { row: EntryRow; first: boolean; last: boolean; onUp: () => void; onDown: () => void; onRemove: () => void } = $props();
+  }: {
+    row: EntryRow;
+    first: boolean;
+    last: boolean;
+    lifted: boolean;
+    dropBefore: boolean;
+    drag: DragHandlers;
+    onUp: () => void;
+    onDown: () => void;
+    onRemove: () => void;
+  } = $props();
 </script>
 
-<ListRow>
-  {#snippet leading()}<span class="position">{row.position}</span>{/snippet}
-  <span class:gone={row.missing}>{row.name}</span>
-  {#snippet trailing()}
-    {#if row.missing}<span title={strings.setlists.missingSong}><StatusBadge tone="warn" label={strings.setlists.missing} /></span>{/if}
-    <span class="time">{row.duration === null ? strings.setlists.noTime : formatTime(row.duration)}</span>
+<div class="row" class:lifted class:gone={row.missing} role="listitem" data-row>
+  {#if dropBefore}<span class="line"></span>{/if}
+  <DragGrip label={strings.setlists.dragEntry(row.name)} handlers={drag} />
+  <span class="position">{row.position}</span>
+  <span class="name">{row.name}</span>
+  {#if row.missing}<span title={strings.setlists.missingSong}><StatusBadge tone="warn" label={strings.setlists.missing} /></span>{/if}
+  <span class="time">{row.duration === null ? strings.setlists.noTime : formatTime(row.duration)}</span>
+  <span class="steps">
     <Button label={strings.setlists.moveUp(row.name)} disabled={first} onclick={onUp}>↑</Button>
     <Button label={strings.setlists.moveDown(row.name)} disabled={last} onclick={onDown}>↓</Button>
-    <Button kind="danger" label={strings.setlists.remove(row.name)} onclick={onRemove}>✕</Button>
-  {/snippet}
-</ListRow>
+  </span>
+  <Button kind="danger" label={strings.setlists.remove(row.name)} onclick={onRemove}>✕</Button>
+</div>
 
 <style>
-  .position { min-width: 22px; text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; }
-  .gone { color: var(--red); }
-  .time { min-width: 50px; text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; }
+  .row { position: relative; box-sizing: border-box; display: flex; align-items: center; gap: 10px; min-height: 50px; padding: 0 6px 0 4px; border-radius: 10px; flex-shrink: 0; }
+  .lifted { opacity: 0.45; }
+  .line { position: absolute; left: 4px; right: 4px; top: -3px; height: 3px; border-radius: 2px; background: var(--green); }
+  .position { min-width: 20px; text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; color: var(--muted); }
+  .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; font-weight: 600; }
+  .gone { background: color-mix(in srgb, var(--red) 10%, transparent); }
+  .gone .name { color: var(--red); }
+  .time { min-width: 48px; text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; color: var(--muted); }
+  .steps { display: flex; gap: 2px; }
 </style>
