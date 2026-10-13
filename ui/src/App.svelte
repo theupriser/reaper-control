@@ -55,18 +55,30 @@
   const notices = $derived($appState.notices.filter((notice) => notice.key !== "link"));
   let wizardOpen = $state(false);
   let healthOpen = $state(false);
+  const STATS_REFRESH_MILLISECONDS = 1000;
   let stats = $state<SystemStats | null>(null);
   let statsFailed = $state(false);
 
-  const openHealth = async () => {
-    healthOpen = true;
-    statsFailed = false;
+  const refreshStats = async () => {
     try {
       stats = await currentSystemStats();
+      statsFailed = false;
     } catch {
       statsFailed = true;
     }
   };
+  const openHealth = () => {
+    healthOpen = true;
+    statsFailed = false;
+  };
+
+  // The numbers keep moving while the dialog is open, like the v1 popover did.
+  $effect(() => {
+    if (!healthOpen) return;
+    refreshStats();
+    const timer = setInterval(refreshStats, STATS_REFRESH_MILLISECONDS);
+    return () => clearInterval(timer);
+  });
 
   const outdated = $derived($appState.problem?.extension_outdated || connection.label === strings.connection.outdated);
   const openConnection = () => (outdated ? (wizardOpen = true) : openHealth());
