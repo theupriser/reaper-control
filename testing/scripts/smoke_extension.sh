@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Loads a packaged extension in an isolated REAPER (macOS or Windows) and checks that it starts and listens.
 # usage: smoke_extension.sh <REAPER executable> <packaged extension> [check script...]
-# Each check script runs while REAPER is up, with REAPER_RESOURCE set to the resource directory.
+# Each check script runs while REAPER is up, with REAPER_RESOURCE set to the resource directory and
+# REAPER_PID to REAPER's process id.
 # SMOKE_SECONDS (default 60) is how long to wait for the extension to listen; SMOKE_PROJECT is a
 # project to open.
 # REAPER runs with a throwaway resource directory under $RUNNER_TEMP or /tmp; your own REAPER is never touched.
@@ -69,5 +70,5 @@ show_screen() {
 
 for check in "$@"; do
   echo "== $check"
-  REAPER_RESOURCE=$resource "$check" || { show_screen; exit 1; }
+  REAPER_RESOURCE=$resource REAPER_PID=$pid "$check" || { show_screen; exit 1; }
 done
