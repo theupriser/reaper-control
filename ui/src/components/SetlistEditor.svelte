@@ -121,7 +121,7 @@
 
 <style>
   .screen { display: flex; flex-direction: column; gap: 14px; padding: 24px 32px 28px; min-height: 0; height: 100%; box-sizing: border-box; }
-  .dragging { user-select: none; cursor: grabbing; }
+  .dragging { -webkit-user-select: none; user-select: none; cursor: grabbing; }
   .back { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; height: 32px; padding: 0; border: none; background: transparent; color: var(--muted); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
   .back:hover { color: var(--text); }
   .head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); }

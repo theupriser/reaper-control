@@ -30,6 +30,7 @@ export function dragHandle(node: HTMLElement, handlers: DragHandlers) {
 
   const down = (event: PointerEvent) => {
     if (event.button !== 0) return;
+    event.preventDefault();
     origin = point(event);
     dragging = false;
     node.setPointerCapture(event.pointerId);

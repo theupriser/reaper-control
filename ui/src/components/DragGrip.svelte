@@ -9,6 +9,6 @@
 </span>
 
 <style>
-  .grip { display: flex; align-items: center; justify-content: center; width: 28px; height: 36px; flex-shrink: 0; color: var(--muted); cursor: grab; touch-action: none; }
+  .grip { display: flex; align-items: center; justify-content: center; width: 28px; height: 36px; flex-shrink: 0; color: var(--muted); cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none; }
   .grip:active { cursor: grabbing; }
 </style>
