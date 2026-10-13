@@ -47,6 +47,7 @@ const link = (current: number | null, position = 0): LinkView => ({
     ],
     setlists: [],
     active_setlist: null,
+    autostart: false,
   },
 });
 

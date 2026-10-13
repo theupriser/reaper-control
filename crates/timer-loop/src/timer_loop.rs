@@ -126,6 +126,11 @@ impl<Port: ReaperPort> TimerLoop<Port> {
             self.refresh_if_changed();
             return self.outcome(chosen);
         }
+        if let Command::SetAutostart { enabled } = &command {
+            ProjectSetlists::set_autostart(&mut self.port, *enabled);
+            self.refresh_if_changed();
+            return Outcome::Done;
+        }
         let start = self.song_start();
         match to_input(command, start, self.performance.flags()) {
             Ok(input) => {
@@ -291,6 +296,7 @@ impl<Port: ReaperPort> TimerLoop<Port> {
         }
         if catalog.setlists != self.catalog.setlists
             || catalog.active_setlist != self.catalog.active_setlist
+            || catalog.autostart != self.catalog.autostart
         {
             catalog.setlist_revision += 1;
         }

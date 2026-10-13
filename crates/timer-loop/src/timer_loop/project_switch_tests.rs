@@ -155,3 +155,44 @@ fn an_unsaved_project_keeps_its_id_and_records_no_path() {
     assert_eq!(timer_loop.port_mut().ext_state("RC2", "project_id"), id);
     assert_eq!(timer_loop.port_mut().ext_state("RC2", "project_path"), None);
 }
+
+#[test]
+fn the_autostart_choice_belongs_to_the_project_and_shows_in_the_catalog() {
+    use protocol::Command::SetAutostart;
+    use protocol::message::Outcome;
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    assert!(!timer_loop.catalog().autostart);
+    let revision = timer_loop.catalog().setlist_revision;
+
+    assert_eq!(
+        timer_loop.link_command(SetAutostart { enabled: true }),
+        Outcome::Done
+    );
+    assert!(timer_loop.catalog().autostart);
+    assert_eq!(timer_loop.catalog().setlist_revision, revision + 1);
+    assert_eq!(
+        timer_loop
+            .port_mut()
+            .ext_state("RC2", "autostart")
+            .as_deref(),
+        Some("1")
+    );
+
+    timer_loop
+        .port_mut()
+        .switch_project(two_songs(), Vec::new());
+    run(&mut timer_loop, 1);
+    assert!(!timer_loop.catalog().autostart);
+
+    timer_loop.link_command(SetAutostart { enabled: true });
+    timer_loop.link_command(SetAutostart { enabled: false });
+    assert!(!timer_loop.catalog().autostart);
+}
+
+#[test]
+fn an_autostart_choice_made_in_reaper_itself_is_picked_up() {
+    let mut timer_loop = TimerLoop::new(fake(two_songs(), Vec::new()));
+    timer_loop.port_mut().set_ext_state("RC2", "autostart", "1");
+    run(&mut timer_loop, 1);
+    assert!(timer_loop.catalog().autostart);
+}

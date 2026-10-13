@@ -18,8 +18,8 @@ use crate::mirror::MirrorKeeper;
 use crate::mirror::MirrorRepository;
 use crate::mirror::SetlistMirror;
 use crate::mirror::SetlistTransfer;
-use crate::start::start_installation;
 use crate::start::start_link;
+use crate::start::{record_application_location, start_installation};
 use crate::system::DiagnosticsBundle;
 use crate::system::Logging;
 use crate::system::PeriodicThread;
@@ -48,7 +48,7 @@ use installer::InstallationService;
 use installer::ProcessCheck;
 use installer::SystemProcessCheck;
 use installer::check_list;
-use installer::{endpoint_file, extension_directory, fault_file};
+use installer::{application_file, endpoint_file, extension_directory, fault_file};
 use legacy_import::JournalImport;
 use legacy_import::import_legacy_config;
 use midi::MidiSource;
@@ -61,7 +61,7 @@ const NOTICE: &str = "notice";
 const LINK_PROBLEM: &str = "link-problem";
 /// The version of the extension that ships with this app (kept equal to the extension's own
 /// version by an architecture test).
-const BUNDLED_EXTENSION_VERSION: &str = "1.0.6";
+const BUNDLED_EXTENSION_VERSION: &str = "1.0.7";
 const UNSUPPORTED_SYSTEM: &str = "the extension is not built for this system";
 
 #[tauri::command]
@@ -188,6 +188,12 @@ fn export_diagnostics(
         .map_err(|error| error.to_string())
 }
 
+/// Whether the extension knows where the app is, so a project can ask for it to be started.
+#[tauri::command]
+fn autostart_ready() -> bool {
+    application_file().is_some_and(|file| file.exists())
+}
+
 #[tauri::command]
 fn dispatch(bus: State<'_, Arc<CommandBus>>, command: Command) -> Result<(), String> {
     bus.dispatch(command).map_err(|error| error.to_string())
@@ -210,6 +216,13 @@ pub fn run() {
             });
             app.manage(fault);
             let file = endpoint_file().ok_or("the home folder is unknown")?;
+            if !tauri::is_dev()
+                && let Some(location) = application_file()
+                && let Ok(executable) = std::env::current_exe()
+                && let Err(error) = record_application_location(&location, &executable)
+            {
+                tracing::warn!(%error, "could not tell the extension where the app is");
+            }
             let events = Arc::new(EventBus::default());
             events.subscribe(log_event);
             let journal = Arc::new(JournalImport::new(
@@ -354,6 +367,7 @@ pub fn run() {
             restore_setlists,
             import_setlists,
             export_diagnostics,
+            autostart_ready,
             dispatch
         ])
         .build(tauri::generate_context!());

@@ -23,6 +23,8 @@ export const currentSystemStats = (): Promise<SystemStats> => invoke<SystemStats
 
 export const markerReading = (name: string): Promise<MarkerReading> => invoke<MarkerReading>("marker_reading", { name });
 
+export const autostartReady = (): Promise<boolean> => invoke<boolean>("autostart_ready");
+
 export const currentSettings = (): Promise<SettingsView> => invoke<SettingsView>("current_settings");
 
 export const saveSettings = (settings: Settings): Promise<void> => invoke<void>("save_settings", { settings });

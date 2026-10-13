@@ -1,6 +1,8 @@
 <script lang="ts">
   import { strings } from "../lib/strings";
   import { screens, type ScreenId } from "../lib/screens";
+  import type { AutostartView } from "../lib/autostart";
+  import SidebarAutostart from "./SidebarAutostart.svelte";
 
   let {
     active,
@@ -10,6 +12,8 @@
     connection,
     midi,
     onMidi,
+    autostart,
+    onAutostart,
   }: {
     active: ScreenId;
     onSelect: (id: ScreenId) => void;
@@ -18,6 +22,8 @@
     connection: { label: string; line?: string; tone: "ok" | "error" };
     midi: { label: string; detail: string; tone: "ok" | "error" } | null;
     onMidi: () => void;
+    autostart: AutostartView;
+    onAutostart: () => void;
   } = $props();
 </script>
 
@@ -37,6 +43,8 @@
   {/each}
 
   <div class="spacer"></div>
+
+  <SidebarAutostart {autostart} onToggle={onAutostart} />
 
   <button class="performer" onclick={onPerformer}>
     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>

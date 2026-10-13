@@ -175,6 +175,7 @@ fn catalog() -> Catalog {
             }],
         }],
         active_setlist: Some("set-1".into()),
+        autostart: true,
     }
 }
 

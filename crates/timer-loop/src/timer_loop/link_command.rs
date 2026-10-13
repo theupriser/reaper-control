@@ -40,6 +40,7 @@ pub(super) fn to_input(
         Command::ToggleRecordArm => Err("recording is not wired yet"),
         Command::SaveSetlist { .. }
         | Command::DeleteSetlist { .. }
-        | Command::SetActiveSetlist { .. } => Err("not a performance command"),
+        | Command::SetActiveSetlist { .. }
+        | Command::SetAutostart { .. } => Err("not a performance command"),
     }
 }

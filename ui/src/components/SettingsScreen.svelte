@@ -7,7 +7,9 @@
   import { onMount } from "svelte";
   import NoteTable from "./NoteTable.svelte";
   import AppearanceCard from "./AppearanceCard.svelte";
+  import AutostartCard from "./AutostartCard.svelte";
   import ConnectionCard from "./ConnectionCard.svelte";
+  import type { AutostartView } from "../lib/autostart";
   import DiagnosticsCard from "./DiagnosticsCard.svelte";
   import SetlistTransferCard from "./SetlistTransferCard.svelte";
   import { currentSettings, saveSettings } from "../lib/ipc";
@@ -15,7 +17,7 @@
   import { applyAppearance, appearanceOf } from "../lib/appearance";
   import { ALL_CHANNELS, LOG_LEVELS, isChanged, toDraft, toSettings, type SettingsDraft } from "../lib/settings-form";
 
-  let { connection, onSetup }: { connection: ConnectionBadge; onSetup: () => void } = $props();
+  let { connection, onSetup, autostart, onAutostart }: { connection: ConnectionBadge; onSetup: () => void; autostart: AutostartView; onAutostart: () => void } = $props();
 
   let view = $state<SettingsView | null>(null);
   let draft = $state<SettingsDraft | null>(null);
@@ -61,6 +63,8 @@
   <h1>{strings.settings.title}</h1>
   {#if view && draft}
     <ConnectionCard {connection} {onSetup} />
+
+    <AutostartCard {autostart} onToggle={onAutostart} />
 
     <Panel title={strings.settings.midi.title} hint={strings.settings.midi.hint}>
       <Switch on={draft.midiEnabled} label={strings.settings.midi.enabled} onchange={() => draft && (draft.midiEnabled = !draft.midiEnabled)} />

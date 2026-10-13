@@ -94,7 +94,7 @@ pub use mirror::SetlistMirror;
 pub use mirror::SetlistTransfer;
 pub use shell::run;
 pub use simulator::{Simulator, sample_project};
-pub use start::{start_installation, start_link};
+pub use start::{application_from, record_application_location, start_installation, start_link};
 pub use system::DiagnosticsBundle;
 pub use system::DiagnosticsError;
 pub use system::Logging;

@@ -11,10 +11,11 @@
   import WizardScreen from "./components/WizardScreen.svelte";
   import Sidebar from "./components/Sidebar.svelte";
   import { createAppStore } from "./lib/app-store";
+  import { autostartView } from "./lib/autostart";
   import { connectionBadge } from "./lib/connection";
   import { midiBadge } from "./lib/midi-status";
   import { watchView } from "./lib/watch";
-  import { backend, bundledExtensionVersion, currentInstallation, currentSettings, currentSystemStats } from "./lib/ipc";
+  import { autostartReady, backend, bundledExtensionVersion, currentInstallation, currentSettings, currentSystemStats } from "./lib/ipc";
   import { needsWizard } from "./lib/wizard";
   import type { SettingsView, SystemStats } from "./lib/generated/protocol";
   import type { ScreenId } from "./lib/screens";
@@ -48,6 +49,15 @@
 
   let bundledVersion = $state<string | null>(null);
   const connection = $derived(connectionBadge($appState.link.status, $appState.problem, bundledVersion));
+
+  let appKnown = $state(false);
+  const autostart = $derived(autostartView($appState.link, appKnown));
+  const toggleAutostart = () => send({ SetAutostart: { enabled: !autostart.on } });
+  // Whether the extension knows where the app is; looked at again when the switch changes.
+  $effect(() => {
+    autostart.on;
+    autostartReady().then((ready) => (appKnown = ready), () => (appKnown = false));
+  });
 
   let settingsView = $state<SettingsView | null>(null);
   const midi = $derived(settingsView && midiBadge(settingsView));
@@ -152,7 +162,7 @@
   <WizardScreen onclose={() => (wizardOpen = false)} />
 {:else}
   <div class="layout">
-    <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} {midi} onMidi={() => select("settings")} onConnection={openConnection} />
+    <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} {midi} onMidi={() => select("settings")} onConnection={openConnection} {autostart} onAutostart={toggleAutostart} />
     <main class="content" tabindex="-1" bind:this={content}>
       {#if screen === "player"}
         <PlayerScreen
@@ -179,7 +189,7 @@
       {:else if screen === "checklist"}
         <ChecklistScreen onSetup={() => (wizardOpen = true)} onSetlists={() => select("setlists")} onPerform={enterPerformer} />
       {:else if screen === "settings"}
-        <SettingsScreen {connection} onSetup={() => (wizardOpen = true)} />
+        <SettingsScreen {connection} onSetup={() => (wizardOpen = true)} {autostart} onAutostart={toggleAutostart} />
       {:else}
         <HelpScreen />
       {/if}

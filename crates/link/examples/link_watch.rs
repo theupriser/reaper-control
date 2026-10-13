@@ -37,11 +37,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             LinkEvent::Catalog(catalog) => {
                 println!(
-                    "{at:>6.1}s catalog revision {}, project {}, {} songs, {} cues",
+                    "{at:>6.1}s catalog revision {}, project {}, {} songs, {} cues, autostart {}",
                     catalog.revision,
                     catalog.project_id,
                     catalog.project_songs.len(),
-                    catalog.cues.len()
+                    catalog.cues.len(),
+                    catalog.autostart
                 );
                 for song in catalog.project_songs.iter().take(3) {
                     println!(
