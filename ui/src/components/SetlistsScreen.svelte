@@ -7,7 +7,7 @@
   import SetlistCards from "./SetlistCards.svelte";
   import SetlistEditor from "./SetlistEditor.svelte";
 
-  let { catalog, send }: { catalog: Catalog; send: (command: Command) => Promise<void> } = $props();
+  let { catalog, send, onPlayed }: { catalog: Catalog; send: (command: Command) => Promise<void>; onPlayed: () => void } = $props();
 
   let draft = $state<edit.SetlistDraft | null>(null);
   const saved = $derived(draft ? catalog.setlists.find((setlist) => setlist.id === draft?.id) : undefined);
@@ -27,6 +27,10 @@
     (draft = edit.emptyDraft(strings.setlists.newName, catalog.setlists.map((setlist) => setlist.id)));
   const change = (next: (current: edit.SetlistDraft) => edit.SetlistDraft) => {
     if (draft) draft = next(draft);
+  };
+  const play = (id: string) => {
+    send({ SetActiveSetlist: { id } });
+    onPlayed();
   };
   const save = () => draft && send(edit.saveCommand(draft));
   let deletingId = $state<string | null>(null);
@@ -61,7 +65,7 @@
     onSave={save}
     onDiscard={discard}
     onReload={discard}
-    onPlay={() => saved && send({ SetActiveSetlist: { id: saved.id } })} />
+    onPlay={() => saved && play(saved.id)} />
   <LeaveSetlistDialog open={leaving} onLeave={leave} onStay={() => (leaving = false)} />
 {:else}
   <section class="screen">
@@ -77,7 +81,7 @@
       songs={catalog.project_songs}
       playing={catalog.active_setlist}
       onOpen={open}
-      onPlay={(id) => send({ SetActiveSetlist: { id } })}
+      onPlay={play}
       onDelete={(id) => (deletingId = id)}
       onCreate={create} />
     <DeleteSetlistDialog

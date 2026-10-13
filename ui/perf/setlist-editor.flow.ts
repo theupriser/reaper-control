@@ -61,6 +61,7 @@ test("the editor plays the setlist once it is saved", async ({ page }) => {
   await page.getByRole("region", { name: "Saturday" }).getByRole("button", { name: "Edit songs" }).click();
   await page.getByRole("button", { name: "Play this setlist" }).click();
   expect(await dispatched(page)).toEqual([{ SetActiveSetlist: { id: "sat" } }]);
+  await expect(page.getByRole("heading", { name: "Setlists" })).toHaveCount(0);
 });
 
 test("leaving some project songs out is not a problem", async ({ page }) => {
@@ -150,4 +151,5 @@ test("a card plays its setlist", async ({ page }) => {
   await openSetlists(page);
   await page.getByRole("region", { name: "Saturday" }).getByRole("button", { name: "Play this" }).click();
   expect(await dispatched(page)).toEqual([{ SetActiveSetlist: { id: "sat" } }]);
+  await expect(page.getByRole("heading", { name: "Setlists" })).toHaveCount(0);
 });
