@@ -2,7 +2,6 @@
 
 #[cfg(windows)]
 mod dll_main;
-mod exit_diagnostic;
 mod exit_file;
 mod exit_notice;
 mod missing_functions;
@@ -15,6 +14,7 @@ mod surface;
 use std::error::Error;
 use std::path::PathBuf;
 use std::sync::OnceLock;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use reaper_low::PluginContext;
 use reaper_medium::ReaperSession;
@@ -34,22 +34,30 @@ static LOG: OnceLock<Log> = OnceLock::new();
 static FAULTS: OnceLock<FaultFile> = OnceLock::new();
 static EXIT_FILE: OnceLock<ExitFile> = OnceLock::new();
 static CLOSING_FRAME: OnceLock<Vec<u8>> = OnceLock::new();
+static SAID_GOODBYE: AtomicBool = AtomicBool::new(false);
 
 unsafe extern "C" {
     fn atexit(callback: extern "C" fn()) -> i32;
 }
 
-/// What REAPER's exit does for us, from the C runtime's exit hook on macOS and from `DllMain` when
-/// the DLL unloads on Windows (ADR-009): tells the connected apps that REAPER is quitting, then
-/// removes the safe-mode marker. A crash, a kill or SIGTERM never gets here, so the marker stays
-/// and no goodbye is sent. Only atomics, raw operating system calls and prepared data are used,
-/// as at this point threads and Rust's thread-locals may be gone.
-fn leave() {
-    exit_diagnostic::note("leave called", 0);
-    if let Some(frame) = CLOSING_FRAME.get() {
+/// Tells the connected apps that REAPER is quitting, once. Called from the entry point when
+/// REAPER calls it with no plugin record at exit (Windows), and from `leave` (macOS, where the C
+/// runtime's exit hook is the only call). A crash, a kill or SIGTERM never gets here.
+fn say_goodbye() {
+    if let Some(frame) = CLOSING_FRAME.get()
+        && !SAID_GOODBYE.swap(true, Ordering::SeqCst)
+    {
         exit_notice::tell_clients(frame);
     }
-    exit_diagnostic::note("leave told the clients", 0);
+}
+
+/// What REAPER's exit does for us at the very end, from the C runtime's exit hook on macOS and from
+/// `DllMain` when the DLL unloads on Windows (ADR-009): the goodbye if it has not gone yet, then
+/// removes the safe-mode marker. A crash, a kill or SIGTERM never gets here, so the marker stays.
+/// Only atomics, raw operating system calls and prepared data are used, as at this point threads
+/// and Rust's thread-locals may be gone and Winsock no longer works.
+fn leave() {
+    say_goodbye();
     if let Some(file) = EXIT_FILE.get() {
         file.remove();
     }
@@ -71,7 +79,9 @@ unsafe extern "C" fn ReaperPluginEntry(
     rec: *mut reaper_low::raw::reaper_plugin_info_t,
 ) -> std::os::raw::c_int {
     if rec.is_null() {
-        exit_diagnostic::note("entry called with a null record", 0);
+        // REAPER's call at exit (seen on Windows; macOS has the exit hook): every thread and
+        // Winsock are still alive, which they are not by the time the DLL unloads.
+        say_goodbye();
     }
     let static_context = reaper_low::static_plugin_context();
     // SAFETY: REAPER passes the handle and the plugin info record it owns, as the macro assumes.
@@ -121,7 +131,6 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
         }
     }
     let _ = CLOSING_FRAME.set(link::closing_frame());
-    exit_diagnostic::prepare(&directory);
     // SAFETY: registers a plain `extern "C" fn` that removes a file and writes one prepared frame.
     let registered = unsafe { atexit(on_exit) };
     log.line(&format!(
