@@ -43,7 +43,7 @@ test("edit a setlist, save it and play it", async ({ page }) => {
   await expect(page.getByText("no longer in the REAPER project")).toBeVisible();
   await expect(page.getByRole("button", { name: "Save setlist" })).toBeDisabled();
 
-  await page.getByRole("button", { name: "Move Ballad up" }).click();
+  await page.getByRole("button", { name: "Remove Opener" }).click();
   await page.getByRole("button", { name: "Remove gone" }).click();
   await page.getByRole("button", { name: "Add Closer" }).click();
   await page.getByLabel("Name").fill("Saturday late");
@@ -52,7 +52,7 @@ test("edit a setlist, save it and play it", async ({ page }) => {
 
   await page.getByRole("button", { name: "Save setlist" }).click();
   expect(await dispatched(page)).toEqual([
-    { SaveSetlist: { id: "sat", name: "Saturday late", entries: [{ id: 2, song_id: "s2" }, { id: 1, song_id: "s1" }, { id: 4, song_id: "s3" }], expected_revision: 2 } },
+    { SaveSetlist: { id: "sat", name: "Saturday late", entries: [{ id: 2, song_id: "s2" }, { id: 4, song_id: "s3" }], expected_revision: 2 } },
   ]);
 });
 

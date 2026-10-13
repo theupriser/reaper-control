@@ -10,7 +10,6 @@
     insertAt,
     element = $bindable(),
     drag,
-    onMove,
     onRemove,
   }: {
     rows: EntryRow[];
@@ -18,7 +17,6 @@
     insertAt: number | null;
     element: HTMLElement | undefined;
     drag: (row: EntryRow) => DragHandlers;
-    onMove: (entryId: number, direction: -1 | 1) => void;
     onRemove: (entryId: number) => void;
   } = $props();
 </script>
@@ -29,13 +27,9 @@
     {#each rows as row, at (row.id)}
       <SetlistEntryRow
         {row}
-        first={at === 0}
-        last={at === rows.length - 1}
         lifted={liftedEntry === row.id}
         dropBefore={insertAt === at}
         drag={drag(row)}
-        onUp={() => onMove(row.id, -1)}
-        onDown={() => onMove(row.id, 1)}
         onRemove={() => onRemove(row.id)} />
     {/each}
     <div class="end" class:active={insertAt === rows.length}>{rows.length === 0 ? strings.setlists.empty : strings.setlists.dropHint}</div>

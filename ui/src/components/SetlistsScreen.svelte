@@ -55,7 +55,6 @@
     playing={saved !== undefined && catalog.active_setlist === saved.id}
     onBack={back}
     onRename={(name) => change((current) => edit.rename(current, name))}
-    onMove={(entryId, direction) => change((current) => edit.moveEntry(current, entryId, direction))}
     onMoveTo={(entryId, index) => change((current) => edit.moveEntryTo(current, entryId, index))}
     onAdd={(songId, index) => change((current) => (index === undefined ? edit.addSong(current, songId) : edit.addSongAt(current, songId, index)))}
     onRemove={(entryId) => change((current) => edit.removeEntry(current, entryId))}

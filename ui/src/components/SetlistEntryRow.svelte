@@ -9,23 +9,15 @@
 
   let {
     row,
-    first,
-    last,
     lifted,
     dropBefore,
     drag,
-    onUp,
-    onDown,
     onRemove,
   }: {
     row: EntryRow;
-    first: boolean;
-    last: boolean;
     lifted: boolean;
     dropBefore: boolean;
     drag: DragHandlers;
-    onUp: () => void;
-    onDown: () => void;
     onRemove: () => void;
   } = $props();
 </script>
@@ -37,10 +29,6 @@
   <span class="name">{row.name}</span>
   {#if row.missing}<span title={strings.setlists.missingSong}><StatusBadge tone="warn" label={strings.setlists.missing} /></span>{/if}
   <span class="time">{row.duration === null ? strings.setlists.noTime : formatTime(row.duration)}</span>
-  <span class="steps">
-    <Button label={strings.setlists.moveUp(row.name)} disabled={first} onclick={onUp}>↑</Button>
-    <Button label={strings.setlists.moveDown(row.name)} disabled={last} onclick={onDown}>↓</Button>
-  </span>
   <Button kind="danger" label={strings.setlists.remove(row.name)} onclick={onRemove}>✕</Button>
 </div>
 
@@ -53,5 +41,4 @@
   .gone { background: color-mix(in srgb, var(--red) 10%, transparent); }
   .gone .name { color: var(--red); }
   .time { min-width: 48px; text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; color: var(--muted); }
-  .steps { display: flex; gap: 2px; }
 </style>

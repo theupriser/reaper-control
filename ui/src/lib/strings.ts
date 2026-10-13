@@ -62,8 +62,6 @@ export const strings = {
     noTime: "--:--",
     listMeta: (count: number, playing: boolean) => `${count === 1 ? "1 song" : `${count} songs`}${playing ? " · Playing" : ""}`,
     remove: (name: string) => `Remove ${name}`,
-    moveUp: (name: string) => `Move ${name} up`,
-    moveDown: (name: string) => `Move ${name} down`,
     missing: "Not in the project",
     missingSong: "This song is no longer in the project",
     save: "Save setlist",

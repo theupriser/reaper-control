@@ -52,16 +52,6 @@ export const removeEntry = (draft: SetlistDraft, entryId: number): SetlistDraft 
   entries: draft.entries.filter((entry) => entry.id !== entryId),
 });
 
-/** Moves an entry up (-1) or down (1); at either end it stays where it is. */
-export function moveEntry(draft: SetlistDraft, entryId: number, direction: -1 | 1): SetlistDraft {
-  const from = draft.entries.findIndex((entry) => entry.id === entryId);
-  const to = from + direction;
-  if (from < 0 || to < 0 || to >= draft.entries.length) return draft;
-  const entries = [...draft.entries];
-  [entries[from], entries[to]] = [entries[to], entries[from]];
-  return { ...draft, entries };
-}
-
 /** Drops an entry in front of the entry now at `index` (the index counts the list as it was before the move). */
 export function moveEntryTo(draft: SetlistDraft, entryId: number, index: number): SetlistDraft {
   const from = draft.entries.findIndex((entry) => entry.id === entryId);

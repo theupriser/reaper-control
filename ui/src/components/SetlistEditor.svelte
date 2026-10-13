@@ -19,7 +19,6 @@
     playing,
     onBack,
     onRename,
-    onMove,
     onMoveTo,
     onAdd,
     onRemove,
@@ -37,7 +36,6 @@
     playing: boolean;
     onBack: () => void;
     onRename: (name: string) => void;
-    onMove: (entryId: number, direction: -1 | 1) => void;
     onMoveTo: (entryId: number, index: number) => void;
     onAdd: (songId: string, index?: number) => void;
     onRemove: (entryId: number) => void;
@@ -114,7 +112,7 @@
   {#if missing > 0}<p class="banner" role="status">{strings.setlists.missingBanner(missing)}</p>{/if}
 
   <div class="columns">
-    <SetlistEntries {rows} liftedEntry={lifted?.kind === "entry" ? lifted.id : null} {insertAt} bind:element={list} drag={entryDrag} {onMove} {onRemove} />
+    <SetlistEntries {rows} liftedEntry={lifted?.kind === "entry" ? lifted.id : null} {insertAt} bind:element={list} drag={entryDrag} {onRemove} />
     <SongPool {songs} {used} lifted={lifted?.kind === "song" ? lifted.id : null} drag={songDrag} onAdd={(songId) => onAdd(songId)} />
   </div>
 </div>

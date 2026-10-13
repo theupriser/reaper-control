@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SetlistInfo, SongInfo } from "./generated/protocol";
-import { addSong, addSongAt, deleteCommand, draftOf, emptyDraft, idFromName, isChanged, moveEntry, moveEntryTo, removeEntry, rename, saveCommand, saveProblem } from "./setlist-edit";
+import { addSong, addSongAt, deleteCommand, draftOf, emptyDraft, idFromName, isChanged, moveEntryTo, removeEntry, rename, saveCommand, saveProblem } from "./setlist-edit";
 
 const saved: SetlistInfo = {
   id: "sat",
@@ -21,20 +21,11 @@ describe("setlist edit", () => {
     expect(draft.entries.map((entry) => entry.id)).toEqual([1, 4, 6]);
   });
 
-  it("moves an entry and stays put at the ends", () => {
-    const draft = draftOf(saved);
-    expect(moveEntry(draft, 4, -1).entries.map((entry) => entry.song_id)).toEqual(["b", "a", "c"]);
-    expect(moveEntry(draft, 4, 1).entries.map((entry) => entry.song_id)).toEqual(["a", "c", "b"]);
-    expect(moveEntry(draft, 1, -1)).toBe(draft);
-    expect(moveEntry(draft, 5, 1)).toBe(draft);
-    expect(moveEntry(draft, 99, 1)).toBe(draft);
-  });
-
   it("knows what changed", () => {
     const draft = draftOf(saved);
     expect(isChanged(draft, saved)).toBe(false);
     expect(isChanged(rename(draft, "Sunday"), saved)).toBe(true);
-    expect(isChanged(moveEntry(draft, 4, -1), saved)).toBe(true);
+    expect(isChanged(moveEntryTo(draft, 4, 0), saved)).toBe(true);
     expect(isChanged(emptyDraft("New", []), undefined)).toBe(true);
   });
 
