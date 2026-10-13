@@ -55,3 +55,25 @@ test("the Player layout fits wide and narrow windows without sideways scrolling"
     await page.screenshot({ path: `perf-results/player-${width}.png` });
   }
 });
+
+test("a long song name stays on one line and slides, so the Player does not change height", async ({ page }) => {
+  const long = "A very long song name that goes on and on and on and on until it cannot possibly fit next to the time";
+  const crowded = { ...view, catalog: { ...view.catalog, songs: [song(1, 0), song(2, 200, { name: long }), song(3, 400)] } };
+  await page.addInitScript(tauriStandIn, crowded);
+  await page.goto("/");
+  const title = page.getByRole("heading", { level: 2, name: long });
+  await expect(title).toBeVisible();
+  const box = await title.boundingBox();
+  expect(box?.height).toBeLessThan(50);
+  const line = title.locator(".line");
+  const offset = () => line.evaluate((node) => new DOMMatrix(getComputedStyle(node).transform).m41);
+  expect(await offset()).toBe(0);
+  await expect.poll(offset, { timeout: 8000 }).toBeLessThan(-100);
+
+  await page.addInitScript(tauriStandIn, view);
+  await page.goto("/");
+  const short = await page.getByRole("heading", { level: 2, name: "Song 2" }).boundingBox();
+  expect(short?.height).toBe(box?.height);
+  await page.waitForTimeout(3500);
+  expect(await page.getByRole("heading", { level: 2, name: "Song 2" }).locator(".line").evaluate((node) => new DOMMatrix(getComputedStyle(node).transform).m41)).toBe(0);
+});
