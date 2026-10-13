@@ -1,4 +1,4 @@
-//! The app and the extension have their own versions (owner's decision, 2026-10-10: app 2.0.0,
+//! The app and the extension have their own versions (owner's decision, 2026-10-10: app 2.0.0, 2.1.0 from 2026-10-13,
 //! extension 1.0.0, then 1.0.1 to 1.0.5 for the hard stop fixes, 1.0.6 for the seek that lands a hair before a song start, 1.0.7 for starting the app with a project). Every crate takes the app version except the extension, whose version is
 //! the one the installer's handshake check (SPEC §13.1 step 6) expects (WP 3.10).
 
