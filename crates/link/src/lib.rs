@@ -10,4 +10,7 @@ mod wire;
 pub use client::{ClientConfig, LinkClient, LinkEvent, SendError};
 pub use endpoint::{Endpoint, EndpointError};
 pub use event_log::{EventLog, Replay};
-pub use server::{CommandHandler, LinkServer, ServerError};
+pub use server::{
+    CommandHandler, EXIT_HANDLE_SLOTS, EXIT_HANDLES, ExitHandles, LinkServer, ServerError,
+    closing_frame,
+};

@@ -147,6 +147,7 @@ fn all_sizes() -> Vec<(String, usize)> {
         link::EventLog,
         link::Replay,
         link::LinkServer,
+        link::ExitHandles,
         link::ServerError,
         performance::Effect,
         performance::Event,

@@ -454,3 +454,23 @@ fn an_idle_extension_that_answers_its_pings_is_never_quiet() -> TestResult {
     drop(server);
     Ok(())
 }
+
+#[test]
+fn the_handle_of_a_connected_client_is_kept_for_the_exit_hook_and_let_go_after() -> TestResult {
+    let (server, endpoint) = started()?;
+    let before = link::EXIT_HANDLES.snapshot().into_iter().flatten().count();
+    let (client, events) = client_for(&endpoint);
+    connected(&events);
+    let during = link::EXIT_HANDLES.snapshot().into_iter().flatten().count();
+    assert_eq!(during, before + 1);
+    drop(client);
+    let start = Instant::now();
+    while server.client_count() > 0 && start.elapsed() < Duration::from_secs(3) {
+        std::thread::sleep(Duration::from_millis(20));
+    }
+    assert_eq!(
+        link::EXIT_HANDLES.snapshot().into_iter().flatten().count(),
+        before
+    );
+    Ok(())
+}

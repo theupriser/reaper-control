@@ -35,6 +35,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     live.phase, live.transport, live.position
                 );
             }
+            LinkEvent::Closing => println!("{at:>6.1}s REAPER says it is closing"),
             LinkEvent::Catalog(catalog) => {
                 println!(
                     "{at:>6.1}s catalog revision {}, project {}, {} songs, {} cues, autostart {}",

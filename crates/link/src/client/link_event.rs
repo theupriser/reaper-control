@@ -29,6 +29,8 @@ pub enum LinkEvent {
         /// What happened.
         outcome: Outcome,
     },
+    /// REAPER said it is quitting cleanly; the connection ends next.
+    Closing,
     /// The connection is gone; the client is trying again.
     Disconnected,
     /// The extension speaks another protocol than the app, so the client does not connect.
@@ -53,7 +55,11 @@ impl LinkEvent {
                 Some(Self::EventsLost { oldest_available })
             }
             ServerMessage::Ack { id, outcome } => Some(Self::Ack { id, outcome }),
+            ServerMessage::Closing => Some(Self::Closing),
             ServerMessage::Welcome { .. } | ServerMessage::Pong => None,
         }
     }
 }
+
+#[cfg(test)]
+mod tests;

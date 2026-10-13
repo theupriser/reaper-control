@@ -3,6 +3,7 @@
 #[cfg(windows)]
 mod dll_main;
 mod exit_file;
+mod exit_notice;
 mod missing_functions;
 #[cfg(feature = "probe")]
 mod probe;
@@ -31,17 +32,30 @@ static FAULT: Fault = Fault::new();
 static LOG: OnceLock<Log> = OnceLock::new();
 static FAULTS: OnceLock<FaultFile> = OnceLock::new();
 static EXIT_FILE: OnceLock<ExitFile> = OnceLock::new();
+static CLOSING_FRAME: OnceLock<Vec<u8>> = OnceLock::new();
 
 unsafe extern "C" {
     fn atexit(callback: extern "C" fn()) -> i32;
 }
 
-/// REAPER does not call `close_no_reset` or drop the surface at a clean quit (ADR-009), but the C
-/// runtime runs this at exit. A crash, a kill or SIGTERM never gets here, so the marker stays.
-extern "C" fn on_exit() {
+/// What REAPER's exit does for us, from the C runtime's exit hook on macOS and from `DllMain` when
+/// the DLL unloads on Windows (ADR-009): tells the connected apps that REAPER is quitting, then
+/// removes the safe-mode marker. A crash, a kill or SIGTERM never gets here, so the marker stays
+/// and no goodbye is sent. Only atomics, raw operating system calls and prepared data are used,
+/// as at this point threads and Rust's thread-locals may be gone.
+fn leave() {
+    if let Some(frame) = CLOSING_FRAME.get() {
+        exit_notice::tell_clients(frame);
+    }
     if let Some(file) = EXIT_FILE.get() {
         file.remove();
     }
+}
+
+/// REAPER does not call `close_no_reset` or drop the surface at a clean quit (ADR-009), but the C
+/// runtime runs this at exit on macOS.
+extern "C" fn on_exit() {
+    leave();
 }
 
 reaper_low::swell_dll_main!();
@@ -100,7 +114,8 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
             }
         }
     }
-    // SAFETY: registers a plain `extern "C" fn` that only removes a file.
+    let _ = CLOSING_FRAME.set(link::closing_frame());
+    // SAFETY: registers a plain `extern "C" fn` that removes a file and writes one prepared frame.
     let registered = unsafe { atexit(on_exit) };
     log.line(&format!(
         "started, version {}, atexit registered: {registered}",

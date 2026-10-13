@@ -43,13 +43,6 @@ pub fn fault_file() -> Option<PathBuf> {
     Some(endpoint_file()?.with_file_name("faulted"))
 }
 
-/// The extension's safe-mode marker: there while REAPER runs with the extension, gone after a
-/// clean exit, left behind by a crash.
-#[must_use]
-pub fn running_file() -> Option<PathBuf> {
-    Some(endpoint_file()?.with_file_name("running"))
-}
-
 /// Where the app tells the extension where it is installed: next to `endpoint.json`. The extension
 /// starts the app from it when a project asks for that.
 #[must_use]

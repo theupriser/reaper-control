@@ -97,7 +97,7 @@ fn typescript_matches_the_rust_types() -> Result<(), Box<dyn std::error::Error>>
 /// The version and the fingerprint of the types the extension link carries. The extension and the
 /// app are built apart, so a change to these types without a new `PROTOCOL_VERSION` lets an old
 /// extension connect and then fail on a message it cannot read.
-const LINK_SCHEMA: (u32, u64) = (4, 18382627383991035106);
+const LINK_SCHEMA: (u32, u64) = (5, 18382627383991035106);
 
 fn fingerprint(text: &str) -> u64 {
     text.bytes().fold(0xcbf2_9ce4_8422_2325, |hash, byte| {
