@@ -1,6 +1,6 @@
-import type { SongInfo } from "./generated/protocol";
+import type { SetlistInfo, SongInfo } from "./generated/protocol";
 import { songLength } from "./performer-view";
-import type { SetlistDraft } from "./setlist-edit";
+import { draftOf, type SetlistDraft } from "./setlist-edit";
 
 export interface EntryRow {
   id: number;
@@ -32,4 +32,26 @@ export const totalDuration = (rows: EntryRow[]): number => rows.reduce((sum, row
 export function matchingSongs(songs: SongInfo[], query: string): SongInfo[] {
   const wanted = query.trim().toLowerCase();
   return wanted === "" ? songs : songs.filter((song) => song.name.toLowerCase().includes(wanted));
+}
+
+export interface CardSummary {
+  count: number;
+  duration: number;
+  preview: string[];
+  more: number;
+  missing: number;
+}
+
+const PREVIEW_SONGS = 3;
+
+/** What a setlist card shows: the count, the play time of the songs the project has, the first names and how many are gone. */
+export function cardSummary(setlist: SetlistInfo, projectSongs: SongInfo[]): CardSummary {
+  const rows = entryRows(draftOf(setlist), projectSongs);
+  return {
+    count: rows.length,
+    duration: totalDuration(rows),
+    preview: rows.slice(0, PREVIEW_SONGS).map((row) => row.name),
+    more: Math.max(rows.length - PREVIEW_SONGS, 0),
+    missing: rows.filter((row) => row.missing).length,
+  };
 }

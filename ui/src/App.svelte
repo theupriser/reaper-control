@@ -163,7 +163,7 @@
         {#if $appState.error}<p class="error" role="alert">{$appState.error}</p>{/if}
         {#if $appState.pending.length > 0}<p class="pending" role="status">{strings.pending.sending}</p>{/if}
       {:else if screen === "setlists"}
-        <SetlistsScreen catalog={$appState.link.catalog} {send} />
+        <SetlistsScreen catalog={$appState.link.catalog} {send} onPlayed={() => select("player")} />
       {:else if screen === "checklist"}
         <ChecklistScreen onSetup={() => (wizardOpen = true)} onSetlists={() => select("setlists")} onPerform={enterPerformer} />
       {:else if screen === "settings"}
