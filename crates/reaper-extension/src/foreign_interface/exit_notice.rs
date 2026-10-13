@@ -5,7 +5,7 @@
 //! the clients' socket handles are kept in atomics by the link server, and the frame goes out with
 //! one `send` call per handle straight to the operating system.
 
-use link::EXIT_HANDLES;
+use link::EXIT_REGISTRY;
 
 #[cfg(windows)]
 #[link(name = "ws2_32")]
@@ -26,7 +26,7 @@ unsafe extern "C" {
 /// Writes `frame` to every client the server holds right now. Failures are ignored: the app
 /// then closes the way it would after a crash, only later.
 pub(super) fn tell_clients(frame: &[u8]) {
-    for handle in EXIT_HANDLES.snapshot().into_iter().flatten() {
+    for handle in EXIT_REGISTRY.snapshot().into_iter().flatten() {
         write_frame(handle, frame);
     }
 }

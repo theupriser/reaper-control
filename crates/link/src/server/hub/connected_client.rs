@@ -2,7 +2,7 @@ use std::net::TcpStream;
 use std::sync::Arc;
 use std::sync::mpsc::SyncSender;
 
-use crate::server::exit_handles::EXIT_HANDLES;
+use crate::server::exit_registry::EXIT_REGISTRY;
 
 pub(in crate::server) type Frame = Arc<Vec<u8>>;
 
@@ -17,7 +17,7 @@ impl ConnectedClient {
     /// Remembers the stream's handle for the exit hook for as long as the client is held.
     pub(super) fn new(id: u64, outbox: SyncSender<Frame>, stream: TcpStream) -> Self {
         let handle = raw_handle(&stream);
-        EXIT_HANDLES.add(handle);
+        EXIT_REGISTRY.add(handle);
         Self {
             id,
             outbox,
@@ -30,7 +30,7 @@ impl ConnectedClient {
 impl Drop for ConnectedClient {
     // Runs before `stream` closes, so a remembered handle never outlives its socket.
     fn drop(&mut self) {
-        EXIT_HANDLES.remove(self.handle);
+        EXIT_REGISTRY.remove(self.handle);
     }
 }
 

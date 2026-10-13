@@ -11,6 +11,6 @@ pub use client::{ClientConfig, LinkClient, LinkEvent, SendError};
 pub use endpoint::{Endpoint, EndpointError};
 pub use event_log::{EventLog, Replay};
 pub use server::{
-    CommandHandler, EXIT_HANDLE_SLOTS, EXIT_HANDLES, ExitHandles, LinkServer, ServerError,
+    CommandHandler, EXIT_REGISTRY, EXIT_REGISTRY_SLOTS, ExitRegistry, LinkServer, ServerError,
     closing_frame,
 };
