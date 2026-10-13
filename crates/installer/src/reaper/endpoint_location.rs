@@ -43,6 +43,13 @@ pub fn fault_file() -> Option<PathBuf> {
     Some(endpoint_file()?.with_file_name("faulted"))
 }
 
+/// Where the app tells the extension where it is installed: next to `endpoint.json`. The extension
+/// starts the app from it when a project asks for that.
+#[must_use]
+pub fn application_file() -> Option<PathBuf> {
+    Some(endpoint_file()?.with_file_name("application"))
+}
+
 #[cfg(target_os = "windows")]
 fn resource_path() -> Option<PathBuf> {
     Some(PathBuf::from(std::env::var_os("APPDATA")?).join("REAPER"))

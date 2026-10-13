@@ -14,7 +14,7 @@ export interface AppState {
 export const emptyLink: LinkView = {
   status: "NotRunning",
   live: null,
-  catalog: { revision: 0, setlist_revision: 0, project_id: "", songs: [], project_songs: [], cues: [], setlists: [], active_setlist: null },
+  catalog: { revision: 0, setlist_revision: 0, project_id: "", songs: [], project_songs: [], cues: [], setlists: [], active_setlist: null, autostart: false },
 };
 
 export const initialState: AppState = { link: emptyLink, problem: null, notices: [], error: null, pending: [] };

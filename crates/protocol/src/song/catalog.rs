@@ -9,7 +9,7 @@ pub struct Catalog {
     /// Raised whenever songs or cues change.
     #[ts(type = "number")]
     pub revision: u64,
-    /// Raised whenever a setlist changes.
+    /// Raised whenever a setlist, the played setlist or the autostart choice changes.
     #[ts(type = "number")]
     pub setlist_revision: u64,
     /// The id the extension keeps in the project, empty while the project has none yet. It names the app's restore-only copy of the setlists.
@@ -24,4 +24,6 @@ pub struct Catalog {
     pub setlists: Vec<SetlistInfo>,
     /// The id of the setlist being played, if any.
     pub active_setlist: Option<String>,
+    /// Whether the extension starts the app when this project opens. A change raises `setlist_revision`.
+    pub autostart: bool,
 }

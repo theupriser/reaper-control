@@ -1,4 +1,5 @@
-//! Joins the link server to the timer loop: commands come in on the main thread's tick, state goes out.
+//! Joins the link server to the timer loop: commands come in on the main thread's tick, state goes out,
+//! and a project that asks for it gets the app started.
 
 mod bridge_error;
 
@@ -12,6 +13,7 @@ use protocol::Command;
 use protocol::message::Outcome;
 use reaper_port::ReaperPort;
 
+use crate::autostart::{Autostarter, ProcessLauncher};
 use crate::journal::Journal;
 use crate::log::Log;
 use timer_loop::{QueuedCommands, StatePublisher, TimerLoop};
@@ -23,6 +25,7 @@ pub struct LinkBridge {
     endpoint_file: PathBuf,
     journal: Journal,
     publisher: StatePublisher,
+    autostarter: Autostarter,
 }
 
 impl LinkBridge {
@@ -42,6 +45,7 @@ impl LinkBridge {
             endpoint_file,
             journal: Journal::new(directory.join("journal.log")),
             publisher: StatePublisher::default(),
+            autostarter: Autostarter::new(directory.join("application"), Box::new(ProcessLauncher)),
         })
     }
 
@@ -56,6 +60,15 @@ impl LinkBridge {
         let journal = &self.journal;
         self.publisher
             .publish(timer_loop, &self.server, |event| journal.record(event));
+        let catalog = timer_loop.catalog();
+        if let Some(line) = self.autostarter.observe(
+            &catalog.project_id,
+            catalog.autostart,
+            self.server.client_count(),
+            timer_loop.now(),
+        ) {
+            log.line(&line);
+        }
     }
 }
 

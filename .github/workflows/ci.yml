@@ -189,6 +189,15 @@ jobs:
           testing/scripts/soak_short_project.sh "$PWD/soak-short.rpp"
           SMOKE_PROJECT="$PWD/soak-short.rpp" testing/scripts/smoke_extension.sh "$REAPER_EXECUTABLE" "$extension" \
             testing/scripts/security_check.sh testing/scripts/soak_short.sh
+      - name: A project that asks gets the app started; one that does not asks nothing
+        shell: bash
+        run: |
+          extension=$(ls dist/reaper_rc2-*.dylib dist/reaper_rc2-*.dll 2>/dev/null | head -1 || true)
+          [ -n "$extension" ] || { echo "no packaged extension in dist/"; exit 1; }
+          SMOKE_PROJECT="$PWD/testing/data/projects/autostart-sample.rpp" testing/scripts/smoke_extension.sh "$REAPER_EXECUTABLE" "$extension" \
+            testing/scripts/autostart_check.sh
+          AUTOSTART_EXPECT=none SMOKE_PROJECT="$PWD/testing/data/projects/s1-sample.rpp" testing/scripts/smoke_extension.sh "$REAPER_EXECUTABLE" "$extension" \
+            testing/scripts/autostart_check.sh
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

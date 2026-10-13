@@ -48,6 +48,7 @@ pub(super) fn build_catalog(
             .collect(),
         setlists: project_setlists.setlists().to_vec(),
         active_setlist: project_setlists.active().map(str::to_string),
+        autostart: project_setlists.autostart(),
     }
 }
 

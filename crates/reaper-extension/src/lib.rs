@@ -3,6 +3,7 @@
 //! the performance core, and the bridge that joins it to the link server.
 #![deny(unsafe_code)]
 
+mod autostart;
 mod fault;
 mod fault_file;
 #[allow(unsafe_code)] // the one module that talks to REAPER and the C runtime (SPEC S-9.2)
@@ -14,6 +15,7 @@ mod safe_mode_marker;
 mod start_up;
 mod tick_watchdog;
 
+pub use autostart::{Autostarter, Launcher, ProcessLauncher};
 pub use fault::Fault;
 pub use fault_file::FaultFile;
 pub use link_bridge::{BridgeError, LinkBridge};

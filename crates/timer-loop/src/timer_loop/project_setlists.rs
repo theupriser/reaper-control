@@ -13,6 +13,8 @@ const SECTION: &str = "RC2";
 const SETLISTS_KEY: &str = "setlists";
 /// The id of the setlist that is played; without one the songs play in timeline order.
 const ACTIVE_KEY: &str = "active_setlist";
+/// "1" when the extension starts the app as this project opens.
+const AUTOSTART_KEY: &str = "autostart";
 
 /// The setlists stored in the project's ExtState and which one is played. A setlist that does not
 /// hold together (empty name, repeated entry id) is left out, as is stored text that is not JSON.
@@ -20,6 +22,7 @@ const ACTIVE_KEY: &str = "active_setlist";
 pub(super) struct ProjectSetlists {
     setlists: Vec<SetlistInfo>,
     active: Option<String>,
+    autostart: bool,
     project_id: Option<String>,
     stored_text: Option<String>,
 }
@@ -34,6 +37,7 @@ impl ProjectSetlists {
         Self {
             setlists: stored.into_iter().filter(Self::holds_together).collect(),
             active: Self::read_active(port),
+            autostart: Self::read_autostart(port),
             project_id: project_identity::read(port),
             stored_text,
         }
@@ -44,12 +48,27 @@ impl ProjectSetlists {
     pub(super) fn is_current(&self, port: &impl ReaperPort) -> bool {
         port.ext_state(SECTION, SETLISTS_KEY) == self.stored_text
             && Self::read_active(port) == self.active
+            && Self::read_autostart(port) == self.autostart
             && project_identity::read(port) == self.project_id
     }
 
     fn read_active(port: &impl ReaperPort) -> Option<String> {
         port.ext_state(SECTION, ACTIVE_KEY)
             .filter(|id| !id.is_empty())
+    }
+
+    fn read_autostart(port: &impl ReaperPort) -> bool {
+        port.ext_state(SECTION, AUTOSTART_KEY).as_deref() == Some("1")
+    }
+
+    /// Whether the extension starts the app as this project opens.
+    pub(super) fn autostart(&self) -> bool {
+        self.autostart
+    }
+
+    /// Stores the autostart choice in the project; the next refresh reads it back.
+    pub(super) fn set_autostart(port: &mut impl ReaperPort, enabled: bool) {
+        port.set_ext_state(SECTION, AUTOSTART_KEY, if enabled { "1" } else { "" });
     }
 
     /// The id of the project, once it has one.

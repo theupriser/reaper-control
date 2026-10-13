@@ -26,6 +26,7 @@ An architecture test fails when something else sits in `testing/`.
 | `scripts/smoke_extension.sh` | the packaged extension loads and listens; runs further check scripts while REAPER is up | macOS or Windows, packaged extension (also runs in CI) |
 | `scripts/security_check.sh` | a wrong token, junk and an oversized length are closed without a reply; the port is not reachable on the network address | run by the smoke script (also in CI) |
 | `scripts/resource_audit.sh` | idle CPU and memory of the app, REAPER and the extension | macOS, release build |
+| `scripts/autostart_check.sh` | a project with the autostart switch on gets the app started once (a stand-in program takes its place), a project without it starts nothing | run by the smoke script with `data/projects/autostart-sample.rpp` or `s1-sample.rpp` (also in CI) |
 | `scripts/soak_short.sh` | 8 songs of 6 s: every hand-over completes within 0.5 s of the plan (about a minute; with `soak_short_project.sh`) | run by the smoke script (also in CI) |
 | `scripts/soak.sh` | 40 songs in a row: hand-over timing and flat memory (about 25 minutes) | isolated REAPER |
 | `scripts/chaos/*.sh` | project switch mid-song, markers inserted live, 1000 regions, restarts | macOS, unlocked screen |

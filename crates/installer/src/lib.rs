@@ -29,8 +29,8 @@ pub use plan::InstallPlan;
 pub use platform::InstallPlatform;
 pub use process::{FakeProcessCheck, ProcessCheck, SystemProcessCheck};
 pub use reaper::{
-    ReaperInstall, endpoint_file, endpoint_file_from, extension_directory, fault_file,
-    reaper_folder_argument,
+    ReaperInstall, application_file, endpoint_file, endpoint_file_from, extension_directory,
+    fault_file, reaper_folder_argument,
 };
 pub use report::InstallReport;
 pub use service::InstallationService;

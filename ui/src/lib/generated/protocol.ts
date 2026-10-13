@@ -48,7 +48,11 @@ expected_revision: number, } } | { "SetActiveSetlist": {
 /**
  * Identity of the setlist, if any.
  */
-id: string | null, } };
+id: string | null, } } | { "SetAutostart": { 
+/**
+ * Whether the extension starts the app when the project opens.
+ */
+enabled: boolean, } };
 
 /**
  * What REAPER's transport is doing.
@@ -211,7 +215,7 @@ export type Catalog = {
  */
 revision: number, 
 /**
- * Raised whenever a setlist changes.
+ * Raised whenever a setlist, the played setlist or the autostart choice changes.
  */
 setlist_revision: number, 
 /**
@@ -237,7 +241,11 @@ setlists: Array<SetlistInfo>,
 /**
  * The id of the setlist being played, if any.
  */
-active_setlist: string | null, };
+active_setlist: string | null, 
+/**
+ * Whether the extension starts the app when this project opens. A change raises `setlist_revision`.
+ */
+autostart: boolean, };
 
 /**
  * The state that changes all the time. Pushed on change (at most ~30 Hz while playing)

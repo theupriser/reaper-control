@@ -65,4 +65,10 @@ pub enum Command {
         /// Identity of the setlist, if any.
         id: Option<String>,
     },
+    /// Switch "Start Reaper Control when this project opens" on or off for the open project. The
+    /// choice is stored in the project.
+    SetAutostart {
+        /// Whether the extension starts the app when the project opens.
+        enabled: bool,
+    },
 }
