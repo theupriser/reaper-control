@@ -19,6 +19,7 @@ export const onNotice = (handler: (notice: Notice) => void): Promise<UnlistenFn>
 export const onLinkProblem = (handler: (problem: LinkProblem | null) => void): Promise<UnlistenFn> =>
   listen<LinkProblem | null>("link-problem", (event) => handler(event.payload));
 
+export const reenableExtension = (): Promise<void> => invoke<void>("reenable_extension");
 export const currentSystemStats = (): Promise<SystemStats> => invoke<SystemStats>("current_system_stats");
 
 export const markerReading = (name: string): Promise<MarkerReading> => invoke<MarkerReading>("marker_reading", { name });

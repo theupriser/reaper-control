@@ -37,7 +37,7 @@ test("a problem the app found shows in the sidebar indicator and clears again", 
   await page.addInitScript(tauriStandIn, view(connected));
   await page.goto("/");
   await page.getByRole("navigation").waitFor();
-  await page.evaluate(() => (window as any).__pushEvent("link-problem", { message: "The extension is not loaded", extension_outdated: false }));
+  await page.evaluate(() => (window as any).__pushEvent("link-problem", { message: "The extension is not loaded", extension_outdated: false, extension_faulted: false }));
   const indicator = page.getByRole("button", { name: "Connection details" });
   await expect(indicator).toContainText("REAPER disconnected");
   await expect(page.getByRole("alert")).toHaveCount(0);
@@ -78,4 +78,17 @@ test("the numbers in the health dialog keep updating while it is open", async ({
   await expect(dialog.locator(".bar.high")).toHaveCount(1);
   await expect(dialog.locator(".bar.medium")).toHaveCount(1);
   await page.screenshot({ path: "perf-results/health-bars.png" });
+});
+
+test("a crashed extension can be switched back on from the health dialog", async ({ page }) => {
+  await page.addInitScript(tauriStandIn, view("NotRunning"));
+  await page.goto("/");
+  await page.getByRole("navigation").waitFor();
+  await page.evaluate(() => (window as any).__pushEvent("link-problem", { message: "The extension turned itself off", extension_outdated: false, extension_faulted: true }));
+  await page.getByRole("button", { name: "Connection details" }).click();
+  const dialog = page.getByRole("dialog", { name: "Connection and health" });
+  await page.screenshot({ path: "perf-results/health-faulted.png" });
+  await dialog.getByRole("button", { name: "Switch the extension back on" }).click();
+  await expect(dialog).toContainText("Restart REAPER to use it");
+  await expect(dialog.getByRole("button", { name: "Switch the extension back on" })).toHaveCount(0);
 });

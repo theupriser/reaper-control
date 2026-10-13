@@ -48,7 +48,7 @@ use installer::InstallationService;
 use installer::ProcessCheck;
 use installer::SystemProcessCheck;
 use installer::check_list;
-use installer::{application_file, endpoint_file, extension_directory, fault_file};
+use installer::{application_file, endpoint_file, extension_directory, fault_file, reset_fault};
 use legacy_import::JournalImport;
 use legacy_import::import_legacy_config;
 use midi::MidiSource;
@@ -84,8 +84,15 @@ fn current_problem(
         .map(|message| LinkProblem {
             message,
             extension_outdated: false,
+            extension_faulted: false,
         })
         .or_else(|| link_problem(&health.health()))
+}
+
+#[tauri::command]
+fn reenable_extension() -> Result<(), String> {
+    let directory = extension_directory().ok_or("the home folder is unknown")?;
+    reset_fault(&directory).map_err(|error| error.to_string())
 }
 
 #[tauri::command]
@@ -358,6 +365,7 @@ pub fn run() {
             bundled_extension_version,
             current_view,
             current_problem,
+            reenable_extension,
             current_system_stats,
             marker_reading,
             current_settings,

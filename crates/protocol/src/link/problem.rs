@@ -9,4 +9,6 @@ pub struct LinkProblem {
     /// The installed extension is older than the one that ships with the app, so the way out is the
     /// setup wizard.
     pub extension_outdated: bool,
+    /// The extension turned itself off after a crash, so the way out is switching it back on.
+    pub extension_faulted: bool,
 }

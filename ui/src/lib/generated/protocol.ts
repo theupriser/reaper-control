@@ -369,7 +369,11 @@ message: string,
  * The installed extension is older than the one that ships with the app, so the way out is the
  * setup wizard.
  */
-extension_outdated: boolean, };
+extension_outdated: boolean, 
+/**
+ * The extension turned itself off after a crash, so the way out is switching it back on.
+ */
+extension_faulted: boolean, };
 
 /**
  * The settings a person can change on the Settings screen.

@@ -83,6 +83,7 @@ fn the_sidebar_names_the_problem_only_while_the_link_is_down() {
         Some(LinkProblem {
             message: "The extension turned itself off".to_owned(),
             extension_outdated: false,
+            extension_faulted: true,
         })
     );
 }
@@ -95,6 +96,7 @@ fn an_older_extension_asks_for_an_update() {
         Some(LinkProblem {
             message: "A new version of the extension is available".to_owned(),
             extension_outdated: true,
+            extension_faulted: false,
         })
     );
 }

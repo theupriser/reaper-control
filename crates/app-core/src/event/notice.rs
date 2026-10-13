@@ -72,10 +72,17 @@ pub fn link_problem(health: &LinkHealth) -> Option<LinkProblem> {
         LinkHealth::Dead(LinkCause::ExtensionOutdated { .. }) => Some(LinkProblem {
             message: "A new version of the extension is available".to_owned(),
             extension_outdated: true,
+            extension_faulted: false,
+        }),
+        LinkHealth::Dead(LinkCause::ExtensionFaulted { .. }) => Some(LinkProblem {
+            message: health_notice(health).title,
+            extension_outdated: false,
+            extension_faulted: true,
         }),
         _ => Some(LinkProblem {
             message: health_notice(health).title,
             extension_outdated: false,
+            extension_faulted: false,
         }),
     }
 }

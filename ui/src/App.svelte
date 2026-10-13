@@ -15,7 +15,7 @@
   import { connectionBadge } from "./lib/connection";
   import { midiBadge } from "./lib/midi-status";
   import { watchView } from "./lib/watch";
-  import { backend, bundledExtensionVersion, currentInstallation, currentSettings, currentSystemStats } from "./lib/ipc";
+  import { backend, bundledExtensionVersion, currentInstallation, currentSettings, currentSystemStats, reenableExtension } from "./lib/ipc";
   import { needsWizard } from "./lib/wizard";
   import type { SettingsView, SystemStats } from "./lib/generated/protocol";
   import type { ScreenId } from "./lib/screens";
@@ -71,7 +71,17 @@
       statsFailed = true;
     }
   };
+  let reenable = $state<"idle" | "done" | "failed">("idle");
+  const switchExtensionOn = async () => {
+    try {
+      await reenableExtension();
+      reenable = "done";
+    } catch {
+      reenable = "failed";
+    }
+  };
   const openHealth = () => {
+    reenable = "idle";
     healthOpen = true;
     statsFailed = false;
   };
@@ -191,7 +201,7 @@
   </div>
 {/if}
 
-<HealthDialog open={healthOpen} {connection} {stats} failed={statsFailed} onclose={() => (healthOpen = false)} />
+<HealthDialog open={healthOpen} {connection} {stats} failed={statsFailed} faulted={$appState.problem?.extension_faulted ?? false} {reenable} onReenable={switchExtensionOn} onclose={() => (healthOpen = false)} />
 
 <style>
   .layout {
