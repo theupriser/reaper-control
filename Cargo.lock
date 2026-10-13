@@ -80,7 +80,7 @@ checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 
 [[package]]
 name = "app"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "app-core",
  "catalogue",
@@ -111,7 +111,7 @@ dependencies = [
 
 [[package]]
 name = "app-core"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "performance",
  "protocol",
@@ -123,7 +123,7 @@ dependencies = [
 
 [[package]]
 name = "architecture-tests"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "cargo_metadata 0.20.0",
  "serde_json",
@@ -547,7 +547,7 @@ dependencies = [
 
 [[package]]
 name = "catalogue"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1930,7 +1930,7 @@ dependencies = [
 
 [[package]]
 name = "installer"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "protocol",
  "thiserror 2.0.21",
@@ -2167,7 +2167,7 @@ checksum = "20870f649af7073d53e38067b2a84312175d56ea15217e1b15bc83506ec50afb"
 
 [[package]]
 name = "legacy-import"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "app-core",
  "protocol",
@@ -2237,7 +2237,7 @@ dependencies = [
 
 [[package]]
 name = "link"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "getrandom 0.3.4",
  "protocol",
@@ -2310,7 +2310,7 @@ dependencies = [
 
 [[package]]
 name = "midi"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "app-core",
  "midir",
@@ -2828,7 +2828,7 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 
 [[package]]
 name = "performance"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "proptest",
  "shared-kernel",
@@ -3101,7 +3101,7 @@ dependencies = [
 
 [[package]]
 name = "protocol"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -3253,7 +3253,7 @@ dependencies = [
 
 [[package]]
 name = "reaper-port"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "performance",
  "proptest",
@@ -3677,7 +3677,7 @@ dependencies = [
 
 [[package]]
 name = "setlists"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "proptest",
  "shared-kernel",
@@ -3706,7 +3706,7 @@ dependencies = [
 
 [[package]]
 name = "shared-kernel"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "serde",
  "thiserror 2.0.21",
@@ -4342,7 +4342,7 @@ dependencies = [
 
 [[package]]
 name = "timer-loop"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "catalogue",
  "link",
