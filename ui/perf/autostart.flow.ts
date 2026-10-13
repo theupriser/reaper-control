@@ -16,12 +16,10 @@ test("the sidebar switch asks the extension to start the app with this project",
 
   await sidebarSwitch(page).click();
   expect(await dispatched(page)).toEqual([{ SetAutostart: { enabled: true } }]);
-  await page.screenshot({ path: "perf-results/autostart-sidebar.png" });
 });
 
 test("the switch shows what the project says, in the sidebar and in Settings", async ({ page }) => {
   await page.addInitScript(tauriStandIn, view(true));
-  await page.addInitScript(() => (window as any).__answer("autostart_ready", true));
   await page.goto("/");
   await expect(sidebarSwitch(page)).toHaveAttribute("aria-checked", "true");
 
@@ -30,17 +28,6 @@ test("the switch shows what the project says, in the sidebar and in Settings", a
   await expect(inSettings).toHaveAttribute("aria-checked", "true");
   await inSettings.click();
   expect(await dispatched(page)).toEqual([{ SetAutostart: { enabled: false } }]);
-});
-
-test("it says so when the extension does not know where the app is", async ({ page }) => {
-  await page.addInitScript(tauriStandIn, view(true));
-  await page.goto("/");
-  await expect(page.getByRole("navigation").getByRole("status").filter({ hasText: "Open the installed app once" })).toBeVisible();
-  await page.screenshot({ path: "perf-results/autostart-unknown.png" });
-
-  await page.evaluate(() => (window as any).__answer("autostart_ready", true));
-  await sidebarSwitch(page).click();
-  await expect(page.getByText("Open the installed app once")).toHaveCount(0);
 });
 
 test("without REAPER the switch cannot be used", async ({ page }) => {

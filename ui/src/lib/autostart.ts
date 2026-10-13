@@ -11,13 +11,12 @@ export interface AutostartView {
   problem: string | null;
 }
 
-/** `ready`: the extension knows where the app is installed. */
-export function autostartView(link: LinkView, ready: boolean): AutostartView {
+export function autostartView(link: LinkView): AutostartView {
   const available = link.status !== "NotRunning";
   const on = available && link.catalog.autostart;
   return {
     on,
     available,
-    problem: !available ? strings.autostart.needsReaper : on && !ready ? strings.autostart.unknownLocation : null,
+    problem: available ? null : strings.autostart.needsReaper,
   };
 }

@@ -82,7 +82,6 @@ export const strings = {
     title: "Start with this project",
     hint: "When this REAPER project opens, REAPER starts Reaper Control if it is not running yet. The choice is saved in the project, so every project can decide for itself. Reaper Control is never closed by it.",
     switchLabel: "Start with this project",
-    unknownLocation: "Open the installed app once, so REAPER knows where to find it.",
     needsReaper: "Connect to REAPER to change this.",
   },
 

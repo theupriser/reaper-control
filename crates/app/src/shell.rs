@@ -188,12 +188,6 @@ fn export_diagnostics(
         .map_err(|error| error.to_string())
 }
 
-/// Whether the extension knows where the app is, so a project can ask for it to be started.
-#[tauri::command]
-fn autostart_ready() -> bool {
-    application_file().is_some_and(|file| file.exists())
-}
-
 #[tauri::command]
 fn dispatch(bus: State<'_, Arc<CommandBus>>, command: Command) -> Result<(), String> {
     bus.dispatch(command).map_err(|error| error.to_string())
@@ -367,7 +361,6 @@ pub fn run() {
             restore_setlists,
             import_setlists,
             export_diagnostics,
-            autostart_ready,
             dispatch
         ])
         .build(tauri::generate_context!());

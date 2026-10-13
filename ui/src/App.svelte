@@ -15,7 +15,7 @@
   import { connectionBadge } from "./lib/connection";
   import { midiBadge } from "./lib/midi-status";
   import { watchView } from "./lib/watch";
-  import { autostartReady, backend, bundledExtensionVersion, currentInstallation, currentSettings, currentSystemStats } from "./lib/ipc";
+  import { backend, bundledExtensionVersion, currentInstallation, currentSettings, currentSystemStats } from "./lib/ipc";
   import { needsWizard } from "./lib/wizard";
   import type { SettingsView, SystemStats } from "./lib/generated/protocol";
   import type { ScreenId } from "./lib/screens";
@@ -50,14 +50,8 @@
   let bundledVersion = $state<string | null>(null);
   const connection = $derived(connectionBadge($appState.link.status, $appState.problem, bundledVersion));
 
-  let appKnown = $state(false);
-  const autostart = $derived(autostartView($appState.link, appKnown));
+  const autostart = $derived(autostartView($appState.link));
   const toggleAutostart = () => send({ SetAutostart: { enabled: !autostart.on } });
-  // Whether the extension knows where the app is; looked at again when the switch changes.
-  $effect(() => {
-    autostart.on;
-    autostartReady().then((ready) => (appKnown = ready), () => (appKnown = false));
-  });
 
   let settingsView = $state<SettingsView | null>(null);
   const midi = $derived(settingsView && midiBadge(settingsView));
