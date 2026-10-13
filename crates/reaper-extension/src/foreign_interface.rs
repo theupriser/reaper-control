@@ -2,6 +2,7 @@
 
 #[cfg(windows)]
 mod dll_main;
+mod exit_diagnostic;
 mod exit_file;
 mod exit_notice;
 mod missing_functions;
@@ -44,9 +45,11 @@ unsafe extern "C" {
 /// and no goodbye is sent. Only atomics, raw operating system calls and prepared data are used,
 /// as at this point threads and Rust's thread-locals may be gone.
 fn leave() {
+    exit_diagnostic::note("leave called", 0);
     if let Some(frame) = CLOSING_FRAME.get() {
         exit_notice::tell_clients(frame);
     }
+    exit_diagnostic::note("leave told the clients", 0);
     if let Some(file) = EXIT_FILE.get() {
         file.remove();
     }
@@ -67,6 +70,9 @@ unsafe extern "C" fn ReaperPluginEntry(
     h_instance: reaper_low::raw::HINSTANCE,
     rec: *mut reaper_low::raw::reaper_plugin_info_t,
 ) -> std::os::raw::c_int {
+    if rec.is_null() {
+        exit_diagnostic::note("entry called with a null record", 0);
+    }
     let static_context = reaper_low::static_plugin_context();
     // SAFETY: REAPER passes the handle and the plugin info record it owns, as the macro assumes.
     unsafe { reaper_low::bootstrap_extension_plugin(h_instance, rec, static_context, plugin_main) }
@@ -115,6 +121,7 @@ fn start(context: PluginContext) -> Result<(), Box<dyn Error>> {
         }
     }
     let _ = CLOSING_FRAME.set(link::closing_frame());
+    exit_diagnostic::prepare(&directory);
     // SAFETY: registers a plain `extern "C" fn` that removes a file and writes one prepared frame.
     let registered = unsafe { atexit(on_exit) };
     log.line(&format!(

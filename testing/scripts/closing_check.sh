@@ -41,6 +41,8 @@ for _ in $(seq 1 40); do kill -0 "$pid" 2>/dev/null || break; sleep 0.5; done
 sleep 2
 wait "$watching" || true
 echo "--- what the client heard"; cat "$output"
+echo "--- exit.diag"; cat "$resource/RC2/exit.diag" 2>&1 || true
+echo "--- running file: $(ls "$resource/RC2/running" 2>&1)"
 
 if [ "$mode" = quit ]; then
   grep -q "REAPER says it is closing" "$output" || { echo "FAIL: no goodbye after a clean quit"; exit 1; }

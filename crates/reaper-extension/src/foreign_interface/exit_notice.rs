@@ -39,7 +39,8 @@ pub(super) fn write_frame(handle: usize, frame: &[u8]) {
     // SAFETY: `frame` is valid for `length` bytes; a handle that is not a socket only makes
     // `send` return an error.
     unsafe {
-        send(handle, frame.as_ptr(), length, 0);
+        let result = send(handle, frame.as_ptr(), length, 0);
+        super::exit_diagnostic::note("send", i64::from(result));
     }
 }
 
