@@ -58,3 +58,17 @@ test("a link notice stays out of the toasts while other notices still show", asy
   await expect(page.getByText("Refused")).toBeVisible();
   await expect(page.getByText("Open REAPER.")).toHaveCount(0);
 });
+
+test("the numbers in the health dialog keep updating while it is open", async ({ page }) => {
+  await page.addInitScript(tauriStandIn, view("NotRunning"));
+  await page.goto("/");
+  await page.getByRole("button", { name: "Connection details" }).click();
+  const dialog = page.getByRole("dialog", { name: "Connection and health" });
+  await expect(dialog).toContainText("12%");
+
+  await page.evaluate(() =>
+    (window as any).__answer("current_system_stats", { machine_cpu_percent: 57, memory_used_megabytes: 5000, memory_total_megabytes: 16000, app_memory_megabytes: 90, reaper_memory_megabytes: 700 }),
+  );
+  await expect(dialog).toContainText("57%");
+  await expect(dialog).toContainText("700 MB");
+});
