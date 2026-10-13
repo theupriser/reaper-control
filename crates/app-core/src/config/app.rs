@@ -28,6 +28,8 @@ pub struct AppConfig {
     pub midi: MidiConfig,
     /// The log level.
     pub log: LogConfig,
+    /// Close the app when REAPER quits cleanly.
+    pub close_with_reaper: bool,
     /// Theme, density and touch size.
     pub appearance: Box<AppearanceConfig>, // boxed to keep `AppConfig` small
 }
@@ -39,6 +41,7 @@ impl Default for AppConfig {
             queue: QueueConfig::default(),
             midi: MidiConfig::default(),
             log: LogConfig::default(),
+            close_with_reaper: false,
             appearance: Box::default(),
         }
     }
@@ -85,6 +88,7 @@ impl AppConfig {
                 })
                 .collect(),
             log_level: self.log.level.clone(),
+            close_with_reaper: self.close_with_reaper,
             appearance: Box::new(AppearanceChoice {
                 theme: self.appearance.theme.clone(),
                 density: self.appearance.density.clone(),
@@ -127,6 +131,7 @@ impl AppConfig {
         config.midi.debounce_milliseconds = settings.midi_debounce_milliseconds.into();
         config.midi.notes = notes_of(&settings.midi_notes)?;
         config.log.level.clone_from(&settings.log_level);
+        config.close_with_reaper = settings.close_with_reaper;
         config
             .appearance
             .theme

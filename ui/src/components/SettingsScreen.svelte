@@ -10,6 +10,7 @@
   import AutostartCard from "./AutostartCard.svelte";
   import ConnectionCard from "./ConnectionCard.svelte";
   import type { AutostartView } from "../lib/autostart";
+  import CloseWithReaperCard from "./CloseWithReaperCard.svelte";
   import DiagnosticsCard from "./DiagnosticsCard.svelte";
   import SetlistTransferCard from "./SetlistTransferCard.svelte";
   import { currentSettings, saveSettings } from "../lib/ipc";
@@ -65,6 +66,8 @@
     <ConnectionCard {connection} {onSetup} />
 
     <AutostartCard {autostart} onToggle={onAutostart} />
+
+    <CloseWithReaperCard on={draft.closeWithReaper} onToggle={() => draft && (draft.closeWithReaper = !draft.closeWithReaper)} />
 
     <Panel title={strings.settings.midi.title} hint={strings.settings.midi.hint}>
       <Switch on={draft.midiEnabled} label={strings.settings.midi.enabled} onchange={() => draft && (draft.midiEnabled = !draft.midiEnabled)} />

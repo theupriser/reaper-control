@@ -78,6 +78,7 @@ fn all_sizes() -> Vec<(String, usize)> {
         app::FakeMirrorRepository,
         installer::FakeProcessCheck,
         app::FakeStatsSource,
+        app::CloseWithReaper,
         app::FaultFileCheck,
         app::HealthMonitor,
         app::ImportError,

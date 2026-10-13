@@ -2,6 +2,7 @@
 
 use tauri::{Emitter, Manager, State};
 
+use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -10,6 +11,7 @@ use protocol::{
     SetlistTransferView, Settings, SettingsView, SystemStats,
 };
 
+use crate::health::CloseWithReaper;
 use crate::health::FaultFileCheck;
 use crate::health::HealthMonitor;
 use crate::link::LinkViewSource;
@@ -48,7 +50,9 @@ use installer::InstallationService;
 use installer::ProcessCheck;
 use installer::SystemProcessCheck;
 use installer::check_list;
-use installer::{application_file, endpoint_file, extension_directory, fault_file, reset_fault};
+use installer::{
+    application_file, endpoint_file, extension_directory, fault_file, reset_fault, running_file,
+};
 use legacy_import::JournalImport;
 use legacy_import::import_legacy_config;
 use midi::MidiSource;
@@ -275,6 +279,20 @@ pub fn run() {
                     None
                 })
                 .unwrap_or_default();
+            let close_with_reaper = Arc::new(AtomicBool::new(config.close_with_reaper));
+            let closer = CloseWithReaper::new(
+                close_with_reaper.clone(),
+                running_file().ok_or("the home folder is unknown")?,
+                Box::new({
+                    let handle = handle.clone();
+                    move || handle.exit(0)
+                }),
+            );
+            events.subscribe(move |event| {
+                if let AppEvent::LinkHealthChanged { health } = event {
+                    closer.observe(health);
+                }
+            });
             let clock = Arc::new(SystemClock::new());
             let simulated = std::env::var_os("RC2_SIMULATOR").is_some();
             let processes: Arc<dyn ProcessCheck> = if simulated {
@@ -335,6 +353,7 @@ pub fn run() {
                 config.clone(),
                 bus.clone(),
                 Arc::new(move |changed| midi.apply(changed)),
+                close_with_reaper,
             )));
             app.manage(Arc::new(SetlistTransfer::new(
                 mirror,

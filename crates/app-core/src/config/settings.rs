@@ -1,5 +1,6 @@
 //! Reading and saving the settings the Settings screen edits.
 
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
 use protocol::{Settings, SettingsView};
@@ -18,6 +19,8 @@ pub struct SettingsService {
     bus: Arc<CommandBus>,
     // Told the new MIDI settings when they change, so input follows without a restart.
     midi_changed: Arc<dyn Fn(&MidiConfig) + Send + Sync>,
+    // Follows the "close with REAPER" choice, so it applies without a restart.
+    close_with_reaper: Arc<AtomicBool>,
 }
 
 impl SettingsService {
@@ -28,12 +31,15 @@ impl SettingsService {
         config: AppConfig,
         bus: Arc<CommandBus>,
         midi_changed: Arc<dyn Fn(&MidiConfig) + Send + Sync>,
+        close_with_reaper: Arc<AtomicBool>,
     ) -> Self {
+        close_with_reaper.store(config.close_with_reaper, Ordering::Relaxed);
         Self {
             store,
             config: Mutex::new(Box::new(config)),
             bus,
             midi_changed,
+            close_with_reaper,
         }
     }
 
@@ -60,6 +66,8 @@ impl SettingsService {
         self.store.save(&changed)?;
         self.bus.apply(changed.queue.settings());
         let midi_differs = changed.midi != config.midi;
+        self.close_with_reaper
+            .store(changed.close_with_reaper, Ordering::Relaxed);
         **config = changed;
         if midi_differs {
             (self.midi_changed)(&config.midi);

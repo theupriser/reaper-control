@@ -30,7 +30,7 @@ pub use platform::InstallPlatform;
 pub use process::{FakeProcessCheck, ProcessCheck, SystemProcessCheck};
 pub use reaper::{
     ReaperInstall, application_file, endpoint_file, endpoint_file_from, extension_directory,
-    fault_file, reaper_folder_argument, reset_fault,
+    fault_file, reaper_folder_argument, reset_fault, running_file,
 };
 pub use report::InstallReport;
 pub use service::InstallationService;

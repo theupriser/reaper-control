@@ -61,6 +61,7 @@ pub use fake::FakeExtension;
 pub use fake::FakeFaultCheck;
 pub use fake::FakeMirrorRepository;
 pub use fake::FakeStatsSource;
+pub use health::CloseWithReaper;
 pub use health::FaultCheck;
 pub use health::FaultFileCheck;
 pub use health::HealthMonitor;

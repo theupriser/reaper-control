@@ -24,6 +24,8 @@ pub struct Settings {
     pub midi_notes: Vec<NoteMapping>,
     /// How much the app logs: error, warn, info, debug or trace. Applies after a restart.
     pub log_level: String,
+    /// Whether the app closes itself when REAPER quits cleanly. Applies at once.
+    pub close_with_reaper: bool,
     /// Theme, density and touch size. Applies at once.
     pub appearance: Box<AppearanceChoice>, // boxed to keep `Settings` small
 }

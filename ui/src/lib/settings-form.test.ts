@@ -10,6 +10,7 @@ const saved: Settings = {
   midi_device_name: null,
   midi_channel: null,
   midi_debounce_milliseconds: 200,
+  close_with_reaper: false,
   midi_notes: [{ note: 50, action: "TogglePlay" }],
   log_level: "info",
   appearance: { theme: "dark", density: "comfortable", touch: "normal" },
