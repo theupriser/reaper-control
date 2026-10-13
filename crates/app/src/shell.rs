@@ -200,6 +200,14 @@ pub fn run() {
         .map_or_else(|| "info".to_owned(), |config| config.log.level);
     let logging = Logging::start(log_directory(), &level);
     let result = tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(
+            |app, _arguments, _directory| {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.unminimize();
+                    let _ = window.set_focus();
+                }
+            },
+        ))
         .setup(|app| {
             let handle = app.handle().clone();
             let fault = Arc::new(AppFault::default());
