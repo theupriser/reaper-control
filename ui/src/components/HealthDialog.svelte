@@ -2,6 +2,7 @@
   import Button from "../kit/Button.svelte";
   import Dialog from "../kit/Dialog.svelte";
   import { statRows } from "../lib/health";
+  import { usageLevel } from "../lib/performer";
   import { strings } from "../lib/strings";
   import type { SystemStats } from "../lib/generated/protocol";
 
@@ -23,9 +24,17 @@
 <Dialog {open} title={strings.health.title} {onclose}>
   <p class="state {connection.tone}"><strong>{connection.label}</strong> <span>{connection.detail}</span></p>
   {#if stats}
-    <dl>
-      {#each statRows(stats) as row (row.label)}<dt>{row.label}</dt><dd>{row.value}</dd>{/each}
-    </dl>
+    <ul class="stats">
+      {#each statRows(stats) as row (row.label)}
+        <li>
+          <span class="name">{row.label}</span>
+          <span class="value">{row.value}</span>
+          <span class="track" role="presentation">
+            {#if row.percent !== null}<span class="bar {usageLevel(row.percent)}" style="width: {Math.max(row.percent, row.percent > 0 ? 1 : 0)}%"></span>{/if}
+          </span>
+        </li>
+      {/each}
+    </ul>
   {:else if failed}
     <p role="status">{strings.health.loadFailed}</p>
   {/if}
@@ -37,7 +46,13 @@
   .state.ok strong { color: var(--green); }
   .state.error strong { color: var(--red); }
   span { color: var(--muted); }
-  dl { display: grid; grid-template-columns: 1fr auto; gap: var(--space-2) var(--space-5); margin: 0; }
-  dt { color: var(--muted); }
-  dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); min-width: 20rem; }
+  li { display: grid; grid-template-columns: 1fr auto; gap: 4px var(--space-5); }
+  .name { color: var(--muted); }
+  .value { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); }
+  .track { grid-column: 1 / -1; height: 8px; border-radius: 4px; background: var(--track); overflow: hidden; }
+  .bar { display: block; height: 100%; border-radius: 4px; transition: width var(--motion-normal); }
+  .low { background: var(--green); }
+  .medium { background: var(--amber); }
+  .high { background: var(--danger); }
 </style>
