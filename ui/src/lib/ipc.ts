@@ -32,6 +32,8 @@ export const currentInstallation = (): Promise<InstallationView> => invoke<Insta
 
 export const installExtension = (): Promise<InstallationView> => invoke<InstallationView>("install_extension");
 
+export const updateExtension = (restart: boolean): Promise<InstallationView> => invoke<InstallationView>("update_extension", { restart });
+
 export const currentChecklist = (): Promise<ChecklistView> => invoke<ChecklistView>("current_checklist");
 
 export const currentTransfer = (): Promise<SetlistTransferView> => invoke<SetlistTransferView>("current_transfer");

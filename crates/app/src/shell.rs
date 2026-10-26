@@ -8,7 +8,7 @@ use std::time::Duration;
 
 use protocol::{
     ChecklistView, Command, InstallationView, LinkProblem, LinkStatus, LinkView, MarkerReading,
-    SetlistTransferView, Settings, SettingsView, SystemStats,
+    Phase, SetlistTransferView, Settings, SettingsView, SystemStats,
 };
 
 use crate::health::CloseWithReaper;
@@ -137,6 +137,30 @@ fn install_extension(
 ) -> Result<InstallationView, String> {
     let service = installation.as_ref().ok_or(UNSUPPORTED_SYSTEM)?;
     service.install(is_connected(&link.view().status))
+}
+
+/// Updates the extension after the person agreed: REAPER is asked to quit, the file is replaced and
+/// REAPER starts again when `restart` is set. Refused while a show runs. Runs off the UI thread:
+/// it waits for REAPER to close.
+#[tauri::command]
+async fn update_extension(
+    restart: bool,
+    installation: State<'_, Option<Arc<InstallationService>>>,
+    link: State<'_, Arc<dyn LinkViewSource>>,
+) -> Result<InstallationView, String> {
+    let service = installation.as_ref().ok_or(UNSUPPORTED_SYSTEM)?.clone();
+    let view = link.view();
+    let connected = is_connected(&view.status);
+    let performing = view
+        .live
+        .is_some_and(|live| !matches!(live.phase, Phase::Idle | Phase::Finished));
+    tauri::async_runtime::spawn_blocking(move || {
+        service
+            .update(connected, performing, restart)
+            .map_err(|error| error.to_string())
+    })
+    .await
+    .map_err(|error| error.to_string())?
 }
 
 #[tauri::command]
@@ -388,6 +412,7 @@ pub fn run() {
             current_settings,
             current_installation,
             install_extension,
+            update_extension,
             current_checklist,
             save_settings,
             current_transfer,

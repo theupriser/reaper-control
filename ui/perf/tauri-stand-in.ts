@@ -15,7 +15,7 @@ export function tauriStandIn(initial: unknown): void {
     },
     current_transfer: { restorable: 0, offers: [] },
     current_checklist: { items: [], ready: true },
-    current_installation: { steps: ["FindReaper", "InstallExtension", "RestartReaper", "Connect"].map((id) => ({ id, status: "Done", advice: "" })), folder: "/reaper", can_install: false, complete: true },
+    current_installation: { steps: ["FindReaper", "InstallExtension", "RestartReaper", "Connect"].map((id) => ({ id, status: "Done", advice: "" })), folder: "/reaper", can_install: false, complete: true, update_available: false, reaper_running: false },
   };
   w.__TAURI_INTERNALS__ = {
     transformCallback(callback: (event: unknown) => void) {
@@ -35,6 +35,10 @@ export function tauriStandIn(initial: unknown): void {
       if (command === "install_extension") {
         w.__installed = true;
         answers.current_installation = answers.install_extension;
+      }
+      if (command === "update_extension") {
+        (w.__updates ??= []).push(args.restart);
+        answers.current_installation = answers.update_extension;
       }
       if (command === "dispatch") (w.__dispatched ??= []).push(args.command);
       return command in answers ? answers[command] : null;

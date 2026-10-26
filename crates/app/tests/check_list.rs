@@ -62,6 +62,8 @@ fn installed(status: WizardStepStatus) -> InstallationView {
         folder: String::new(),
         can_install: false,
         complete: true,
+        update_available: false,
+        reaper_running: false,
     }
 }
 

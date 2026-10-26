@@ -14,4 +14,8 @@ pub struct InstallationView {
     pub can_install: bool,
     /// Whether everything is in place and the extension answers.
     pub complete: bool,
+    /// Whether an older extension is installed and the app has a newer one to put in its place.
+    pub update_available: bool,
+    /// Whether REAPER runs now; an update then closes it first.
+    pub reaper_running: bool,
 }
