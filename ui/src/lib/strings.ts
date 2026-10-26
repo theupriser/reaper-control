@@ -114,6 +114,19 @@ export const strings = {
     plusMore: (name: string, more: number) => `${name} and ${more} more`,
   },
 
+  extensionUpdate: {
+    title: "A new extension is ready",
+    text: "Reaper Control has a newer REAPER extension than the one installed.",
+    review: "Update",
+    laterButton: "Not now",
+    dialogTitle: "Update the extension?",
+    dialogRunning: "REAPER will be closed to do this. If a project has unsaved changes, REAPER asks you to save first. Nothing is updated until REAPER has closed.",
+    dialogStopped: "REAPER is closed, so the extension can be replaced right away.",
+    updateAndRestart: "Update and restart REAPER",
+    updateOnly: "Update only",
+    working: "Updating. Answer REAPER if it asks to save.",
+    done: "The extension is updated.",
+  },
   wizard: {
     title: "Set up the connection",
     intro: "Reaper Control talks to REAPER through a small extension. This puts it in place and checks that it answers.",

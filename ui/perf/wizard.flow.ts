@@ -6,11 +6,13 @@ const connected = { status: { Connected: { extension_version: "test" } }, live: 
 const down = { status: "NotRunning", live: null, catalog };
 
 type Step = [string, string, string];
-const installation = (steps: Step[], canInstall: boolean, complete = false) => ({
+const installation = (steps: Step[], canInstall: boolean, complete = false, updateAvailable = false) => ({
   steps: steps.map(([id, status, advice]) => ({ id, status, advice })),
   folder: "/Users/test/Library/Application Support/REAPER",
   can_install: canInstall,
   complete,
+  update_available: updateAvailable,
+  reaper_running: updateAvailable,
 });
 const fresh = installation([["FindReaper", "Done", ""], ["InstallExtension", "Current", "not installed"], ["RestartReaper", "Waiting", ""], ["Connect", "Waiting", ""]], true);
 const installed = installation([["FindReaper", "Done", ""], ["InstallExtension", "Done", ""], ["RestartReaper", "Current", "Open REAPER. It loads the extension when it starts."], ["Connect", "Waiting", ""]], false);
@@ -94,4 +96,38 @@ test("an outdated extension says a new version is available and the indicator op
   await indicator.click();
   await expect(page.getByRole("heading", { name: "Set up the connection" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Install the extension" })).toBeEnabled();
+});
+
+test("a newer extension is offered, and nothing happens until the person agrees", async ({ page }) => {
+  const stale = installation([["FindReaper", "Done", ""], ["InstallExtension", "Current", "installed, but not the version that ships with the app"], ["RestartReaper", "Done", ""], ["Connect", "Done", ""]], true, true, true);
+  await page.addInitScript(tauriStandIn, connected);
+  await page.addInitScript((answers) => {
+    const w = window as any;
+    const wait = setInterval(() => { if (w.__answer) { clearInterval(wait); w.__answer("current_installation", answers.stale); w.__answer("update_extension", answers.finished); } }, 1);
+  }, { stale, finished });
+  await page.goto("/");
+
+  await expect(page.getByText("A new extension is ready")).toBeVisible();
+  expect(await page.evaluate(() => (window as any).__updates ?? [])).toEqual([]);
+  await page.screenshot({ path: "perf-results/extension-update-banner.png" });
+
+  await page.getByRole("button", { name: "Update", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Update the extension?" })).toContainText("REAPER will be closed");
+  await page.getByRole("button", { name: "Update and restart REAPER" }).click();
+
+  await expect(page.getByText("A new extension is ready")).toHaveCount(0);
+  expect(await page.evaluate(() => (window as any).__updates)).toEqual([true]);
+});
+
+test("a person can put the extension update off", async ({ page }) => {
+  const stale = installation([["FindReaper", "Done", ""], ["InstallExtension", "Current", ""], ["RestartReaper", "Done", ""], ["Connect", "Done", ""]], true, true, true);
+  await page.addInitScript(tauriStandIn, connected);
+  await page.addInitScript((answer) => {
+    const w = window as any;
+    const wait = setInterval(() => { if (w.__answer) { clearInterval(wait); w.__answer("current_installation", answer); } }, 1);
+  }, stale);
+  await page.goto("/");
+  await page.getByRole("button", { name: "Not now" }).click();
+  await expect(page.getByText("A new extension is ready")).toHaveCount(0);
+  expect(await page.evaluate(() => (window as any).__updates ?? [])).toEqual([]);
 });

@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use installer::{
-    ExtensionInstaller, FakeProcessCheck, InstallPlatform, InstallationService,
+    ExtensionInstaller, FakeProcessCheck, FakeReaperControl, InstallPlatform, InstallationService,
     PlainExtensionPreparer, ReaperInstall,
 };
 use protocol::{InstallationView, WizardStepId, WizardStepStatus};
@@ -55,7 +55,12 @@ fn wizard(reaper_header: &[u8], resource_exists: bool) -> Result<Wizard, std::io
         resource_folder: resource,
         executable: Some(executable),
     };
-    let service = InstallationService::new(installer, install, process.clone());
+    let service = InstallationService::new(
+        installer,
+        install,
+        process.clone(),
+        Arc::new(FakeReaperControl::new(process.clone())),
+    );
     Ok(Wizard {
         root,
         process,

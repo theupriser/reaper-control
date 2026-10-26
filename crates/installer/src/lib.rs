@@ -10,10 +10,12 @@ mod plan;
 mod platform;
 mod process;
 mod reaper;
+mod reaper_control;
 mod report;
 mod service;
 mod stamp;
 mod status;
+mod update_error;
 mod verification;
 mod wizard;
 
@@ -32,9 +34,11 @@ pub use reaper::{
     ReaperInstall, application_file, endpoint_file, endpoint_file_from, extension_directory,
     fault_file, reaper_folder_argument, reset_fault,
 };
+pub use reaper_control::{FakeReaperControl, ReaperControl, SystemReaperControl};
 pub use report::InstallReport;
 pub use service::InstallationService;
 pub use stamp::{stamp_matches, stamp_path, write_stamp};
 pub use status::InstallStatus;
+pub use update_error::UpdateError;
 pub use verification::InstallVerification;
 pub use wizard::{check_list, wizard_step_list};

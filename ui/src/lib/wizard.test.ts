@@ -8,6 +8,8 @@ const view = (statuses: WizardStepStatus[], complete = false): InstallationView 
   folder: "/reaper",
   can_install: false,
   complete,
+  update_available: false,
+  reaper_running: false,
 });
 
 describe("needsWizard", () => {

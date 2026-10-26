@@ -614,7 +614,15 @@ can_install: boolean,
 /**
  * Whether everything is in place and the extension answers.
  */
-complete: boolean, };
+complete: boolean, 
+/**
+ * Whether an older extension is installed and the app has a newer one to put in its place.
+ */
+update_available: boolean, 
+/**
+ * Whether REAPER runs now; an update then closes it first.
+ */
+reaper_running: boolean, };
 
 /**
  * One thing the pre-show checklist looks at (SPEC S-7).

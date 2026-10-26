@@ -2,6 +2,8 @@
   import { onMount, tick } from "svelte";
   import HelpScreen from "./components/HelpScreen.svelte";
   import ChecklistScreen from "./components/ChecklistScreen.svelte";
+  import ExtensionUpdateBanner from "./components/ExtensionUpdateBanner.svelte";
+  import ExtensionUpdateDialog from "./components/ExtensionUpdateDialog.svelte";
   import HealthDialog from "./components/HealthDialog.svelte";
   import Notices from "./components/Notices.svelte";
   import PerformerScreen from "./components/PerformerScreen.svelte";
@@ -15,9 +17,10 @@
   import { connectionBadge } from "./lib/connection";
   import { midiBadge } from "./lib/midi-status";
   import { watchView } from "./lib/watch";
-  import { backend, bundledExtensionVersion, currentInstallation, currentSettings, currentSystemStats, reenableExtension } from "./lib/ipc";
-  import { needsWizard } from "./lib/wizard";
-  import type { SettingsView, SystemStats } from "./lib/generated/protocol";
+  import { backend, bundledExtensionVersion, currentInstallation, currentSettings, currentSystemStats, reenableExtension, updateExtension } from "./lib/ipc";
+  import { updateOffered } from "./lib/extension-update";
+  import { needsWizard, watchInstallation } from "./lib/wizard";
+  import type { InstallationView, SettingsView, SystemStats } from "./lib/generated/protocol";
   import type { ScreenId } from "./lib/screens";
   import { fixtureFor } from "./lib/performer-fixtures";
   import { keyAction, toKeyPress } from "./lib/keyboard";
@@ -58,6 +61,25 @@
 
   const notices = $derived($appState.notices.filter((notice) => notice.key !== "link"));
   let wizardOpen = $state(false);
+  let installation = $state<InstallationView | null>(null);
+  let updateDismissed = $state(false);
+  let updateDialogOpen = $state(false);
+  let updateBusy = $state(false);
+  let updateError = $state<string | null>(null);
+  const offerUpdate = $derived(!updateDismissed && updateOffered(installation, live?.phase));
+
+  const runExtensionUpdate = async (restart: boolean) => {
+    updateDialogOpen = false;
+    updateBusy = true;
+    updateError = null;
+    try {
+      installation = await updateExtension(restart);
+    } catch (error) {
+      updateError = String(error);
+    } finally {
+      updateBusy = false;
+    }
+  };
   let healthOpen = $state(false);
   const STATS_REFRESH_MILLISECONDS = 1000;
   let stats = $state<SystemStats | null>(null);
@@ -134,9 +156,11 @@
       .then((installation) => (wizardOpen = needsWizard(installation)))
       .catch(() => {});
     const stopWatching = watchView(currentSettings, (found) => (settingsView = found), 3000);
+    const stopInstallation = watchInstallation(currentInstallation, (found) => (installation = found), 5000);
     const stopStore = appState.start();
     return () => {
       stopWatching();
+      stopInstallation();
       stopStore();
     };
   });
@@ -168,6 +192,9 @@
   <div class="layout">
     <Sidebar active={screen} onSelect={select} onPerformer={enterPerformer} {connection} {midi} onMidi={() => select("settings")} onConnection={openConnection} {autostart} onAutostart={toggleAutostart} />
     <main class="content" tabindex="-1" bind:this={content}>
+      {#if offerUpdate || updateBusy}
+        <ExtensionUpdateBanner busy={updateBusy} error={updateError} onReview={() => (updateDialogOpen = true)} onLater={() => (updateDismissed = true)} />
+      {/if}
       {#if screen === "player"}
         <PlayerScreen
           {view}
@@ -201,6 +228,7 @@
   </div>
 {/if}
 
+<ExtensionUpdateDialog open={updateDialogOpen} reaperRunning={installation?.reaper_running ?? false} onUpdate={runExtensionUpdate} onCancel={() => (updateDialogOpen = false)} />
 <HealthDialog open={healthOpen} {connection} {stats} failed={statsFailed} faulted={$appState.problem?.extension_faulted ?? false} {reenable} onReenable={switchExtensionOn} onclose={() => (healthOpen = false)} />
 
 <style>
