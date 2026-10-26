@@ -168,7 +168,11 @@ jobs:
         if: runner.os == 'macOS'
         shell: bash
         run: |
-          curl -fsSL -o "$RUNNER_TEMP/reaper.dmg" https://www.reaper.fm/files/7.x/reaper782_universal.dmg
+          # the newest REAPER, as users have it (an older one opens a "new version" dialog that blocks it); the first
+          # word of REAPER's own update check is the version, e.g. 7.83
+          version=$(curl -fsSL "https://www.reaper.fm/latestversion/?p=osx_arm64" | head -1 | cut -d' ' -f1)
+          echo "REAPER $version"
+          curl -fsSL -o "$RUNNER_TEMP/reaper.dmg" "https://www.reaper.fm/files/${version%%.*}.x/reaper${version//./}_universal.dmg"
           # the dmg opens with REAPER's licence agreement; installing it means accepting that
           echo Y | hdiutil attach "$RUNNER_TEMP/reaper.dmg" -nobrowse -mountpoint "$RUNNER_TEMP/reaper-volume" > /dev/null
           cp -R "$RUNNER_TEMP/reaper-volume/REAPER.app" "$RUNNER_TEMP/REAPER.app"
@@ -178,7 +182,12 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri https://www.reaper.fm/files/7.x/reaper782_x64-install.exe -OutFile "$env:RUNNER_TEMP\reaper-install.exe"
+          # the newest REAPER, as users have it (an older one opens a "new version" dialog that blocks it); the first
+          # word of REAPER's own update check is the version, e.g. 7.83
+          $version = ((Invoke-RestMethod -Uri "https://www.reaper.fm/latestversion/?p=win64") -split "\s+")[0]
+          Write-Host "REAPER $version"
+          $major = $version.Split(".")[0]
+          Invoke-WebRequest -Uri "https://www.reaper.fm/files/$major.x/reaper$($version.Replace('.', ''))_x64-install.exe" -OutFile "$env:RUNNER_TEMP\reaper-install.exe"
           Start-Process -FilePath "$env:RUNNER_TEMP\reaper-install.exe" -ArgumentList "/S", "/PORTABLE", "/D=$env:RUNNER_TEMP\REAPER" -Wait
           "REAPER_EXECUTABLE=$env:RUNNER_TEMP\REAPER\reaper.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
       - name: The extension starts, refuses strangers and keeps time inside REAPER
