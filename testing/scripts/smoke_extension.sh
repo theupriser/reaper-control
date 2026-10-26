@@ -21,6 +21,10 @@ mkdir -p "$resource/UserPlugins"
 cp "$extension" "$resource/UserPlugins/$(basename "$extension")"
 cp testing/data/reaper/reaper.ini "$resource/reaper.ini"
 case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) cat testing/data/reaper/windows.ini >> "$resource/reaper.ini" ;; esac
+# REAPER opens a modal "New Version Notification" at start when its last version check is old (it did as soon as
+# 7.83 came out, and it blocks the main thread). The check time is a number REAPER keeps itself, so it is set to now;
+# a time in the future does not work, REAPER then checks anyway.
+printf '\n[verchk]\nlastt=%s\n' "$(date +%s)" >> "$resource/reaper.ini"
 
 configuration=$resource/reaper.ini
 case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) configuration=$(cygpath -w "$configuration") ;; esac
